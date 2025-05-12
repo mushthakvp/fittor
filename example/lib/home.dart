@@ -1,4 +1,4 @@
-import 'package:adaptix/adaptix.dart';
+import 'package:adaptix/fittor.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -59,12 +59,12 @@ class HomeScreen extends StatelessWidget {
             Text('Screen Width: ${context.width}'),
             Text('Screen Height: ${context.height}'),
             Text(
-              'Orientation: ${AdaptixHelper.isPortrait ? 'Portrait' : 'Landscape'}',
+              'Orientation: ${FittorHelper.isPortrait ? 'Portrait' : 'Landscape'}',
             ),
             Text(
-              'Device Type: ${AdaptixHelper.isMobile
+              'Device Type: ${FittorHelper.isMobile
                   ? 'Mobile'
-                  : AdaptixHelper.isTablet
+                  : FittorHelper.isTablet
                   ? 'Tablet'
                   : 'Desktop'}',
             ),

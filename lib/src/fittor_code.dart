@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class AdaptixHelper {
+class FittorHelper {
   // Singleton instance
-  static final AdaptixHelper _instance = AdaptixHelper._internal();
-  factory AdaptixHelper() => _instance;
-  AdaptixHelper._internal();
+  static final FittorHelper _instance = FittorHelper._internal();
+  factory FittorHelper() => _instance;
+  FittorHelper._internal();
 
   // Screen dimensions
   static double _screenWidth = 0;

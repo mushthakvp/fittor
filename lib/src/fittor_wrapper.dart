@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../adaptix.dart';
+import '../fittor.dart';
 
-mixin AdaptixAppMixin on Widget {
+mixin FittorAppMixin on Widget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         return OrientationBuilder(
           builder: (context, orientation) {
-            AdaptixHelper().init(context, constraints, orientation);
+            FittorHelper().init(context, constraints, orientation);
             return responsive(context);
           },
         );
