@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../adaptix_helper.dart';
+import '../adaptix.dart';
 
 mixin AdaptixAppMixin on Widget {
   Widget build(BuildContext context) {

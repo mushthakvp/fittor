@@ -1,4 +1,4 @@
-import 'package:adaptix/adaptix_helper.dart';
+import 'package:adaptix/adaptix.dart';
 import 'package:flutter/material.dart';
 import 'package:test/home.dart';
 

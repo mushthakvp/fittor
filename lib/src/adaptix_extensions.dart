@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../adaptix_helper.dart';
+import '../adaptix.dart';
 
 extension ResponsiveExtensions on BuildContext {
   // Screen dimensions
