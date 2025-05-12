@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'responsive_helper.dart';
+import '../responsive_helper.dart';
 
 mixin ResponsiveMixin<T extends StatefulWidget> on State<T> {
   @protected

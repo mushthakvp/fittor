@@ -15,7 +15,7 @@
   * Context extensions for responsive design
   * Device-specific value selection
 
-## ## 1.0.1
+## ## 1.0.3
 
 - Improved device detection
 - More granular responsive utilities

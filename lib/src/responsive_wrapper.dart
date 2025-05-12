@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../responsive.dart';
+import '../responsive_helper.dart';
 
 mixin ResponsiveAppMixin on Widget {
   Widget build(BuildContext context) {
