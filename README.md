@@ -41,6 +41,27 @@ flutter pub get
 import 'package:responsive_helper/responsive.dart';
 ```
 
+### 1.1 Main Function
+
+```dart
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget with ResponsiveAppMixin {
+  const MyApp({super.key});
+
+  @override
+  Widget responsive(BuildContext context) {
+    return MaterialApp(
+      title: 'Responsive Demo',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const HomeScreen(),
+    );
+  }
+}
+```
+
 ### 2. Context Extensions
 
 The package provides powerful extensions on `BuildContext`:
