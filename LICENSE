@@ -1,0 +1,8 @@
+
+### 5. CHANGELOG.md
+
+```markdown
+## 1.0.0
+
+- Initial version of the responsive helper package
+- Includes percentage-based sizing, device detection, and adaptive sizing

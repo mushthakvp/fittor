@@ -1,0 +1,30 @@
+name: responsive
+description: A comprehensive Flutter package for creating responsive UIs that adapt to different screen sizes and orientations.
+version: 1.0.0
+homepage: https://github.com/mushthakvp/responsive
+repository: https://github.com/mushthakvp/responsive.git
+issue_tracker: https://github.com/mushthakvp/responsive/issues
+
+environment:
+  sdk: ^3.7.2
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+
+  # assets:
+  #   - images/a_dot_burr.jpeg
+
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+
