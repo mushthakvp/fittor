@@ -139,7 +139,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.9.1"
-  responsive:
+  responsive_helper:
     dependency: "direct main"
     description:
       path: ".."

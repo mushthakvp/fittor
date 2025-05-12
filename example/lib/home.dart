@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:responsive/responsive.dart';
+import 'package:responsive_helper/responsive.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

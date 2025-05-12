@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
-  responsive:
+  responsive_helper:
     path: ..
 
 dev_dependencies:
