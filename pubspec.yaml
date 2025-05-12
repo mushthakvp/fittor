@@ -1,6 +1,6 @@
 name: responsive_helper
 description: A comprehensive Flutter package for creating responsive UIs that adapt to different screen sizes and orientations.
-version: 1.0.0
+version: 1.0.1
 homepage: https://github.com/mushthakvp/responsive
 repository: https://github.com/mushthakvp/responsive.git
 issue_tracker: https://github.com/mushthakvp/responsive/issues
