@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../responsive_helper.dart';
+import '../adaptix_helper.dart';
 
-mixin ResponsiveAppMixin on Widget {
+mixin AdaptixAppMixin on Widget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         return OrientationBuilder(
           builder: (context, orientation) {
-            ResponsiveHelper().init(context, constraints, orientation);
+            AdaptixHelper().init(context, constraints, orientation);
             return responsive(context);
           },
         );

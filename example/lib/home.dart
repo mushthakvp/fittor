@@ -1,5 +1,5 @@
+import 'package:adaptix/adaptix_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:responsive_helper/responsive_helper.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -59,12 +59,12 @@ class HomeScreen extends StatelessWidget {
             Text('Screen Width: ${context.width}'),
             Text('Screen Height: ${context.height}'),
             Text(
-              'Orientation: ${ResponsiveHelper.isPortrait ? 'Portrait' : 'Landscape'}',
+              'Orientation: ${AdaptixHelper.isPortrait ? 'Portrait' : 'Landscape'}',
             ),
             Text(
-              'Device Type: ${ResponsiveHelper.isMobile
+              'Device Type: ${AdaptixHelper.isMobile
                   ? 'Mobile'
-                  : ResponsiveHelper.isTablet
+                  : AdaptixHelper.isTablet
                   ? 'Tablet'
                   : 'Desktop'}',
             ),

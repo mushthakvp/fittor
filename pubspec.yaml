@@ -1,4 +1,4 @@
-name: responsive_helper
+name: adaptix
 description: A comprehensive Flutter package for creating responsive UIs that adapt to different screen sizes and orientations.
 version: 1.0.3
 homepage: https://github.com/mushthakvp/responsive

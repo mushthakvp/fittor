@@ -1,12 +1,12 @@
+import 'package:adaptix/adaptix_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:responsive_helper/responsive_helper.dart';
 import 'package:test/home.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget with ResponsiveAppMixin {
+class MyApp extends StatelessWidget with AdaptixAppMixin {
   const MyApp({super.key});
 
   @override

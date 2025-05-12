@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class ResponsiveHelper {
+class AdaptixHelper {
   // Singleton instance
-  static final ResponsiveHelper _instance = ResponsiveHelper._internal();
-  factory ResponsiveHelper() => _instance;
-  ResponsiveHelper._internal();
+  static final AdaptixHelper _instance = AdaptixHelper._internal();
+  factory AdaptixHelper() => _instance;
+  AdaptixHelper._internal();
 
   // Screen dimensions
   static double _screenWidth = 0;
