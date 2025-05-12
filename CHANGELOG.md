@@ -14,3 +14,10 @@
   * Adaptive font sizes
   * Context extensions for responsive design
   * Device-specific value selection
+
+## 1.0.1
+
+- Fixed a bug in the `ResponsiveHelper.of` method that caused a crash when used in a widget tree.
+- Added a new method `ResponsiveHelper.ofContext` to retrieve the responsive helper instance from a BuildContext.
+- Added a new method `ResponsiveHelper.ofDeviceType` to retrieve the device type from a BuildContext.
+- Added a new method `ResponsiveHelper.ofOrientation` to retrieve the orientation from a BuildContext.

@@ -1,5 +1,5 @@
 
-# Responsive Helper 📱🖥️ by Mushthak VP
+# Responsive Helper (fittor) 📱🖥️ by Mushthak VP
 
 A cutting-edge Flutter package for building truly responsive UIs that adapt seamlessly across different screen sizes, orientations, and device types. Developed by Mushthak VP to simplify responsive design in Flutter applications.
 
@@ -29,7 +29,7 @@ Responsive Flutter Package, Flutter UI Adaptation, Cross-Device UI Design, Respo
 
 ```yaml
 dependencies:
-  responsive_helper: ^1.0.0
+  fittor: ^1.0.1
 ```
 
 2. Install dependencies:
@@ -42,7 +42,7 @@ flutter pub get
 ### 1. Import the Package
 
 ```dart
-import 'package:responsive_helper/responsive.dart';
+import 'package:fittor/fittor.dart';
 ```
 
 ### 1.1 Main Function
@@ -52,7 +52,7 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget with ResponsiveAppMixin {
+class MyApp extends StatelessWidget with FittorAppMixin {
   const MyApp({super.key});
 
   @override
