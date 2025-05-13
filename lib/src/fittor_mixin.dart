@@ -49,25 +49,6 @@ mixin FittorMixin<T extends StatefulWidget> on State<T> {
   double get r24 => FittorHelper.r24;
   double get r30 => FittorHelper.r30;
 
-  Widget get s_5 => FittorHelper.s_5;
-  Widget get s1 => FittorHelper.s1;
-  Widget get s_15 => FittorHelper.s_15;
-  Widget get s2 => FittorHelper.s2;
-  Widget get s4 => FittorHelper.s4;
-  Widget get s8 => FittorHelper.s8;
-  Widget get s12 => FittorHelper.s12;
-  Widget get s16 => FittorHelper.s16;
-  Widget get s20 => FittorHelper.s20;
-  Widget get s_5w => FittorHelper.s_5w;
-  Widget get s1w => FittorHelper.s1w;
-  Widget get s_15w => FittorHelper.s_15w;
-  Widget get s2w => FittorHelper.s2w;
-  Widget get s4w => FittorHelper.s4w;
-  Widget get s8w => FittorHelper.s8w;
-  Widget get s12w => FittorHelper.s12w;
-  Widget get s16w => FittorHelper.s16w;
-  Widget get s20w => FittorHelper.s20w;
-
   T deviceValue<T>({required T mobile, T? tablet, T? desktop}) =>
       FittorHelper.deviceValue(
         mobile: mobile,

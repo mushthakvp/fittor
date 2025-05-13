@@ -18,6 +18,8 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Custom SizedBox Examples
+            _buildCustomSizedBoxExamples(context),
             // Device Info Section
             _buildDeviceInfoSection(context),
 
@@ -55,7 +57,7 @@ class HomeScreen extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            context.s8,
+            8.h,
             Text('Screen Width: ${context.width}'),
             Text('Screen Height: ${context.height}'),
             Text(
@@ -78,7 +80,7 @@ class HomeScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        context.s16,
+        16.h,
         Text(
           'Spacing Examples',
           style: TextStyle(
@@ -86,7 +88,7 @@ class HomeScreen extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        context.s8,
+        8.h,
         Wrap(
           spacing: context.p8,
           runSpacing: context.p8,
@@ -99,16 +101,16 @@ class HomeScreen extends StatelessWidget {
             _buildSpacingBox(context, 'p24', context.p24),
           ],
         ),
-        context.s16,
+        16.h,
         Text('Vertical Spacers', style: TextStyle(fontSize: context.fs(16))),
         Column(
           children: [
             Container(color: Colors.red, height: 2),
-            context.s_5,
+            .5.h,
             Container(color: Colors.green, height: 2),
-            context.s1,
+            1.h,
             Container(color: Colors.blue, height: 2),
-            context.s2,
+            2.h,
             Container(color: Colors.orange, height: 2),
           ],
         ),
@@ -130,7 +132,7 @@ class HomeScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        context.s20,
+        20.h,
         Text(
           'Sizing Examples',
           style: TextStyle(
@@ -138,9 +140,9 @@ class HomeScreen extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        context.s8,
+        8.h,
         Text('Percentage of Screen Width/Height'),
-        context.s8,
+        8.h,
         Container(
           width: context.wp(80),
           height: context.hp(15),
@@ -148,9 +150,9 @@ class HomeScreen extends StatelessWidget {
           alignment: Alignment.center,
           child: Text('80% width, 15% height'),
         ),
-        context.s16,
+        16.h,
         Text('Scaled Containers'),
-        context.s8,
+        8.h,
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -178,7 +180,7 @@ class HomeScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        context.s20,
+        10.h,
         Text(
           'Font Size Examples',
           style: TextStyle(
@@ -186,15 +188,15 @@ class HomeScreen extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        context.s8,
+        8.h,
         Text('Fixed Size (fs16)', style: TextStyle(fontSize: context.fs(16))),
         Text(
           'Adaptive Size (adaptiveFs16)',
           style: TextStyle(fontSize: context.adaptiveFs(16)),
         ),
-        context.s8,
+        8.h,
         Text('Predefined Sizes:', style: TextStyle(fontSize: context.fs(14))),
-        context.s4,
+        4.h,
         Text('fs12', style: TextStyle(fontSize: context.fs12)),
         Text('fs16', style: TextStyle(fontSize: context.fs16)),
         Text('fs20', style: TextStyle(fontSize: context.fs20)),
@@ -208,7 +210,7 @@ class HomeScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        context.s20,
+        20.h,
         Text(
           'Adaptive Widgets',
           style: TextStyle(
@@ -216,7 +218,7 @@ class HomeScreen extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        context.s8,
+        8.h,
         Container(
           padding: EdgeInsets.all(
             context.deviceValue(
@@ -231,7 +233,7 @@ class HomeScreen extends StatelessWidget {
             style: TextStyle(fontSize: context.adaptiveFs(16)),
           ),
         ),
-        context.s16,
+        16.h,
         Container(
           width: context.adaptiveSize(200),
           height: context.adaptiveSize(100),
@@ -250,7 +252,7 @@ class HomeScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        context.s20,
+        20.h,
         Text(
           'Safe Area Examples',
           style: TextStyle(
@@ -258,7 +260,7 @@ class HomeScreen extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        context.s8,
+        8.h,
         Container(
           width: context.swp(90), // Safe width percentage
           height: context.shp(10), // Safe height percentage
@@ -269,6 +271,30 @@ class HomeScreen extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildCustomSizedBoxExamples(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Height 10',
+          style: TextStyle(
+            fontSize: context.fs(18),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        10.h,
+        Text(
+          'Height 20',
+          style: TextStyle(
+            fontSize: context.fs(18),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        20.h,
       ],
     );
   }

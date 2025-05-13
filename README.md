@@ -112,6 +112,34 @@ class DeviceInfoWidget extends StatelessWidget {
 }
 ```
 
+#### Custom Sized Box
+
+```dart
+  Widget _buildCustomSizedBoxExamples(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Height 10',
+          style: TextStyle(
+            fontSize: context.fs(18),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        10.h,
+        Text(
+          'Height 20',
+          style: TextStyle(
+            fontSize: context.fs(18),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        20.h,
+      ],
+    );
+  }
+```
+
 #### Adaptive Sizing
 
 ```dart

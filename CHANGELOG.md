@@ -21,3 +21,33 @@
 - Added a new method `ResponsiveHelper.ofContext` to retrieve the responsive helper instance from a BuildContext.
 - Added a new method `ResponsiveHelper.ofDeviceType` to retrieve the device type from a BuildContext.
 - Added a new method `ResponsiveHelper.ofOrientation` to retrieve the orientation from a BuildContext.
+
+## 1.0.2
+
+- New SizedBox widget to wrap content and apply responsive sizing.
+- Use Height Like this
+```dart
+  Widget _buildCustomSizedBoxExamples(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Height 10',
+          style: TextStyle(
+            fontSize: context.fs(18),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        10.h,
+        Text(
+          'Height 20',
+          style: TextStyle(
+            fontSize: context.fs(18),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        20.h,
+      ],
+    );
+  }
+```

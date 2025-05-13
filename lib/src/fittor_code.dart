@@ -174,25 +174,4 @@ class FittorHelper {
     if (isTablet && tablet != null) return tablet;
     return mobile;
   }
-
-  // Common SizedBoxes for spacing
-  static Widget get s_5 => SizedBox(height: hp(.5));
-  static Widget get s1 => SizedBox(height: hp(1));
-  static Widget get s_15 => SizedBox(height: hp(1.5));
-  static Widget get s2 => SizedBox(height: hp(2));
-  static Widget get s4 => SizedBox(height: hp(4));
-  static Widget get s8 => SizedBox(height: hp(8));
-  static Widget get s12 => SizedBox(height: hp(12));
-  static Widget get s16 => SizedBox(height: hp(16));
-  static Widget get s20 => SizedBox(height: hp(20));
-
-  static Widget get s_5w => SizedBox(width: wp(.5));
-  static Widget get s1w => SizedBox(width: wp(1));
-  static Widget get s_15w => SizedBox(width: wp(1.5));
-  static Widget get s2w => SizedBox(width: wp(2));
-  static Widget get s4w => SizedBox(width: wp(4));
-  static Widget get s8w => SizedBox(width: wp(8));
-  static Widget get s12w => SizedBox(width: wp(12));
-  static Widget get s16w => SizedBox(width: wp(16));
-  static Widget get s20w => SizedBox(width: wp(20));
 }
