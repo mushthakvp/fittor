@@ -98,20 +98,19 @@ class HomeScreen extends StatelessWidget {
             _buildSpacingBox(context, 'p12', context.p12),
             _buildSpacingBox(context, 'p16', context.p16),
             _buildSpacingBox(context, 'p20', context.p20),
-            _buildSpacingBox(context, 'p24', context.p24),
           ],
         ),
         16.h,
         Text('Vertical Spacers', style: TextStyle(fontSize: context.fs(16))),
         Column(
           children: [
-            Container(color: Colors.red, height: 2),
-            .5.h,
-            Container(color: Colors.green, height: 2),
-            1.h,
-            Container(color: Colors.blue, height: 2),
-            2.h,
-            Container(color: Colors.orange, height: 2),
+            Container(color: Colors.red, height: 4),
+            5.h,
+            Container(color: Colors.green, height: 6),
+            10.h,
+            Container(color: Colors.blue, height: 8),
+            15.h,
+            Container(color: Colors.orange, height: 10),
           ],
         ),
       ],
@@ -120,8 +119,8 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildSpacingBox(BuildContext context, String label, double size) {
     return Container(
-      width: size * 3,
-      height: size * 3,
+      width: size * 6,
+      height: size * 6,
       color: Colors.blue.withOpacity(0.5),
       alignment: Alignment.center,
       child: Text(label),
@@ -182,7 +181,7 @@ class HomeScreen extends StatelessWidget {
       children: [
         10.h,
         Text(
-          'Font Size Examples',
+          'Font Size Examples  10.h',
           style: TextStyle(
             fontSize: context.fs(18),
             fontWeight: FontWeight.bold,
@@ -280,7 +279,7 @@ class HomeScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Height 10',
+          'Height 10 --10.h--',
           style: TextStyle(
             fontSize: context.fs(18),
             fontWeight: FontWeight.bold,
@@ -288,7 +287,7 @@ class HomeScreen extends StatelessWidget {
         ),
         10.h,
         Text(
-          'Height 20',
+          'Height 20 --20.h--',
           style: TextStyle(
             fontSize: context.fs(18),
             fontWeight: FontWeight.bold,
