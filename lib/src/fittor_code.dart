@@ -47,7 +47,8 @@ class FittorHelper {
   ) {
     // Media query data
     MediaQueryData mediaQuery = MediaQuery.of(context);
-    _textScaleFactor = mediaQuery.textScaleFactor;
+    final textScaler = MediaQuery.textScalerOf(context);
+    _textScaleFactor = textScaler.scale(1.0);
 
     // Screen dimensions based on orientation
     if (orientation == Orientation.portrait) {

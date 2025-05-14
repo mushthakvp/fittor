@@ -56,3 +56,4 @@
 
 - License updated to MIT
 - README.md updated with new features and examples
+- ScaleFactor Deprecated and replaced with ScaleFactor.of
