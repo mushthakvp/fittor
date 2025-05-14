@@ -49,7 +49,7 @@ mixin FittorMixin<T extends StatefulWidget> on State<T> {
   double get r24 => FittorHelper.r24;
   double get r30 => FittorHelper.r30;
 
-  T deviceValue<T>({required T mobile, T? tablet, T? desktop}) =>
+  T deviceValue({required T mobile, T? tablet, T? desktop}) =>
       FittorHelper.deviceValue(
         mobile: mobile,
         tablet: tablet,

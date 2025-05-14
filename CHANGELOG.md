@@ -57,3 +57,7 @@
 - License updated to MIT
 - README.md updated with new features and examples
 - ScaleFactor Deprecated and replaced with ScaleFactor.of
+
+## 1.0.2+2
+
+- Added a new method to the ResponsiveHelper class to retrieve the current device type from a BuildContext.
