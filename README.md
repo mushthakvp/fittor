@@ -236,9 +236,8 @@ Have a project or need custom Flutter development? Feel free to reach out! I'm a
 
 Contributions are welcome! Whether you're reporting bugs, suggesting improvements, or want to collaborate, don't hesitate to connect.
 
-## 📄 License
-
-MIT License
+## License
+[MIT](LICENSE) - Copyright © 2025 Mushthak VP
 
 ## 🆘 Support
 

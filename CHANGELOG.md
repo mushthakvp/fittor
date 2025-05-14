@@ -51,3 +51,8 @@
     );
   }
 ```
+
+## 1.0.2+1
+
+- License updated to MIT
+- README.md updated with new features and examples

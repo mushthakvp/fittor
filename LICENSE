@@ -1,73 +1,21 @@
-# MIT License
+MIT License
 
-## Responsive Helper Package License
+Copyright (c) 2025 Mushthak VP
 
-**Copyright (c) 2024 Musthak VP**
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-### Preamble
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-The MIT License is a permissive free software license that allows for extensive use, modification, and distribution of the software with minimal restrictions.
-
-### Terms and Conditions
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-#### 1. Copyright Notice
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-#### 2. Grant of Rights
-- **Usage**: Users are free to use the Software for any purpose, commercial or non-commercial.
-- **Modification**: Users can modify the Software to suit their needs.
-- **Distribution**: Users can distribute the original or modified versions of the Software.
-- **Sublicensing**: Users can create and distribute software that uses this package under their own terms.
-
-#### 3. Limitations
-
-##### 3.1 No Warranty
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF:
-- MERCHANTABILITY
-- FITNESS FOR A PARTICULAR PURPOSE
-- NON-INFRINGEMENT
-
-##### 3.2 Liability
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY:
-- CLAIM
-- DAMAGES
-- OTHER LIABILITY
-
-Whether arising from:
-- CONTRACT
-- TORT
-- OTHER ACTION
-- CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
-
-### Interpretation
-
-#### 4. Key Principles
-- You are free to use this software in personal and commercial projects.
-- You can modify and redistribute the software.
-- You must include the original copyright notice.
-- The software comes with no guarantees or warranties.
-
-#### 5. Compatibility
-This license is compatible with most open-source and commercial software development practices.
-
-### Contact
-
-For any questions regarding the license, please contact:
-- **Author:** Musthak VP
-- **Email:** mail.musthak@gmail.com
-
-### Additional Resources
-- Full license text: https://opensource.org/licenses/MIT
-- More information: https://choosealicense.com/licenses/mit/
-
-### Disclaimer
-While this license provides significant freedom, users are encouraged to:
-- Provide attribution when possible
-- Understand the full implications of the license
-- Consult legal counsel if uncertain about any terms
-
----
-
-**End of MIT License**
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
