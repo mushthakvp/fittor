@@ -194,13 +194,6 @@ class _MyScreenState extends State<MyScreen> with ConnectivityMixin {
 }
 ```
 
-## 🎯 Best Practices
-
-- Use `context.wp()` and `context.hp()` for responsive layouts
-- Utilize `context.fs()` for adaptive typography
-- Leverage `context.deviceValue()` for device-specific customizations
-- Always consider both portrait and landscape orientations
-
 ## 🐞 Troubleshooting
 
 - Ensure the package is correctly imported
