@@ -61,3 +61,27 @@
 ## 1.0.3
 
 - Added a new method to the ResponsiveHelper class to retrieve the current device type from a BuildContext.
+
+## 1.0.4
+
+- Added Internet Connectivity Monitoring
+- Added ConnectivityMixin for StatefulWidgets
+- Added ConnectivityWrapper for wrapping UI with connectivity monitoring
+
+```dart
+class MyApp extends StatelessWidget with FittorAppMixin {
+  const MyApp({super.key});
+  @override
+  Widget responsive(BuildContext context) {
+    return MaterialApp(
+      home: ConnectivityWrapper(
+        ignoreOfflineState: true,
+        onConnectivityChanged: (status) {
+          debugPrint('Connectivity status: $status');
+        },
+        child: const HomeScreen(),
+      ),
+    );
+  }
+}
+```
