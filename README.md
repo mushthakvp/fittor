@@ -126,6 +126,24 @@ Fittor includes built-in internet connectivity monitoring without any external p
 Wrap your widget with `ConnectivityWrapper` to automatically show a no-internet screen when connectivity is lost:
 
 ```dart
+class MyApp extends StatelessWidget with FittorAppMixin {
+  const MyApp({super.key});
+  @override
+  Widget responsive(BuildContext context) {
+    return MaterialApp(
+      home: ConnectivityWrapper(
+        ignoreOfflineState: true,
+        onConnectivityChanged: (status) {
+          debugPrint('Connectivity status: $status');
+        },
+        child: const HomeScreen(),
+      ),
+    );
+  }
+}
+```
+
+```dart
 ConnectivityWrapper(
   child: YourWidget(),
   // Optional customizations:
