@@ -85,3 +85,8 @@ class MyApp extends StatelessWidget with FittorAppMixin {
   }
 }
 ```
+
+## 1.0.5
+
+- Add Logo to README.md
+- Add Clear Cache to README.md

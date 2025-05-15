@@ -4,10 +4,21 @@
   <img src="https://raw.githubusercontent.com/mushthakvp/fittor/dev/assets/fittor.png" alt="Fittor Logo" width="200">
 </p>
 
+![Package Views](https://komarev.com/ghpvc/?username=fittor-package&label=Package%20Views&color=blue)
+[![pub package](https://img.shields.io/pub/v/fittor.svg)](https://pub.dev/packages/fittor)
+[![pub points](https://img.shields.io/pub/points/fittor.svg)](https://pub.dev/packages/fittor/score)
+[![popularity](https://img.shields.io/pub/popularity/fittor.svg)](https://pub.dev/packages/fittor/score)
+[![likes](https://img.shields.io/pub/likes/fittor.svg)](https://pub.dev/packages/fittor)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub issues](https://img.shields.io/github/issues/mushthakvp/fittor)](https://github.com/mushthakvp/fittor/issues)
+[![GitHub stars](https://img.shields.io/github/stars/mushthakvp/fittor)](https://github.com/mushthakvp/fittor/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/mushthakvp/fittor)](https://github.com/mushthakvp/fittor/network)
+[![Last Commit](https://img.shields.io/github/last-commit/mushthakvp/fittor)](https://github.com/mushthakvp/fittor/commits/main)
+
 
 A comprehensive Flutter package for responsive UI design and network connectivity management.
 
-[![pub package](https://img.shields.io/pub/v/fittor.svg)](https://pub.dev/packages/fittor)
+<!-- [![pub package](https://img.shields.io/pub/v/fittor.svg)](https://pub.dev/packages/fittor) -->
 
 ## Table of Contents
 
