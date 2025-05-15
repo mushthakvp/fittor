@@ -12,7 +12,6 @@ A comprehensive Flutter package for responsive UI design and network connectivit
   - [Responsive](#responsive)
   - [Custom Sized Box](#custom-sized-box)
   - [Internet Connectivity](#internet-connectivity)
-- [Examples](#examples)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -123,8 +122,6 @@ Fittor includes built-in internet connectivity monitoring without any external p
 
 #### Using ConnectivityWrapper
 
-Wrap your widget with `ConnectivityWrapper` to automatically show a no-internet screen when connectivity is lost:
-
 ```dart
 class MyApp extends StatelessWidget with FittorAppMixin {
   const MyApp({super.key});
@@ -142,6 +139,8 @@ class MyApp extends StatelessWidget with FittorAppMixin {
   }
 }
 ```
+
+Wrap your widget with `ConnectivityWrapper` to automatically show a no-internet screen when connectivity is lost:
 
 ```dart
 ConnectivityWrapper(
@@ -191,170 +190,6 @@ class _MyScreenState extends State<MyScreen> with ConnectivityMixin {
     } else {
       return OfflineContent();
     }
-  }
-}
-```
-
-## Examples
-
-### Responsive App Example
-
-```dart
-import 'package:fittor/fittor.dart';
-import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget with FittorAppMixin {
-  const MyApp({super.key});
-
-  @override
-  Widget responsive(BuildContext context) {
-    return MaterialApp(
-      title: 'Responsive Demo',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const HomeScreen(),
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Responsive Demo')),
-      body: Center(
-        child: Container(
-          width: context.wp(80),
-          padding: EdgeInsets.all(context.p16),
-          decoration: BoxDecoration(
-            color: Colors.blue.shade100,
-            borderRadius: BorderRadius.circular(context.r8),
-          ),
-          child: Text(
-            'This text and container adapt to screen size',
-            style: TextStyle(fontSize: context.fs18),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
-}
-```
-
-### Internet Connectivity Example
-
-```dart
-import 'package:fittor/fittor.dart';
-import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget with FittorAppMixin {
-  const MyApp({super.key});
-
-  @override
-  Widget responsive(BuildContext context) {
-    return MaterialApp(
-      title: 'Connectivity Demo',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: ConnectivityWrapper(
-        // Set to true if you want to handle connectivity display yourself
-        ignoreOfflineState: true,
-        onConnectivityChanged: (status) {
-          debugPrint('Connectivity status: $status');
-        },
-        child: const HomeScreen(),
-      ),
-    );
-  }
-}
-
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> with ConnectivityMixin {
-  @override
-  void onConnectivityChanged(ConnectivityStatus status) {
-    if (status == ConnectivityStatus.online) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You are back online!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You are offline!'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Connectivity Demo'),
-        actions: [
-          Icon(
-            isOnline ? Icons.wifi : Icons.wifi_off,
-            color: isOnline ? Colors.green : Colors.red,
-          ),
-          const SizedBox(width: 16),
-        ],
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Current Connectivity Status:',
-              style: TextStyle(fontSize: context.fs18),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              isOnline ? 'ONLINE' : 'OFFLINE',
-              style: TextStyle(
-                fontSize: context.fs24,
-                fontWeight: FontWeight.bold,
-                color: isOnline ? Colors.green : Colors.red,
-              ),
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () async {
-                // Force a connectivity check
-                final status = await checkConnectivity();
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Connectivity check result: ${status == ConnectivityStatus.online ? 'ONLINE' : 'OFFLINE'}',
-                      ),
-                    ),
-                  );
-                }
-              },
-              child: const Text('Check Connectivity Now'),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 ```
