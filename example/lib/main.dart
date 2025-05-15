@@ -12,9 +12,16 @@ class MyApp extends StatelessWidget with FittorAppMixin {
   @override
   Widget responsive(BuildContext context) {
     return MaterialApp(
+      // debugShowCheckedModeBanner: false,
       title: 'Responsive Demo',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const HomeScreen(),
+      home: ConnectivityWrapper(
+        ignoreOfflineState: true,
+        onConnectivityChanged: (status) {
+          debugPrint('Connectivity status: $status');
+        },
+        child: const HomeScreen(),
+      ),
     );
   }
 }

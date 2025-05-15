@@ -1,53 +1,264 @@
+# Fittor
 
-# Responsive Helper (fittor) 📱🖥️ by Mushthak VP
+A comprehensive Flutter package for responsive UI design and network connectivity management.
 
-A cutting-edge Flutter package for building truly responsive UIs that adapt seamlessly across different screen sizes, orientations, and device types. Developed by Mushthak VP to simplify responsive design in Flutter applications.
+[![pub package](https://img.shields.io/pub/v/fittor.svg)](https://pub.dev/packages/fittor)
 
-## 🏆 SEO Keywords
-Responsive Flutter Package, Flutter UI Adaptation, Cross-Device UI Design, Responsive Design Tool, Flutter Responsive Framework
+## Table of Contents
 
-## ✨ Features
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Responsive](#responsive)
+  - [Custom Sized Box](#custom-sized-box)
+  - [Internet Connectivity](#internet-connectivity)
+- [Examples](#examples)
+- [Contributing](#contributing)
+- [License](#license)
 
-- 🔍 Device Type Detection
-  - Identify device type (Mobile, Tablet, Desktop)
-  - Orientation detection (Portrait & Landscape)
+## Features
 
-- 📐 Adaptive Sizing
-  - Percentage-based width and height calculations
-  - Safe area aware sizing
-  - Adaptive font sizes
-  - Device-specific value selection
+- 📱 **Responsive UI**: Easily create responsive layouts that adapt to different screen sizes and orientations
+- 📦 **Custom Sized Box**: Convenient extensions for creating SizedBox widgets
+- 🌐 **Internet Connectivity**: Built-in connectivity monitoring with customizable no-internet UI
 
-- 🛠️ Convenient Extensions
-  - Easy-to-use context extensions
-  - Predefined spacing widgets
-  - Lightweight and intuitive API
-
-## 📦 Installation
-
-1. Add the package to your `pubspec.yaml`:
+## Installation
 
 ```yaml
 dependencies:
-  fittor: ^1.0.1
+  fittor: ^latest_version
 ```
 
-2. Install dependencies:
+Then run:
+
 ```bash
 flutter pub get
 ```
 
-## 🚀 Usage Guide
+## Usage
 
-### 1. Import the Package
+### Responsive
+
+Fittor provides a responsive design system through mixins and extensions. Here's how to use it:
+
+#### Basic Setup
+
+Add the `FittorAppMixin` to your app:
+
+```dart
+class MyApp extends StatelessWidget with FittorAppMixin {
+  const MyApp({super.key});
+
+  @override
+  Widget responsive(BuildContext context) {
+    return MaterialApp(
+      title: 'Responsive Demo',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const HomeScreen(),
+    );
+  }
+}
+```
+
+#### Using in Widgets
+
+Access responsive values through context extensions:
+
+```dart
+Container(
+  width: context.wp(50),          // 50% of screen width
+  height: context.hp(25),         // 25% of screen height
+  padding: EdgeInsets.all(context.p16), // Adaptive padding
+  child: Text(
+    'Responsive Text',
+    style: TextStyle(fontSize: context.fs18), // Adaptive font size
+  ),
+)
+```
+
+#### Responsive Mixins
+
+Use the `FittorMixin` in your StatefulWidget:
+
+```dart
+class _MyWidgetState extends State<MyWidget> with FittorMixin {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: wp(50),    // 50% of screen width
+      padding: EdgeInsets.all(p16), // Predefined padding
+      child: Text(
+        'Hello World',
+        style: TextStyle(fontSize: fs(18)), // Responsive font size
+      ),
+    );
+  }
+}
+```
+
+### Custom Sized Box
+
+Create SizedBox widgets with simple extensions:
+
+```dart
+// Width SizedBox
+20.w  // SizedBox with width 20
+
+// Height SizedBox
+16.h  // SizedBox with height 16
+
+// Square SizedBox
+24.s  // SizedBox with width and height both 24
+```
+
+### Internet Connectivity
+
+Fittor includes built-in internet connectivity monitoring without any external packages.
+
+#### Using ConnectivityWrapper
+
+Wrap your widget with `ConnectivityWrapper` to automatically show a no-internet screen when connectivity is lost:
+
+```dart
+ConnectivityWrapper(
+  child: YourWidget(),
+  // Optional customizations:
+  offlineWidget: YourCustomOfflineWidget(),
+  onConnectivityChanged: (status) {
+    print('Connectivity status: $status');
+  },
+)
+```
+
+The `ignoreOfflineState` parameter (default: false) controls whether the wrapper automatically shows the no-internet screen:
+
+```dart
+ConnectivityWrapper(
+  ignoreOfflineState: true,  // Don't show no-internet screen automatically
+  onConnectivityChanged: (status) {
+    // Handle connectivity changes yourself
+  },
+  child: YourWidget(),
+)
+```
+
+When `ignoreOfflineState` is set to `true`, the ConnectivityWrapper will not automatically show the no-internet screen when connectivity is lost. Instead, it will continue showing your child widget and notify you of connectivity changes through the `onConnectivityChanged` callback. This is useful when you want to handle connectivity UI yourself, such as showing snackbars or banners instead of full-screen notifications.
+
+#### Using ConnectivityMixin
+
+For more fine-grained control, use the `ConnectivityMixin` in your StatefulWidget:
+
+```dart
+class _MyScreenState extends State<MyScreen> with ConnectivityMixin {
+  @override
+  void onConnectivityChanged(ConnectivityStatus status) {
+    if (status == ConnectivityStatus.online) {
+      // Handle online state
+    } else {
+      // Handle offline state
+    }
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    // Access connectivity status with:
+    if (isOnline) {
+      return OnlineContent();
+    } else {
+      return OfflineContent();
+    }
+  }
+}
+```
+
+#### Custom Handling with Material Banner Example
+
+Here's an example of custom connectivity handling with Material Banners:
+
+```dart
+class _NoInternetState extends State<NoInternet> with ConnectivityMixin {
+  @override
+  void onConnectivityChanged(ConnectivityStatus status) {
+    if (status == ConnectivityStatus.online) {
+      ScaffoldMessenger.of(context).showMaterialBanner(
+        MaterialBanner(
+          backgroundColor: Colors.green,
+          content: const Text(
+            'Internet connection restored.',
+            style: TextStyle(color: Colors.white),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showMaterialBanner(
+        MaterialBanner(
+          backgroundColor: Colors.red,
+          content: const Text(
+            'No internet connection.',
+            style: TextStyle(color: Colors.white),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Connectivity Demo')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isOnline ? Icons.wifi : Icons.wifi_off,
+              size: 48,
+              color: isOnline ? Colors.green : Colors.red,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              isOnline ? 'Connected' : 'No Internet Connection',
+              style: TextStyle(fontSize: 20),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () async {
+                await checkConnectivity();
+              },
+              child: const Text('Check Connection'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+```
+
+## Examples
+
+### Responsive App Example
 
 ```dart
 import 'package:fittor/fittor.dart';
-```
+import 'package:flutter/material.dart';
 
-### 1.1 Main Function
-
-```dart
 void main() {
   runApp(const MyApp());
 }
@@ -64,181 +275,169 @@ class MyApp extends StatelessWidget with FittorAppMixin {
     );
   }
 }
-```
 
-### 2. Context Extensions
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
 
-The package provides powerful extensions on `BuildContext`:
-
-```dart
-// Screen Dimensions
-double screenWidth = context.width;
-double screenHeight = context.height;
-
-// Adaptive Font Sizing
-TextStyle title = TextStyle(fontSize: context.fs(20));
-
-// Percentage-based Sizing
-Widget responsiveContainer = Container(
-  width: context.wp(80),   // 80% of screen width
-  height: context.hp(50),  // 50% of screen height
-);
-
-// Device-specific Values
-Widget adaptiveWidget = context.deviceValue(
-  mobile: mobileWidget,
-  tablet: tabletWidget,
-  desktop: desktopWidget,
-);
-```
-
-### 3. Detailed Examples
-
-#### Device Information
-
-```dart
-class DeviceInfoWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text('Screen Width: ${context.width}'),
-        Text('Screen Height: ${context.height}'),
-        Text('Orientation: ${ResponsiveHelper.isPortrait ? 'Portrait' : 'Landscape'}'),
-        Text('Device Type: ${ResponsiveHelper.deviceType}'),
-      ],
-    );
-  }
-}
-```
-
-#### Custom Sized Box
-
-```dart
-  Widget _buildCustomSizedBoxExamples(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Height 10',
-          style: TextStyle(
-            fontSize: context.fs(18),
-            fontWeight: FontWeight.bold,
+    return Scaffold(
+      appBar: AppBar(title: const Text('Responsive Demo')),
+      body: Center(
+        child: Container(
+          width: context.wp(80),
+          padding: EdgeInsets.all(context.p16),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade100,
+            borderRadius: BorderRadius.circular(context.r8),
+          ),
+          child: Text(
+            'This text and container adapt to screen size',
+            style: TextStyle(fontSize: context.fs18),
+            textAlign: TextAlign.center,
           ),
         ),
-        10.h,
-        Text(
-          'Height 20',
-          style: TextStyle(
-            fontSize: context.fs(18),
-            fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+}
+```
+
+### Internet Connectivity Example
+
+```dart
+import 'package:fittor/fittor.dart';
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget with FittorAppMixin {
+  const MyApp({super.key});
+
+  @override
+  Widget responsive(BuildContext context) {
+    return MaterialApp(
+      title: 'Connectivity Demo',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: ConnectivityWrapper(
+        // Set to true if you want to handle connectivity display yourself
+        ignoreOfflineState: true,
+        onConnectivityChanged: (status) {
+          debugPrint('Connectivity status: $status');
+        },
+        child: const HomeScreen(),
+      ),
+    );
+  }
+}
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> with ConnectivityMixin {
+  @override
+  void onConnectivityChanged(ConnectivityStatus status) {
+    if (status == ConnectivityStatus.online) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You are back online!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You are offline!'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Connectivity Demo'),
+        actions: [
+          Icon(
+            isOnline ? Icons.wifi : Icons.wifi_off,
+            color: isOnline ? Colors.green : Colors.red,
           ),
+          const SizedBox(width: 16),
+        ],
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Current Connectivity Status:',
+              style: TextStyle(fontSize: context.fs18),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              isOnline ? 'ONLINE' : 'OFFLINE',
+              style: TextStyle(
+                fontSize: context.fs24,
+                fontWeight: FontWeight.bold,
+                color: isOnline ? Colors.green : Colors.red,
+              ),
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: () async {
+                // Force a connectivity check
+                final status = await checkConnectivity();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Connectivity check result: ${status == ConnectivityStatus.online ? 'ONLINE' : 'OFFLINE'}',
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Check Connectivity Now'),
+            ),
+          ],
         ),
-        20.h,
-      ],
-    );
-  }
-```
-
-#### Adaptive Sizing
-
-```dart
-class AdaptiveSizingExample extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Percentage-based container
-        Container(
-          width: context.wp(90),   // 90% of screen width
-          height: context.hp(20),  // 20% of screen height
-          color: Colors.blue,
-        ),
-
-        // Adaptive padding
-        Padding(
-          padding: EdgeInsets.all(context.deviceValue(
-            mobile: context.p8,
-            tablet: context.p16,
-            desktop: context.p24,
-          )),
-          child: Text('Adaptive Padding'),
-        ),
-      ],
-    );
-  }
-}
-```
-
-#### Font Sizing
-
-```dart
-class ResponsiveFontExample extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Adaptive font sizes
-        Text('Title', style: TextStyle(fontSize: context.fs(24))),
-        Text('Subtitle', style: TextStyle(fontSize: context.fs(18))),
-        
-        // Predefined font sizes
-        Text('Small Text', style: TextStyle(fontSize: context.fs12)),
-        Text('Large Text', style: TextStyle(fontSize: context.fs32)),
-      ],
+      ),
     );
   }
 }
 ```
 
-### 4. Available Extensions
+## Contributing
 
-| Extension | Description | Example |
-|----------|-------------|---------|
-| `context.width` | Total screen width | `double width = context.width;` |
-| `context.height` | Total screen height | `double height = context.height;` |
-| `context.wp(%)` | Percentage of screen width | `context.wp(80)` gives 80% of screen width |
-| `context.hp(%)` | Percentage of screen height | `context.hp(50)` gives 50% of screen height |
-| `context.fs()` | Adaptive font size | `context.fs(16)` returns responsive font size |
-| `context.p*` | Adaptive padding | `context.p16` gives adaptive 16 padding |
-| `context.s*` | Vertical spacers | `context.s16` adds a 16-unit vertical space |
-| `context.deviceValue()` | Device-specific values | Select value based on device type |
-
-## 🎯 Best Practices
-
-- Use `context.wp()` and `context.hp()` for responsive layouts
-- Utilize `context.fs()` for adaptive typography
-- Leverage `context.deviceValue()` for device-specific customizations
-- Always consider both portrait and landscape orientations
-
-## 🐞 Troubleshooting
-
-- Ensure the package is correctly imported
-- Check that you're using the latest version
-- Verify flutter and dart SDK compatibility
-- Check for any conflicts with other packages
-
-## 📞 Contact & Support
-
-**Author:** Mushthak VP
-
-### 🌐 Connect With Me
-- **Email:** mail.musthak@gmail.com
-- **WhatsApp:** +919061213930
-- **LinkedIn:** [Mushthak VP](https://in.linkedin.com/in/musthak)
-- **Instagram:** [@musth4k](https://www.instagram.com/musth4k/)
-- **GitHub:** [mushthakvp](https://github.com/mushthakvp)
-
-### 💡 Collaboration
-Have a project or need custom Flutter development? Feel free to reach out! I'm always open to interesting projects, collaborations, and opportunities.
-
-## 🤝 Contributing
-
-Contributions are welcome! Whether you're reporting bugs, suggesting improvements, or want to collaborate, don't hesitate to connect.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
-[MIT](LICENSE) - Copyright © 2025 Mushthak VP
 
-## 🆘 Support
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-For any questions, issues, or custom development needs, please contact me directly via email or social media channels.
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Add click handlers to table of contents links
+  const tocLinks = document.querySelectorAll('a[href^="#"]');
+  tocLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetId = this.getAttribute('href').substring(1);
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) {
+        targetElement.scrollIntoView({
+          behavior: 'smooth'
+        });
+      }
+    });
+  });
+});
+</script>

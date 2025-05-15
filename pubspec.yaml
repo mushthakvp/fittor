@@ -21,8 +21,8 @@ dev_dependencies:
 
 flutter:
 
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/no_internet.jpg
 
   # fonts:
   #   - family: Schyler

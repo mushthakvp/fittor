@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:xml/xml.dart' as xml;
 
@@ -295,14 +297,30 @@ class SvgPathBuilder {
           }
           break;
 
-        case 'a': // arcTo (simplified implementation)
+        case 'a': // arcTo - Improved implementation
           for (int i = 0; i < params.length; i += 7) {
             if (i + 6 < params.length) {
-              // For simplicity, we'll just draw a line to the end point
-              // A proper arc implementation would be more complex
+              final rx = params[i].abs();
+              final ry = params[i + 1].abs();
+              final xAxisRotation = params[i + 2] * math.pi / 180;
+              final largeArcFlag = params[i + 3] != 0;
+              final sweepFlag = params[i + 4] != 0;
               final x = isRelative ? lastX + params[i + 5] : params[i + 5];
               final y = isRelative ? lastY + params[i + 6] : params[i + 6];
-              path.lineTo(x, y);
+
+              _addArcToPath(
+                path,
+                lastX,
+                lastY,
+                rx,
+                ry,
+                xAxisRotation,
+                largeArcFlag,
+                sweepFlag,
+                x,
+                y,
+              );
+
               lastX = x;
               lastY = y;
             }
@@ -316,6 +334,210 @@ class SvgPathBuilder {
     }
 
     return path;
+  }
+
+  /// Add an elliptical arc to the path
+  static void _addArcToPath(
+    Path path,
+    double lastX,
+    double lastY,
+    double rx,
+    double ry,
+    double xAxisRotation,
+    bool largeArcFlag,
+    bool sweepFlag,
+    double x,
+    double y,
+  ) {
+    // If radii are 0, just draw a line
+    if (rx == 0 || ry == 0) {
+      path.lineTo(x, y);
+      return;
+    }
+
+    // If endpoints are the same, do nothing
+    if (lastX == x && lastY == y) {
+      return;
+    }
+
+    // Convert the arc to cubic bezier curves
+    _arcToCubicBeziers(
+      path,
+      lastX,
+      lastY,
+      rx,
+      ry,
+      xAxisRotation,
+      largeArcFlag,
+      sweepFlag,
+      x,
+      y,
+    );
+  }
+
+  /// Convert an elliptical arc to a series of cubic bezier curves
+  static void _arcToCubicBeziers(
+    Path path,
+    double x1,
+    double y1,
+    double rx,
+    double ry,
+    double xAxisRotation,
+    bool largeArcFlag,
+    bool sweepFlag,
+    double x2,
+    double y2,
+  ) {
+    // Step 1: Compute the center of the ellipse
+    final cosAngle = math.cos(xAxisRotation);
+    final sinAngle = math.sin(xAxisRotation);
+
+    // Step 1.1: Transform to standard position
+    final dx = (x1 - x2) / 2;
+    final dy = (y1 - y2) / 2;
+    final x1p = cosAngle * dx + sinAngle * dy;
+    final y1p = -sinAngle * dx + cosAngle * dy;
+
+    // Ensure radii are large enough
+    rx = rx.abs();
+    ry = ry.abs();
+    double rxSq = rx * rx;
+    double rySq = ry * ry;
+    final x1pSq = x1p * x1p;
+    final y1pSq = y1p * y1p;
+
+    // Check if radii are big enough
+    double radiiCheck = x1pSq / rxSq + y1pSq / rySq;
+    if (radiiCheck > 1) {
+      rx *= math.sqrt(radiiCheck);
+      ry *= math.sqrt(radiiCheck);
+      rxSq = rx * rx;
+      rySq = ry * ry;
+    }
+
+    // Step 1.2: Compute center parameters
+    double sign = (largeArcFlag == sweepFlag) ? -1 : 1;
+    double sq =
+        ((rxSq * rySq) - (rxSq * y1pSq) - (rySq * x1pSq)) /
+        ((rxSq * y1pSq) + (rySq * x1pSq));
+    sq = sq < 0 ? 0 : sq;
+    final coef = sign * math.sqrt(sq);
+    final cxp = coef * ((rx * y1p) / ry);
+    final cyp = coef * -((ry * x1p) / rx);
+
+    // Step 1.3: Transform back
+    final cx = cosAngle * cxp - sinAngle * cyp + (x1 + x2) / 2;
+    final cy = sinAngle * cxp + cosAngle * cyp + (y1 + y2) / 2;
+
+    // Step 2: Compute the start and end angles
+    final ux = (x1p - cxp) / rx;
+    final uy = (y1p - cyp) / ry;
+    final vx = (-x1p - cxp) / rx;
+    final vy = (-y1p - cyp) / ry;
+
+    // Initial angle
+    double startAngle = _angle(1, 0, ux, uy);
+
+    // Sweep angle
+    double sweepAngle = _angle(ux, uy, vx, vy);
+    if (!sweepFlag && sweepAngle > 0) {
+      sweepAngle -= 2 * math.pi;
+    } else if (sweepFlag && sweepAngle < 0) {
+      sweepAngle += 2 * math.pi;
+    }
+
+    // Approximate the arc using cubic bezier curves
+    final numSegments = math.max(1, (sweepAngle.abs() * 2 / math.pi).ceil());
+    final angleDelta = sweepAngle / numSegments;
+
+    // Draw the segments
+    for (int i = 0; i < numSegments; i++) {
+      _approximateArcSegment(
+        path,
+        cx,
+        cy,
+        rx,
+        ry,
+        startAngle + i * angleDelta,
+        angleDelta,
+        xAxisRotation,
+      );
+    }
+  }
+
+  /// Calculate the angle between two vectors
+  static double _angle(double ux, double uy, double vx, double vy) {
+    final dot = ux * vx + uy * vy;
+    final len = math.sqrt((ux * ux + uy * uy) * (vx * vx + vy * vy));
+    double angle = math.acos(dot / len);
+
+    // Determine the sign
+    if (ux * vy - uy * vx < 0) {
+      angle = -angle;
+    }
+
+    return angle;
+  }
+
+  /// Approximate an elliptical arc segment using a cubic bezier curve
+  static void _approximateArcSegment(
+    Path path,
+    double cx,
+    double cy,
+    double rx,
+    double ry,
+    double startAngle,
+    double sweepAngle,
+    double rotationAngle,
+  ) {
+    final cosRotation = math.cos(rotationAngle);
+    final sinRotation = math.sin(rotationAngle);
+    final endAngle = startAngle + sweepAngle;
+
+    // Calculate the start and end points
+    final startX =
+        cx +
+        rx * math.cos(startAngle) * cosRotation -
+        ry * math.sin(startAngle) * sinRotation;
+    final startY =
+        cy +
+        rx * math.cos(startAngle) * sinRotation +
+        ry * math.sin(startAngle) * cosRotation;
+    final endX =
+        cx +
+        rx * math.cos(endAngle) * cosRotation -
+        ry * math.sin(endAngle) * sinRotation;
+    final endY =
+        cy +
+        rx * math.cos(endAngle) * sinRotation +
+        ry * math.sin(endAngle) * cosRotation;
+
+    // Calculate the control points using the approximation formula
+    // For an arc segment, the approximation factor is 4/3 * tan(sweepAngle/4)
+    final alpha = math.tan(sweepAngle / 4) * 4 / 3;
+
+    // First control point
+    final cp1x =
+        startX -
+        alpha * rx * math.sin(startAngle) * cosRotation -
+        alpha * ry * math.cos(startAngle) * sinRotation;
+    final cp1y =
+        startY -
+        alpha * rx * math.sin(startAngle) * sinRotation +
+        alpha * ry * math.cos(startAngle) * cosRotation;
+
+    // Second control point
+    final cp2x =
+        endX +
+        alpha * rx * math.sin(endAngle) * cosRotation +
+        alpha * ry * math.cos(endAngle) * sinRotation;
+    final cp2y =
+        endY +
+        alpha * rx * math.sin(endAngle) * sinRotation -
+        alpha * ry * math.cos(endAngle) * cosRotation;
+
+    // Add the cubic bezier curve
+    path.cubicTo(cp1x, cp1y, cp2x, cp2y, endX, endY);
   }
 }
 
@@ -345,7 +567,7 @@ class SvgParser {
           final color = _parseColor(
             pathElement.getAttribute('fill') ?? '#000000',
           );
-          final style = _parsePaintingStyle(pathElement);
+          final style = parsePaintingStyle(pathElement);
           final strokeWidth =
               double.tryParse(
                 pathElement.getAttribute('stroke-width') ?? '1.0',
@@ -375,7 +597,7 @@ class SvgParser {
         final color = _parseColor(
           circleElement.getAttribute('fill') ?? '#000000',
         );
-        final style = _parsePaintingStyle(circleElement);
+        final style = parsePaintingStyle(circleElement);
         final strokeWidth =
             double.tryParse(
               circleElement.getAttribute('stroke-width') ?? '1.0',
@@ -386,6 +608,75 @@ class SvgParser {
           SvgCircleElement(
             center: Offset(cx, cy),
             radius: r,
+            color: color,
+            style: style,
+            strokeWidth: strokeWidth,
+          ),
+        );
+      }
+
+      // Process ellipses - Added support for ellipse elements
+      for (final ellipseElement in svgElement.findElements('ellipse')) {
+        final cx =
+            double.tryParse(ellipseElement.getAttribute('cx') ?? '0') ?? 0.0;
+        final cy =
+            double.tryParse(ellipseElement.getAttribute('cy') ?? '0') ?? 0.0;
+        final rx =
+            double.tryParse(ellipseElement.getAttribute('rx') ?? '0') ?? 0.0;
+        final ry =
+            double.tryParse(ellipseElement.getAttribute('ry') ?? '0') ?? 0.0;
+
+        // Create a path for the ellipse
+        final path = Path();
+        // Ellipse using 4 Bezier curves
+        path.moveTo(cx + rx, cy);
+        path.cubicTo(
+          cx + rx,
+          cy + ry * 0.552,
+          cx + rx * 0.552,
+          cy + ry,
+          cx,
+          cy + ry,
+        );
+        path.cubicTo(
+          cx - rx * 0.552,
+          cy + ry,
+          cx - rx,
+          cy + ry * 0.552,
+          cx - rx,
+          cy,
+        );
+        path.cubicTo(
+          cx - rx,
+          cy - ry * 0.552,
+          cx - rx * 0.552,
+          cy - ry,
+          cx,
+          cy - ry,
+        );
+        path.cubicTo(
+          cx + rx * 0.552,
+          cy - ry,
+          cx + rx,
+          cy - ry * 0.552,
+          cx + rx,
+          cy,
+        );
+        path.close();
+
+        final color = _parseColor(
+          ellipseElement.getAttribute('fill') ?? '#000000',
+        );
+        final style = parsePaintingStyle(ellipseElement);
+        final strokeWidth =
+            double.tryParse(
+              ellipseElement.getAttribute('stroke-width') ?? '1.0',
+            ) ??
+            1.0;
+
+        elements.add(
+          SvgPathElement(
+            path: path,
             color: color,
             style: style,
             strokeWidth: strokeWidth,
@@ -406,32 +697,156 @@ class SvgParser {
         final ry =
             double.tryParse(rectElement.getAttribute('ry') ?? '0') ?? 0.0;
 
-        final color = _parseColor(
-          rectElement.getAttribute('fill') ?? '#000000',
-        );
-        final style = _parsePaintingStyle(rectElement);
-        final strokeWidth =
-            double.tryParse(
-              rectElement.getAttribute('stroke-width') ?? '1.0',
-            ) ??
-            1.0;
+        // For rounded rectangles, create a custom path
+        if (rx > 0 || ry > 0) {
+          final effectiveRx = rx > 0 ? rx : ry;
+          final effectiveRy = ry > 0 ? ry : rx;
 
-        elements.add(
-          SvgRectElement(
-            rect: Rect.fromLTWH(x, y, width, height),
-            rx: rx,
-            ry: ry,
-            color: color,
-            style: style,
-            strokeWidth: strokeWidth,
-          ),
-        );
+          // Create a path with rounded corners
+          final path = Path();
+          path.moveTo(x + effectiveRx, y);
+          path.lineTo(x + width - effectiveRx, y);
+          path.cubicTo(
+            x + width - effectiveRx / 2,
+            y,
+            x + width,
+            y + effectiveRy / 2,
+            x + width,
+            y + effectiveRy,
+          );
+          path.lineTo(x + width, y + height - effectiveRy);
+          path.cubicTo(
+            x + width,
+            y + height - effectiveRy / 2,
+            x + width - effectiveRx / 2,
+            y + height,
+            x + width - effectiveRx,
+            y + height,
+          );
+          path.lineTo(x + effectiveRx, y + height);
+          path.cubicTo(
+            x + effectiveRx / 2,
+            y + height,
+            x,
+            y + height - effectiveRy / 2,
+            x,
+            y + height - effectiveRy,
+          );
+          path.lineTo(x, y + effectiveRy);
+          path.cubicTo(
+            x,
+            y + effectiveRy / 2,
+            x + effectiveRx / 2,
+            y,
+            x + effectiveRx,
+            y,
+          );
+          path.close();
+
+          final color = _parseColor(
+            rectElement.getAttribute('fill') ?? '#000000',
+          );
+          final style = parsePaintingStyle(rectElement);
+          final strokeWidth =
+              double.tryParse(
+                rectElement.getAttribute('stroke-width') ?? '1.0',
+              ) ??
+              1.0;
+
+          elements.add(
+            SvgPathElement(
+              path: path,
+              color: color,
+              style: style,
+              strokeWidth: strokeWidth,
+            ),
+          );
+        } else {
+          // Regular rectangle without rounded corners
+          final color = _parseColor(
+            rectElement.getAttribute('fill') ?? '#000000',
+          );
+          final style = parsePaintingStyle(rectElement);
+          final strokeWidth =
+              double.tryParse(
+                rectElement.getAttribute('stroke-width') ?? '1.0',
+              ) ??
+              1.0;
+
+          elements.add(
+            SvgRectElement(
+              rect: Rect.fromLTWH(x, y, width, height),
+              rx: rx,
+              ry: ry,
+              color: color,
+              style: style,
+              strokeWidth: strokeWidth,
+            ),
+          );
+        }
+      }
+
+      // Process polygons and polylines
+      for (final polygonElement in [
+        ...svgElement.findElements('polygon'),
+        ...svgElement.findElements('polyline'),
+      ]) {
+        final isPolygon = polygonElement.name.local == 'polygon';
+        final pointsStr = polygonElement.getAttribute('points');
+
+        if (pointsStr != null && pointsStr.isNotEmpty) {
+          final points = <Offset>[];
+          final coords = pointsStr.trim().split(RegExp(r'[\s,]+'));
+
+          for (int i = 0; i < coords.length - 1; i += 2) {
+            if (i + 1 < coords.length) {
+              final x = double.tryParse(coords[i]);
+              final y = double.tryParse(coords[i + 1]);
+              if (x != null && y != null) {
+                points.add(Offset(x, y));
+              }
+            }
+          }
+
+          if (points.isNotEmpty) {
+            final path = Path();
+            path.moveTo(points[0].dx, points[0].dy);
+
+            for (int i = 1; i < points.length; i++) {
+              path.lineTo(points[i].dx, points[i].dy);
+            }
+
+            if (isPolygon) {
+              path.close();
+            }
+
+            final color = _parseColor(
+              polygonElement.getAttribute('fill') ?? '#000000',
+            );
+            final style = parsePaintingStyle(polygonElement);
+            final strokeWidth =
+                double.tryParse(
+                  polygonElement.getAttribute('stroke-width') ?? '1.0',
+                ) ??
+                1.0;
+
+            elements.add(
+              SvgPathElement(
+                path: path,
+                color: color,
+                style: style,
+                strokeWidth: strokeWidth,
+              ),
+            );
+          }
+        }
       }
 
       // Add support for more SVG elements as needed
 
       return SvgData(viewBox: viewBox, elements: elements);
     } catch (e) {
+      debugPrint('SVG Parsing Error: $e');
       // Return empty SVG data on error
       return SvgData(
         viewBox: const SvgViewBox(width: 24, height: 24),
@@ -442,6 +857,27 @@ class SvgParser {
 
   /// Parse color from SVG attribute
   static Color _parseColor(String colorString) {
+    if (colorString == 'none' || colorString.isEmpty) {
+      return Colors.transparent;
+    }
+
+    // Handle hex colors
+    if (colorString.startsWith('#')) {
+      String hex = colorString.substring(1);
+      if (hex.length == 3) {
+        // Convert shorthand format to full format
+        hex = hex.split('').map((c) => '$c$c').join('');
+      }
+
+      if (hex.length == 6) {
+        return Color(int.parse('FF$hex', radix: 16));
+      } else if (hex.length == 8) {
+        return Color(int.parse(hex, radix: 16));
+      }
+    }
+
+    /// Parse color from SVG attribute
+
     if (colorString == 'none' || colorString.isEmpty) {
       return Colors.transparent;
     }
@@ -482,7 +918,7 @@ class SvgParser {
   }
 
   /// Parse painting style from SVG element
-  static PaintingStyle _parsePaintingStyle(xml.XmlElement element) {
+  static PaintingStyle parsePaintingStyle(xml.XmlElement element) {
     final fill = element.getAttribute('fill');
     final stroke = element.getAttribute('stroke');
 
