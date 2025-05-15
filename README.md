@@ -4,7 +4,6 @@
   <img src="https://raw.githubusercontent.com/mushthakvp/fittor/dev/assets/fittor.png" alt="Fittor Logo" width="200">
 </p>
 
-![Package Views](https://komarev.com/ghpvc/?username=fittor-package&label=Package%20Views&color=blue)
 [![pub package](https://img.shields.io/pub/v/fittor.svg)](https://pub.dev/packages/fittor)
 [![pub points](https://img.shields.io/pub/points/fittor.svg)](https://pub.dev/packages/fittor/score)
 [![popularity](https://img.shields.io/pub/popularity/fittor.svg)](https://pub.dev/packages/fittor/score)
