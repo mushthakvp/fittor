@@ -12,6 +12,7 @@ A comprehensive Flutter package for responsive UI design and network connectivit
   - [Responsive](#responsive)
   - [Custom Sized Box](#custom-sized-box)
   - [Internet Connectivity](#internet-connectivity)
+- [Extension](#Extension)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -193,6 +194,30 @@ class _MyScreenState extends State<MyScreen> with ConnectivityMixin {
   }
 }
 ```
+
+## Extension
+
+### Available Extensions
+
+| Extension | Description | Example |
+|----------|-------------|---------|
+| `num.w` | Creates SizedBox with width | `20.w` creates SizedBox(width: 20) |
+| `num.h` | Creates SizedBox with height | `16.h` creates SizedBox(height: 16) |
+| `num.s` | Creates square SizedBox | `24.s` creates SizedBox.square(dimension: 24) |
+| `context.wp(%)` | Percentage of screen width | `context.wp(80)` gives 80% of screen width |
+| `context.hp(%)` | Percentage of screen height | `context.hp(50)` gives 50% of screen height |
+| `context.p*` | Adaptive padding | `context.p16` gives adaptive 16 padding |
+| `context.fs*` | Adaptive font size | `context.fs16` returns responsive font size 16 |
+
+### Connectivity Features
+
+| Feature | Description | Example |
+|---------|-------------|---------|
+| `ConnectivityWrapper` | Wraps UI with connectivity monitoring | `ConnectivityWrapper(child: MyApp())` |
+| `ConnectivityMixin` | Mixin for StatefulWidgets | `class _MyState extends State<MyWidget> with ConnectivityMixin` |
+| `isOnline` property | Check online status with mixin | `if (isOnline) { /* do network request */ }` |
+| `checkConnectivity()` | Manual connectivity check | `await checkConnectivity()` |
+| `onConnectivityChanged` | Handle status changes | `onConnectivityChanged(status) { /* handle change */ }` |
 
 ## 🐞 Troubleshooting
 
