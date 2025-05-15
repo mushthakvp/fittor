@@ -16,6 +16,8 @@ A comprehensive Flutter package for responsive UI design and network connectivit
 - [Contributing](#contributing)
 - [License](#license)
 
+
+
 ## Features
 
 - 📱 **Responsive UI**: Easily create responsive layouts that adapt to different screen sizes and orientations
@@ -27,6 +29,10 @@ A comprehensive Flutter package for responsive UI design and network connectivit
 ```yaml
 dependencies:
   fittor: ^latest_version
+```
+
+```bash
+flutter pub add fittor
 ```
 
 Then run:
