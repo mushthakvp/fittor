@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget with FittorAppMixin {
   @override
   Widget responsive(BuildContext context) {
     return MaterialApp(
-      // debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: true,
       title: 'Responsive Demo',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: ConnectivityWrapper(

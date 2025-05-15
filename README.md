@@ -1,5 +1,10 @@
 # Fittor
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/mushthakvp/fittor/dev/assets/fittor.png" alt="Fittor Logo" width="200">
+</p>
+
+
 A comprehensive Flutter package for responsive UI design and network connectivity management.
 
 [![pub package](https://img.shields.io/pub/v/fittor.svg)](https://pub.dev/packages/fittor)

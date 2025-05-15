@@ -33,6 +33,7 @@ flutter:
 
   assets:
     - assets/no_internet.jpg
+    - assets/
 
   # fonts:
   #   - family: Schyler
