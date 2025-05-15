@@ -194,12 +194,41 @@ class _MyScreenState extends State<MyScreen> with ConnectivityMixin {
 }
 ```
 
-## Contributing
+## 🎯 Best Practices
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+- Use `context.wp()` and `context.hp()` for responsive layouts
+- Utilize `context.fs()` for adaptive typography
+- Leverage `context.deviceValue()` for device-specific customizations
+- Always consider both portrait and landscape orientations
+
+## 🐞 Troubleshooting
+
+- Ensure the package is correctly imported
+- Check that you're using the latest version
+- Verify flutter and dart SDK compatibility
+- Check for any conflicts with other packages
+
+## 📞 Contact & Support
+
+**Author:** Mushthak VP
+
+### 🌐 Connect With Me
+- **Email:** mail.musthak@gmail.com
+- **WhatsApp:** +919061213930
+- **LinkedIn:** [Mushthak VP](https://in.linkedin.com/in/musthak)
+- **Instagram:** [@musth4k](https://www.instagram.com/musth4k/)
+- **GitHub:** [mushthakvp](https://github.com/mushthakvp)
+
+### 💡 Collaboration
+Have a project or need custom Flutter development? Feel free to reach out! I'm always open to interesting projects, collaborations, and opportunities.
+
+## 🤝 Contributing
+
+Contributions are welcome! Whether you're reporting bugs, suggesting improvements, or want to collaborate, don't hesitate to connect.
 
 ## License
+[MIT](LICENSE) - Copyright © 2025 Mushthak VP
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## 🆘 Support
 
-
+For any questions, issues, or custom development needs, please contact me directly via email or social media channels.
