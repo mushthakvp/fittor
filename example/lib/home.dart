@@ -2,6 +2,7 @@ import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
 import 'package:test/no_internet.dart';
 
+import 'app/ui/home_fit.dart';
 import 'currency_converter.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -34,6 +35,20 @@ class HomeScreen extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             20.h,
+            items(
+              context,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const FitStateHomePage(),
+                  ),
+                );
+              },
+              heading: 'Fit State Management',
+              content: 'Powered by Fittor',
+              color: Colors.teal,
+            ),
+            10.h,
             items(
               context,
               onTap: () {
