@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget with FittorAppMixin {
       title: 'Responsive Demo',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: ConnectivityWrapper(
-        ignoreOfflineState: true,
+        ignoreOfflineState: false,
         onConnectivityChanged: (status) {
           debugPrint('Connectivity status: $status');
         },
