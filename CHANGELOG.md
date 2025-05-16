@@ -1,26 +1,67 @@
-## 0.0.1
+## 1.0.6
 
-* Initial development release
-* Preparing package for pub.dev publication
+- Currency Converter Free API
+- Live Currency Converter
+- Currency Converter Widget
+- Currency Converter Example
 
-## 1.0.0
+```dart
+final converter = CurrencyConverter();
 
-- First stable release of Responsive Helper package
-- Core features implemented:
-  * Device type detection (Mobile, Tablet, Desktop)
-  * Orientation detection
-  * Percentage-based width and height calculations
-  * Safe area aware sizing
-  * Adaptive font sizes
-  * Context extensions for responsive design
-  * Device-specific value selection
+// Manually get latest rates for a base currency
+Map<String, dynamic> rates = await converter.getLatestRates('EUR');
 
-## 1.0.1
+// Create Widget
 
-- Fixed a bug in the `ResponsiveHelper.of` method that caused a crash when used in a widget tree.
-- Added a new method `ResponsiveHelper.ofContext` to retrieve the responsive helper instance from a BuildContext.
-- Added a new method `ResponsiveHelper.ofDeviceType` to retrieve the device type from a BuildContext.
-- Added a new method `ResponsiveHelper.ofOrientation` to retrieve the orientation from a BuildContext.
+final currencyUtils = FittorCurrency();
+
+// Create a currency text widget
+Widget priceText = currencyUtils.currencyText(
+  '\$1,234.56',
+  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+);
+```
+
+## 1.0.5
+
+- Add Logo to README.md
+- Add Clear Cache to README.md
+
+## 1.0.4
+
+- Added Internet Connectivity Monitoring
+- Added ConnectivityMixin for StatefulWidgets
+- Added ConnectivityWrapper for wrapping UI with connectivity monitoring
+
+```dart
+class MyApp extends StatelessWidget with FittorAppMixin {
+  const MyApp({super.key});
+  @override
+  Widget responsive(BuildContext context) {
+    return MaterialApp(
+      home: ConnectivityWrapper(
+        ignoreOfflineState: true,
+        onConnectivityChanged: (status) {
+          debugPrint('Connectivity status: $status');
+        },
+        child: const HomeScreen(),
+      ),
+    );
+  }
+}
+```
+
+## 1.0.3
+
+- Added a new method to the ResponsiveHelper class to retrieve the current device type from a BuildContext.
+
+
+## 1.0.2+1
+
+- License updated to MIT
+- README.md updated with new features and examples
+- ScaleFactor Deprecated and replaced with ScaleFactor.of
+
 
 ## 1.0.2
 
@@ -52,48 +93,27 @@
   }
 ```
 
-## 1.0.2+1
+## 1.0.1
 
-- License updated to MIT
-- README.md updated with new features and examples
-- ScaleFactor Deprecated and replaced with ScaleFactor.of
+- Fixed a bug in the `ResponsiveHelper.of` method that caused a crash when used in a widget tree.
+- Added a new method `ResponsiveHelper.ofContext` to retrieve the responsive helper instance from a BuildContext.
+- Added a new method `ResponsiveHelper.ofDeviceType` to retrieve the device type from a BuildContext.
+- Added a new method `ResponsiveHelper.ofOrientation` to retrieve the orientation from a BuildContext.
 
-## 1.0.3
+## 1.0.0
 
-- Added a new method to the ResponsiveHelper class to retrieve the current device type from a BuildContext.
+- First stable release of Responsive Helper package
+- Core features implemented:
+  * Device type detection (Mobile, Tablet, Desktop)
+  * Orientation detection
+  * Percentage-based width and height calculations
+  * Safe area aware sizing
+  * Adaptive font sizes
+  * Context extensions for responsive design
+  * Device-specific value selection
 
-## 1.0.4
 
-- Added Internet Connectivity Monitoring
-- Added ConnectivityMixin for StatefulWidgets
-- Added ConnectivityWrapper for wrapping UI with connectivity monitoring
+## 0.0.1
 
-```dart
-class MyApp extends StatelessWidget with FittorAppMixin {
-  const MyApp({super.key});
-  @override
-  Widget responsive(BuildContext context) {
-    return MaterialApp(
-      home: ConnectivityWrapper(
-        ignoreOfflineState: true,
-        onConnectivityChanged: (status) {
-          debugPrint('Connectivity status: $status');
-        },
-        child: const HomeScreen(),
-      ),
-    );
-  }
-}
-```
-
-## 1.0.5
-
-- Add Logo to README.md
-- Add Clear Cache to README.md
-
-## 1.0.6
-
-- Currency Converter Free API
-- Live Currency Converter
-- Currency Converter Widget
-- Currency Converter Example
+* Initial development release
+* Preparing package for pub.dev publication

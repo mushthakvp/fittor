@@ -29,13 +29,12 @@ dev_dependencies:
   flutter_lints: ^5.0.0
 
 screenshots:
-  - description: The bloc package logo.
-    path: assets/fittor.png
+  - description: Fitter
+    path: assets/icon.png
 
 flutter:
 
   assets:
-    - assets/no_internet.jpg
     - assets/
 
   # fonts:

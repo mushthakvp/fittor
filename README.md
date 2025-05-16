@@ -214,34 +214,72 @@ Fittor provides a currency converter utility with live exchange rates.
 #### Basic Conversion
 
 ```dart
+// Convert 100 INR to USD
 double usdAmount = await context.convertCurrency(
   from: 'INR',
   to: 'USD',
   amount: 100.0,
 );
+
+print('100 INR = $usdAmount USD');
 ```
 
 #### Convert and Format
 
 ```dart
-String formatted = await context.convertAndFormat(
+// Convert and format with currency symbol
+String formattedAmount = await context.convertAndFormat(
   from: 'INR',
   to: 'USD',
   amount: 100.0,
 );
+
+print('100 INR = $formattedAmount'); // Outputs: 100 INR = $1.17
 ```
 
 #### Format with Custom Symbols
 
 ```dart
+// Format a currency amount with proper symbol
 String formatted = context.formatCurrency(1234.56, 'USD');
+print(formatted); // Outputs: $1,234.56
 ```
 
 ### Live Exchange Rates
 
 ```dart
+// Get the current exchange rate between two currencies
 double rate = await context.getExchangeRate('INR', 'USD');
+print('1 INR = $rate USD'); 
 ```
+
+#### Advanced Usage
+
+### Direct Access to CurrencyConverter
+
+```dart
+final converter = CurrencyConverter();
+
+// Manually get latest rates for a base currency
+Map<String, dynamic> rates = await converter.getLatestRates('EUR');
+
+// Check cache status
+Map<String, dynamic> cacheInfo = converter.getCacheInfo();
+print('Last updated: ${cacheInfo['lastUpdated']}');
+```
+
+### FittorCurrency Utilities
+
+```dart
+final currencyUtils = FittorCurrency();
+
+// Create a currency text widget
+Widget priceText = currencyUtils.currencyText(
+  '\$1,234.56',
+  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+);
+```
+
 
 ## Extension
 
