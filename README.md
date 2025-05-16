@@ -1,18 +1,12 @@
-# Fittor
-
 <p align="center">
   <img src="https://raw.githubusercontent.com/mushthakvp/fittor/dev/assets/fittor.png" alt="Fittor Logo" width="200">
 </p>
 
 [![pub package](https://img.shields.io/pub/v/fittor.svg)](https://pub.dev/packages/fittor)
 [![pub points](https://img.shields.io/pub/points/fittor.svg)](https://pub.dev/packages/fittor/score)
-[![popularity](https://img.shields.io/pub/popularity/fittor.svg)](https://pub.dev/packages/fittor/score)
-[![likes](https://img.shields.io/pub/likes/fittor.svg)](https://pub.dev/packages/fittor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub issues](https://img.shields.io/github/issues/mushthakvp/fittor)](https://github.com/mushthakvp/fittor/issues)
 [![GitHub stars](https://img.shields.io/github/stars/mushthakvp/fittor)](https://github.com/mushthakvp/fittor/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/mushthakvp/fittor)](https://github.com/mushthakvp/fittor/network)
-[![Last Commit](https://img.shields.io/github/last-commit/mushthakvp/fittor)](https://github.com/mushthakvp/fittor/commits/main)
 
 
 A comprehensive Flutter package for responsive UI design and network connectivity management.
@@ -27,6 +21,7 @@ A comprehensive Flutter package for responsive UI design and network connectivit
   - [Responsive](#responsive)
   - [Custom Sized Box](#custom-sized-box)
   - [Internet Connectivity](#internet-connectivity)
+  - [Currency Converter](#currency-converter)
 - [Extension](#Extension)
 - [Contributing](#contributing)
 - [License](#license)
@@ -38,6 +33,8 @@ A comprehensive Flutter package for responsive UI design and network connectivit
 - 📱 **Responsive UI**: Easily create responsive layouts that adapt to different screen sizes and orientations
 - 📦 **Custom Sized Box**: Convenient extensions for creating SizedBox widgets
 - 🌐 **Internet Connectivity**: Built-in connectivity monitoring with customizable no-internet UI
+- 💱 **Currency Converter**: Live exchange rates and currency conversion utilities
+- 📦 **Package Management**: Manage dependencies with ease
 
 ## Installation
 
@@ -210,9 +207,45 @@ class _MyScreenState extends State<MyScreen> with ConnectivityMixin {
 }
 ```
 
+### Currency Converter
+
+Fittor provides a currency converter utility with live exchange rates.
+
+#### Basic Conversion
+
+```dart
+double usdAmount = await context.convertCurrency(
+  from: 'INR',
+  to: 'USD',
+  amount: 100.0,
+);
+```
+
+#### Convert and Format
+
+```dart
+String formatted = await context.convertAndFormat(
+  from: 'INR',
+  to: 'USD',
+  amount: 100.0,
+);
+```
+
+#### Format with Custom Symbols
+
+```dart
+String formatted = context.formatCurrency(1234.56, 'USD');
+```
+
+### Live Exchange Rates
+
+```dart
+double rate = await context.getExchangeRate('INR', 'USD');
+```
+
 ## Extension
 
-### Available Extensions
+### Responsive Features
 
 | Extension | Description | Example |
 |----------|-------------|---------|
@@ -233,6 +266,17 @@ class _MyScreenState extends State<MyScreen> with ConnectivityMixin {
 | `isOnline` property | Check online status with mixin | `if (isOnline) { /* do network request */ }` |
 | `checkConnectivity()` | Manual connectivity check | `await checkConnectivity()` |
 | `onConnectivityChanged` | Handle status changes | `onConnectivityChanged(status) { /* handle change */ }` |
+
+
+### Currency Features
+
+| Feature | Description | Example |
+|---------|-------------|---------|
+| `convertCurrency()` | Convert currency | `double usdAmount = await context.convertCurrency(from: 'INR', to: 'USD', amount: 100.0);` |
+| `convertAndFormat()` | Convert and format | `String formatted = await context.convertAndFormat(from: 'INR', to: 'USD', amount: 100.0);` |
+| `formatCurrency()` | Format currency | `String formatted = context.formatCurrency(1234.56, 'USD');` |
+| `getExchange Rate()` | Get exchange rate | `double rate = await context.getExchangeRate('INR', 'USD');` |
+
 
 ## 🐞 Troubleshooting
 

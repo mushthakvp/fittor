@@ -90,3 +90,10 @@ class MyApp extends StatelessWidget with FittorAppMixin {
 
 - Add Logo to README.md
 - Add Clear Cache to README.md
+
+## 1.0.6
+
+- Currency Converter Free API
+- Live Currency Converter
+- Currency Converter Widget
+- Currency Converter Example
