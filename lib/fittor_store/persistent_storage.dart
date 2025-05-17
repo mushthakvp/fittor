@@ -20,8 +20,13 @@ class PersistentStorage {
     if (_initialized) return;
 
     try {
-      // Get the application storage directory
+      // Get the application storage directory without using path_provider
       final directory = await _getStorageDirectory();
+
+      // Create the directory if it doesn't exist
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
+      }
 
       // Create our storage file
       _storageFile = File('${directory.path}/fittor_store.json');
@@ -37,6 +42,7 @@ class PersistentStorage {
     } catch (e) {
       debugPrint('PersistentStorage init error: $e');
       _initialized = false;
+      rethrow;
     }
   }
 
@@ -52,29 +58,53 @@ class PersistentStorage {
   /// Get the storage directory based on platform without using path_provider
   Future<Directory> _getStorageDirectory() async {
     try {
-      // Get application directory based on platform
+      // For iOS and macOS: use NSDocumentDirectory which apps have access to
       if (Platform.isIOS || Platform.isMacOS) {
-        // iOS/macOS: Use NSLibraryDirectory
-        return Directory(
-          '${_getHomeDirectory()}/Library/Application Support/com.fittor.app',
-        );
-      } else if (Platform.isAndroid) {
-        // Android: Use app's data directory
-        return Directory('/data/data/${_getPackageName()}/app_data');
-      } else if (Platform.isWindows) {
-        // Windows: Use AppData directory
-        final appData = Platform.environment['APPDATA'] ?? '';
-        return Directory('$appData\\Fittor');
-      } else if (Platform.isLinux) {
-        // Linux: Use ~/.config directory
         final home = _getHomeDirectory();
-        return Directory('$home/.config/fittor');
-      } else {
-        // Fallback for other platforms
+        final appName = 'fittor_app';
+
+        // iOS app sandbox: create in Documents directory
+        if (Platform.isIOS) {
+          return Directory('$home/Documents/$appName');
+        }
+
+        // macOS: try Documents directory first
+        return Directory('$home/Documents/$appName');
+      }
+      // For Android: use the app's data directory
+      else if (Platform.isAndroid) {
+        // On Android, we can often write to the app's files directory
+        final appDir = Directory(
+          '/data/data/${_getPackageName()}/files/fittor',
+        );
+        // If we can't create this directory, we'll fall back to a temporary directory
+        try {
+          if (!await appDir.exists()) {
+            await appDir.create(recursive: true);
+          }
+          return appDir;
+        } catch (_) {
+          // Fall back to temp directory which should always be writable
+          return Directory.systemTemp.createTempSync('fittor_store');
+        }
+      }
+      // For Windows: use a folder in the user's Documents directory
+      else if (Platform.isWindows) {
+        final documents = '${_getHomeDirectory()}\\Documents\\Fittor';
+        return Directory(documents);
+      }
+      // For Linux: use ~/.local/share/fittor
+      else if (Platform.isLinux) {
+        final home = _getHomeDirectory();
+        return Directory('$home/.local/share/fittor');
+      }
+      // Fallback for other platforms
+      else {
         return _getTemporaryDirectory();
       }
     } catch (e) {
       // Create a temporary directory as fallback
+      debugPrint('Error getting storage directory: $e');
       return _getTemporaryDirectory();
     }
   }
@@ -90,8 +120,8 @@ class PersistentStorage {
 
   /// Get package name (simplified implementation)
   String _getPackageName() {
-    // In a real app, this would come from your app's build configuration
-    return 'com.fittor.app';
+    // This is a simplified approach - in a real app with a real package name
+    return 'com.example.fittor';
   }
 
   /// Get temporary directory without path_provider
@@ -154,7 +184,7 @@ class PersistentStorage {
     _ensureInitialized();
 
     try {
-      final directory = await _getStorageDirectory();
+      final directory = Directory.systemTemp;
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final backupFile = File(
         '${directory.path}/fittor_store_backup_$timestamp.json',

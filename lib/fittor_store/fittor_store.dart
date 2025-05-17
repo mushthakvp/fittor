@@ -33,14 +33,24 @@ class FittorStore {
     try {
       _autoSave = autoSave;
 
-      // Initialize persistent storage
-      await _persistentStorage.init();
-
-      // Initialize secure storage
+      // Initialize secure storage first (which should always work)
       await _secureStorage.init();
+      debugPrint('Secure storage initialized successfully');
 
-      // Load data from persistent storage
-      _storage = await _persistentStorage.loadData();
+      // Initialize persistent storage (which might fail if file access is restricted)
+      try {
+        await _persistentStorage.init();
+        debugPrint('Persistent storage initialized successfully');
+
+        // Load data from persistent storage
+        _storage = await _persistentStorage.loadData();
+      } catch (e) {
+        debugPrint('Warning: Persistent storage initialization failed: $e');
+        debugPrint(
+          'Using in-memory storage only (data will not persist between app runs)',
+        );
+        _storage = {};
+      }
 
       // Set up auto-save timer if enabled
       if (_autoSave) {
@@ -52,6 +62,8 @@ class FittorStore {
     } catch (e) {
       debugPrint('FittorStore initialization error: $e');
       _storage = {};
+      _initialized = false;
+      rethrow;
     }
   }
 
@@ -69,21 +81,40 @@ class FittorStore {
 
   /// Save the current state to persistent storage
   static Future<void> save() async {
-    _ensureInitialized();
-    await _persistentStorage.saveData(_storage);
+    if (!_initialized) {
+      debugPrint(
+        'Warning: Attempted to save when FittorStore is not initialized',
+      );
+      return;
+    }
+
+    try {
+      await _persistentStorage.saveData(_storage);
+    } catch (e) {
+      debugPrint('Error saving data: $e');
+      // Continue execution - we don't want to crash the app for storage errors
+    }
   }
 
   /// Reload stored preferences from persistent storage
   static Future<void> reload() async {
     _ensureInitialized();
-    _storage = await _persistentStorage.loadData();
+    try {
+      _storage = await _persistentStorage.loadData();
+    } catch (e) {
+      debugPrint('Error reloading data: $e');
+    }
   }
 
   /// Clear all stored preferences
   static Future<void> clear() async {
     _ensureInitialized();
     _storage.clear();
-    await _persistentStorage.clearData();
+    try {
+      await _persistentStorage.clearData();
+    } catch (e) {
+      debugPrint('Error clearing persistent storage: $e');
+    }
   }
 
   /// Remove a specific key
@@ -110,7 +141,12 @@ class FittorStore {
     if (value == null) return null;
 
     if (value is String && _secureStorage.shouldEncrypt(key)) {
-      return _secureStorage.encrypt(value);
+      try {
+        return _secureStorage.encrypt(value);
+      } catch (e) {
+        debugPrint('Error encrypting value for key $key: $e');
+        return value; // Store unencrypted as fallback
+      }
     }
 
     return value;
@@ -122,7 +158,12 @@ class FittorStore {
     if (value == null) return null;
 
     if (value is String && _secureStorage.shouldEncrypt(key)) {
-      return _secureStorage.decrypt(value);
+      try {
+        return _secureStorage.decrypt(value);
+      } catch (e) {
+        debugPrint('Error decrypting value for key $key: $e');
+        return value; // Return encrypted value as fallback
+      }
     }
 
     return value;
@@ -305,14 +346,24 @@ class FittorStore {
   /// Create a backup of the store
   static Future<String?> createBackup() async {
     _ensureInitialized();
-    final backupFile = await _persistentStorage.backup();
-    return backupFile?.path;
+    try {
+      final backupFile = await _persistentStorage.backup();
+      return backupFile?.path;
+    } catch (e) {
+      debugPrint('Error creating backup: $e');
+      return null;
+    }
   }
 
   /// Get the size of the stored data in bytes
   static Future<int> getSize() async {
     _ensureInitialized();
-    return _persistentStorage.getSize();
+    try {
+      return _persistentStorage.getSize();
+    } catch (e) {
+      debugPrint('Error getting store size: $e');
+      return 0;
+    }
   }
 
   /// Rotate the encryption key for added security

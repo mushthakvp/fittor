@@ -138,7 +138,7 @@ class SecureStorage {
 
   /// Generate a unique device identifier (for key derivation)
   /// This is a placeholder - in production, use platform-specific methods
-  Future<String> _getDeviceIdentifier() async {
+  Future<String> getDeviceIdentifier() async {
     try {
       // This is a simplified example
       // In production, use a combination of device-specific identifiers
