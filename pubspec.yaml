@@ -12,20 +12,8 @@ topics:
   - responsive
   - connectivity
   - ui-design
-  - layout
-  - adaptive
   - state-management
   - currency-formatting
-  - live-currency-rate
-  - currency-converter
-  - currency-converter-app
-  - currency-converter-flutter
-  - fittor-flutter
-  - fittor-flutter-package
-  - fittor-flutter-package-for-responsive-ui
-  - fittor-flutter-package-for-responsive-ui-design
-  - fittor-flutter-package-for-responsive-ui-design-and-state-management
-  - fittor-flutter-package-for-responsive-ui-design-and-state-management-and-currency-formatting
 
 environment:
   sdk: ^3.7.2
