@@ -1,7 +1,8 @@
-// File: lib/bin/fittor_impl.dart
+// File: lib/bin/custom_fittor_impl.dart
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:flutter/widgets.dart';
 import 'package:path/path.dart' as path;
 
 void main(List<String> arguments) {
@@ -11,7 +12,7 @@ void main(List<String> arguments) {
   try {
     runner.run(arguments);
   } catch (e) {
-    print('Error: $e');
+    debugPrint('Error: $e');
     runner.printUsage();
   }
 }
@@ -30,16 +31,23 @@ class CreateCommand extends Command {
 }
 
 void createFittorStructure(Directory baseDir) {
-  print('🚀 Creating Fittor project structure...');
+  debugPrint('🚀 Creating Fittor project structure...');
 
-  // Create main.dart if it doesn't exist
+  // Always create or overwrite main.dart with the template
   final mainFile = File(path.join(baseDir.path, 'lib', 'main.dart'));
-  if (!mainFile.existsSync()) {
-    mainFile.createSync(recursive: true);
-    mainFile.writeAsStringSync(_mainDartTemplate());
-    print('✅ Created lib/main.dart');
+
+  // Create directory if needed
+  if (!mainFile.parent.existsSync()) {
+    mainFile.parent.createSync(recursive: true);
+  }
+
+  // Always write the template, regardless of whether the file exists
+  mainFile.writeAsStringSync(_mainDartTemplate());
+
+  if (mainFile.existsSync()) {
+    debugPrint('✅ Created/Replaced lib/main.dart with Fittor template');
   } else {
-    print('ℹ️ lib/main.dart already exists, skipping...');
+    debugPrint('❌ Failed to create lib/main.dart');
   }
 
   // Create fittor directory structure
@@ -55,7 +63,7 @@ void createFittorStructure(Directory baseDir) {
   _createDirectory(fittorDir, 'core/routes');
   _createFile(fittorDir, 'core/routes/app_routes.dart', _appRoutesTemplate());
 
-  print('✅ Created core folder structure');
+  debugPrint('✅ Created core folder structure');
 
   // Create data folder structure
   _createDirectory(fittorDir, 'data/model');
@@ -79,7 +87,7 @@ void createFittorStructure(Directory baseDir) {
     _sampleDataSourceTemplate(),
   );
 
-  print('✅ Created data folder structure');
+  debugPrint('✅ Created data folder structure');
 
   // Create presentation folder structure
   _createDirectory(fittorDir, 'presentation/screen');
@@ -96,13 +104,13 @@ void createFittorStructure(Directory baseDir) {
     _sampleControllerTemplate(),
   );
 
-  print('✅ Created presentation folder structure');
+  debugPrint('✅ Created presentation folder structure');
 
   // Create index files for each main folder
   _createIndexFile(fittorDir, 'core', ['network', 'util', 'routes']);
   _createIndexFile(fittorDir, 'data', ['model', 'repo', 'source']);
   _createIndexFile(fittorDir, 'presentation', ['screen', 'controller']);
-  print('✅ Created index.dart files');
+  debugPrint('✅ Created index.dart files');
 
   // Create main index file for fittor directory
   final mainIndexFile = File(path.join(fittorDir.path, 'index.dart'));
@@ -116,21 +124,27 @@ export 'presentation/index.dart';
 ''');
   }
 
-  print('\n🎉 Fittor project structure created successfully!');
-  print('\nRecommended next steps:');
-  print('  1. Update your pubspec.yaml to include required dependencies');
-  print(
+  debugPrint('\n🎉 Fittor project structure created successfully!');
+  debugPrint('\nRecommended next steps:');
+  debugPrint('  1. Update your pubspec.yaml to include required dependencies');
+  debugPrint(
     '  2. Create your app routes in lib/fittor/core/routes/app_routes.dart',
   );
-  print('  3. Define your data models in lib/fittor/data/model');
-  print('  4. Run "flutter pub get" to fetch dependencies');
+  debugPrint('  3. Define your data models in lib/fittor/data/model');
+  debugPrint('  4. Run "flutter pub get" to fetch dependencies');
+  debugPrint('''
+      Email: mail.musthak@gmail.com
+      WhatsApp: +919061213930
+      LinkedIn: Mushthak VP
+      Instagram: @musth4k
+''');
 }
 
 void _createDirectory(Directory baseDir, String relativePath) {
   final directory = Directory(path.join(baseDir.path, relativePath));
   if (!directory.existsSync()) {
     directory.createSync(recursive: true);
-    print('  Created directory: $relativePath');
+    debugPrint('  Created directory: $relativePath');
   }
 }
 
@@ -139,9 +153,9 @@ void _createFile(Directory baseDir, String relativePath, String content) {
   if (!file.existsSync()) {
     file.createSync(recursive: true);
     file.writeAsStringSync(content);
-    print('  Created file: $relativePath');
+    debugPrint('  Created file: $relativePath');
   } else {
-    print('  File already exists, skipping: $relativePath');
+    debugPrint('  File already exists, skipping: $relativePath');
   }
 }
 

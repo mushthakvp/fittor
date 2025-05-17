@@ -1,8 +1,7 @@
 name: fittor
-description: A comprehensive Flutter package for creating responsive UIs that adapt to different screen sizes and orientations. A lightweight, intuitive state management solution for Flutter applications.
-version: 1.0.8+1
+description: A Flutter package for responsive UIs and state management. Adapts to screen sizes and orientations.
+version: 1.0.8+2
 repository: https://github.com/mushthakvp/fittor
-issue_tracker: https://github.com/mushthakvp/fittor/issues
 license: MIT
 
 funding:
@@ -34,14 +33,6 @@ dev_dependencies:
 executables:
   fittor: fittor
 
-
 flutter:
-
   assets:
     - assets/
-
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-
