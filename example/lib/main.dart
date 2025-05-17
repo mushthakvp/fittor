@@ -7,6 +7,7 @@ import 'app/bindings/fit_bindings.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await FittorStore.init();
+  FittorStore.getString('name');
   runApp(MyApp());
 }
 

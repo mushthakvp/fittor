@@ -1,3 +1,20 @@
+## 1.0.8
+
+- Fittor Store
+- A secure, persistent key-value storage solution for Flutter applications with built-in encryption for sensitive data.
+- **Secure Storage**: Automatically encrypts sensitive data (tokens, passwords, etc.)
+- **Persistent Storage**: Data survives app restarts
+- **Type-Safe Operations**: Dedicated methods for different data types
+- **Automatic Serialization**: Handles complex types like DateTime and JSON
+- **Security Features**:
+  - PIN protection (via `FittorSecure`)
+  - Session timeout
+  - Failed attempt lockout
+  - Encryption key rotation
+- **Convenience Mixin**: Easy access to storage in StatefulWidgets
+- **Backup & Restore**: Create and restore from backups
+- **Auto-Save**: Configurable auto-save functionality
+
 ## 1.0.7
 
 - A lightweight, intuitive state management solution for Flutter applications.

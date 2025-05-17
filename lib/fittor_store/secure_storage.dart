@@ -129,6 +129,10 @@ class SecureStorage {
       'auth',
       'key',
       'private',
+      'web-token',
+      'phone',
+      'jwt',
+      'access',
     ];
 
     return sensitiveKeys.any(

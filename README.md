@@ -28,6 +28,7 @@ A lightweight, intuitive state management solution for Flutter applications.
   - [Custom Sized Box](#custom-sized-box)
   - [Internet Connectivity](#internet-connectivity)
   - [Currency Converter](#currency-converter)
+- [Fittor Store](#fittor-store)
 - [Extension](#Extension)
 - [Contributing](#contributing)
 - [License](#license)
@@ -475,6 +476,96 @@ FitBuilder<VideoController>(
 )
 ```
 
+## Fittor Store
+
+#### A secure, persistent key-value storage solution for Flutter applications with built-in encryption for sensitive data.
+
+## Features
+
+- **Secure Storage**: Automatically encrypts sensitive data (tokens, passwords, etc.)
+- **Persistent Storage**: Data survives app restarts
+- **Type-Safe Operations**: Dedicated methods for different data types
+- **Automatic Serialization**: Handles complex types like DateTime and JSON
+- **Security Features**:
+  - PIN protection (via `FittorSecure`)
+  - Session timeout
+  - Failed attempt lockout
+  - Encryption key rotation
+- **Convenience Mixin**: Easy access to storage in StatefulWidgets
+- **Backup & Restore**: Create and restore from backups
+- **Auto-Save**: Configurable auto-save functionality
+
+### Initialization
+
+```dart
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await FittorStore.init();
+  runApp(MyApp());
+}
+```
+
+### Basic Operations
+
+```dart
+// Set values
+await FittorStore.setString('username', 'user123');
+await FittorStore.setInt('user_age', 30);
+await FittorStore.setBool('dark_mode', true);
+
+// Get values
+String? username = FittorStore.getString('username');
+int? age = FittorStore.getInt('user_age');
+bool? darkMode = FittorStore.getBool('dark_mode');
+
+// Delete values
+
+FittorStore.remove('username');
+FittorStore.remove('user_age');
+FittorStore.remove('dark_mode');
+```
+
+### Using the Mixin
+
+```dart
+class MyWidget extends StatefulWidget {
+  const MyWidget({super.key});
+
+  @override
+  State<MyWidget> createState() => _MyWidgetState();
+}
+
+class _MyWidgetState extends State<MyWidget> with FittorStoreMixin {
+  @override
+  Widget build(BuildContext context) {
+    return Text(getString('username') ?? 'No username');
+  }
+}
+```
+
+### Sensitive Keys
+
+```dart
+[
+  'token', 'password', 'credit', 'card', 'ssn', 'secret', 'auth',
+  'key','private', 'web-token','phone', 'jwt','access',
+];
+```
+
+### How to use FittorSecure
+
+```dart
+class Store {
+  static const String _dbName = 'store.db';
+  static const String _tableName = 'store';
+
+  static String get dbName => FittorStore.getString(_dbName) ?? "";
+  static set dbName(String value) => FittorStore.setString(_dbName, value);
+
+  static String get tableName => FittorStore.getString(_tableName) ?? "";
+  static set tableName(String value) => FittorStore.setString(_tableName, value);
+}
+```
 
 ## Extension
 
