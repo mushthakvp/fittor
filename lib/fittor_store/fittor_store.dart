@@ -1,24 +1,54 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
 
+import 'persistent_storage.dart';
+import 'secure_storage.dart';
+
 class FittorStore {
-  // In-memory storage map that simulates SharedPreferences
+  // In-memory storage map
   static Map<String, dynamic> _storage = {};
   static bool _initialized = false;
+
+  // Persistent storage handler
+  static final PersistentStorage _persistentStorage = PersistentStorage();
+
+  // Secure storage handler
+  static final SecureStorage _secureStorage = SecureStorage();
+
+  // Auto-save configuration
+  static bool _autoSave = true;
+  static Timer? _autoSaveTimer;
+  static const Duration _autoSaveDuration = Duration(seconds: 5);
 
   // Current timestamp for operations that need it
   static DateTime get now => DateTime.now();
 
   /// Initialize the FittorStore
   /// Must be called at app start (typically in main.dart)
-  static Future<void> init() async {
-    try {
-      // Load any persistent data here if implementing persistence
-      _initialized = true;
+  static Future<void> init({bool autoSave = true}) async {
+    if (_initialized) return;
 
-      // For now, we're just initializing with an empty map
-      _storage = {};
+    try {
+      _autoSave = autoSave;
+
+      // Initialize secure storage
+      await _secureStorage.init();
+
+      // Initialize persistent storage
+      await _persistentStorage.init();
+
+      // Load data from persistent storage
+      _storage = await _persistentStorage.loadData();
+
+      // Set up auto-save timer if enabled
+      if (_autoSave) {
+        _autoSaveTimer = Timer.periodic(_autoSaveDuration, (_) => save());
+      }
+
+      _initialized = true;
+      debugPrint('FittorStore initialized successfully');
     } catch (e) {
       debugPrint('FittorStore initialization error: $e');
       _storage = {};
@@ -37,24 +67,34 @@ class FittorStore {
     }
   }
 
-  /// Reload stored preferences
+  /// Save the current state to persistent storage
+  static Future<void> save() async {
+    _ensureInitialized();
+    await _persistentStorage.saveData(_storage);
+  }
+
+  /// Reload stored preferences from persistent storage
   static Future<void> reload() async {
     _ensureInitialized();
-    // In a real implementation, this would reload from disk
-    // For now, this is a no-op
+    _storage = await _persistentStorage.loadData();
   }
 
   /// Clear all stored preferences
   static Future<void> clear() async {
     _ensureInitialized();
     _storage.clear();
-    return Future.value();
+    await _persistentStorage.clearData();
   }
 
   /// Remove a specific key
   static Future<bool> remove(String key) async {
     _ensureInitialized();
     _storage.remove(key);
+
+    if (_autoSave) {
+      await save();
+    }
+
     return Future.value(true);
   }
 
@@ -64,16 +104,48 @@ class FittorStore {
     return _storage.keys.toSet();
   }
 
+  /// Process the value before storing
+  /// Encrypts sensitive data automatically
+  static dynamic _processValueForStorage(String key, dynamic value) {
+    if (value == null) return null;
+
+    if (value is String && _secureStorage.shouldEncrypt(key)) {
+      return _secureStorage.encrypt(value);
+    }
+
+    return value;
+  }
+
+  /// Process the value after retrieving
+  /// Decrypts sensitive data automatically
+  static dynamic _processValueFromStorage(String key, dynamic value) {
+    if (value == null) return null;
+
+    if (value is String && _secureStorage.shouldEncrypt(key)) {
+      return _secureStorage.decrypt(value);
+    }
+
+    return value;
+  }
+
   // String operations
   static String? getString(String key) {
     _ensureInitialized();
     final value = _storage[key];
-    return value is String ? value : null;
+    if (value is String) {
+      return _processValueFromStorage(key, value) as String?;
+    }
+    return null;
   }
 
   static Future<bool> setString(String key, String value) async {
     _ensureInitialized();
-    _storage[key] = value;
+    _storage[key] = _processValueForStorage(key, value);
+
+    if (_autoSave) {
+      await save();
+    }
+
     return Future.value(true);
   }
 
@@ -87,6 +159,11 @@ class FittorStore {
   static Future<bool> setInt(String key, int value) async {
     _ensureInitialized();
     _storage[key] = value;
+
+    if (_autoSave) {
+      await save();
+    }
+
     return Future.value(true);
   }
 
@@ -100,6 +177,11 @@ class FittorStore {
   static Future<bool> setDouble(String key, double value) async {
     _ensureInitialized();
     _storage[key] = value;
+
+    if (_autoSave) {
+      await save();
+    }
+
     return Future.value(true);
   }
 
@@ -113,6 +195,11 @@ class FittorStore {
   static Future<bool> setBool(String key, bool value) async {
     _ensureInitialized();
     _storage[key] = value;
+
+    if (_autoSave) {
+      await save();
+    }
+
     return Future.value(true);
   }
 
@@ -129,6 +216,11 @@ class FittorStore {
   static Future<bool> setStringList(String key, List<String> value) async {
     _ensureInitialized();
     _storage[key] = value;
+
+    if (_autoSave) {
+      await save();
+    }
+
     return Future.value(true);
   }
 
@@ -149,6 +241,11 @@ class FittorStore {
   static Future<bool> setDateTime(String key, DateTime value) async {
     _ensureInitialized();
     _storage[key] = value.toIso8601String();
+
+    if (_autoSave) {
+      await save();
+    }
+
     return Future.value(true);
   }
 
@@ -181,6 +278,9 @@ class FittorStore {
     _ensureInitialized();
     final value = _storage[key];
     if (value is T) {
+      if (value is String && _secureStorage.shouldEncrypt(key)) {
+        return _processValueFromStorage(key, value) as T?;
+      }
       return value;
     }
     return defaultValue;
@@ -188,7 +288,67 @@ class FittorStore {
 
   static Future<bool> setValue<T>(String key, T value) async {
     _ensureInitialized();
-    _storage[key] = value;
+
+    if (value is String && _secureStorage.shouldEncrypt(key)) {
+      _storage[key] = _processValueForStorage(key, value);
+    } else {
+      _storage[key] = value;
+    }
+
+    if (_autoSave) {
+      await save();
+    }
+
     return Future.value(true);
+  }
+
+  /// Create a backup of the store
+  static Future<String?> createBackup() async {
+    _ensureInitialized();
+    final backupFile = await _persistentStorage.backup();
+    return backupFile?.path;
+  }
+
+  /// Get the size of the stored data in bytes
+  static Future<int> getSize() async {
+    _ensureInitialized();
+    return _persistentStorage.getSize();
+  }
+
+  /// Rotate the encryption key for added security
+  /// This will re-encrypt all sensitive data with a new key
+  static Future<void> rotateEncryptionKey() async {
+    _ensureInitialized();
+
+    // Store keys that need re-encryption
+    final keysToReencrypt = <String, String>{};
+
+    // Find all sensitive keys
+    for (final key in _storage.keys) {
+      if (_storage[key] is String && _secureStorage.shouldEncrypt(key)) {
+        final decryptedValue = getString(key);
+        if (decryptedValue != null) {
+          keysToReencrypt[key] = decryptedValue;
+        }
+      }
+    }
+
+    // Rotate the key
+    await _secureStorage.rotateKey();
+
+    // Re-encrypt all sensitive values with the new key
+    for (final entry in keysToReencrypt.entries) {
+      await setString(entry.key, entry.value);
+    }
+
+    // Save changes
+    await save();
+  }
+
+  /// Dispose resources used by FittorStore
+  static void dispose() {
+    _autoSaveTimer?.cancel();
+    _autoSaveTimer = null;
+    _initialized = false;
   }
 }
