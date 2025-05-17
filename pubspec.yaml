@@ -42,7 +42,7 @@ dev_dependencies:
 
 screenshots:
   - description: Fitter
-    path: assets/icon.png
+    path: assets/fittor-icon-square.png
 
 flutter:
 
