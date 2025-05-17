@@ -1,3 +1,7 @@
+## 1.0.8+1
+
+- Add Command Line Interface (CLI) for Fittor Store
+
 ## 1.0.8
 
 - Fittor Store
