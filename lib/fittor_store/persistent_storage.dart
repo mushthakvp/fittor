@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
 
 /// A class that handles persistent storage for FittorStore
 /// This allows data to be saved to the device's file system
@@ -20,16 +21,16 @@ class PersistentStorage {
     if (_initialized) return;
 
     try {
-      // Get the application storage directory without using path_provider
-      final directory = await _getStorageDirectory();
+      // Get the application storage directory using path_provider
+      final directory = await getApplicationDocumentsDirectory();
 
-      // Create the directory if it doesn't exist
-      if (!await directory.exists()) {
-        await directory.create(recursive: true);
+      // Create our storage file in a subdirectory
+      final storageDir = Directory('${directory.path}/fittor_store');
+      if (!await storageDir.exists()) {
+        await storageDir.create(recursive: true);
       }
 
-      // Create our storage file
-      _storageFile = File('${directory.path}/fittor_store.json');
+      _storageFile = File('${storageDir.path}/fittor_store.json');
 
       // Create the file if it doesn't exist
       if (!await _storageFile.exists()) {
@@ -38,11 +39,11 @@ class PersistentStorage {
       }
 
       _initialized = true;
-      debugPrint('PersistentStorage initialized at: ${_storageFile.path}');
+      debugPrint('Storage Activated Successfully');
     } catch (e) {
       debugPrint('PersistentStorage init error: $e');
       _initialized = false;
-      rethrow;
+      rethrow; // Rethrow to allow FittorStore to handle the error
     }
   }
 
@@ -53,80 +54,6 @@ class PersistentStorage {
         'PersistentStorage not initialized. Call PersistentStorage.init() first.',
       );
     }
-  }
-
-  /// Get the storage directory based on platform without using path_provider
-  Future<Directory> _getStorageDirectory() async {
-    try {
-      // For iOS and macOS: use NSDocumentDirectory which apps have access to
-      if (Platform.isIOS || Platform.isMacOS) {
-        final home = _getHomeDirectory();
-        final appName = 'fittor_app';
-
-        // iOS app sandbox: create in Documents directory
-        if (Platform.isIOS) {
-          return Directory('$home/Documents/$appName');
-        }
-
-        // macOS: try Documents directory first
-        return Directory('$home/Documents/$appName');
-      }
-      // For Android: use the app's data directory
-      else if (Platform.isAndroid) {
-        // On Android, we can often write to the app's files directory
-        final appDir = Directory(
-          '/data/data/${_getPackageName()}/files/fittor',
-        );
-        // If we can't create this directory, we'll fall back to a temporary directory
-        try {
-          if (!await appDir.exists()) {
-            await appDir.create(recursive: true);
-          }
-          return appDir;
-        } catch (_) {
-          // Fall back to temp directory which should always be writable
-          return Directory.systemTemp.createTempSync('fittor_store');
-        }
-      }
-      // For Windows: use a folder in the user's Documents directory
-      else if (Platform.isWindows) {
-        final documents = '${_getHomeDirectory()}\\Documents\\Fittor';
-        return Directory(documents);
-      }
-      // For Linux: use ~/.local/share/fittor
-      else if (Platform.isLinux) {
-        final home = _getHomeDirectory();
-        return Directory('$home/.local/share/fittor');
-      }
-      // Fallback for other platforms
-      else {
-        return _getTemporaryDirectory();
-      }
-    } catch (e) {
-      // Create a temporary directory as fallback
-      debugPrint('Error getting storage directory: $e');
-      return _getTemporaryDirectory();
-    }
-  }
-
-  /// Get the home directory
-  String _getHomeDirectory() {
-    if (Platform.isWindows) {
-      return Platform.environment['USERPROFILE'] ?? '';
-    } else {
-      return Platform.environment['HOME'] ?? '';
-    }
-  }
-
-  /// Get package name (simplified implementation)
-  String _getPackageName() {
-    // This is a simplified approach - in a real app with a real package name
-    return 'com.example.fittor';
-  }
-
-  /// Get temporary directory without path_provider
-  Directory _getTemporaryDirectory() {
-    return Directory.systemTemp.createTempSync('fittor_store');
   }
 
   /// Load all data from persistent storage
@@ -184,7 +111,7 @@ class PersistentStorage {
     _ensureInitialized();
 
     try {
-      final directory = Directory.systemTemp;
+      final directory = await getTemporaryDirectory();
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final backupFile = File(
         '${directory.path}/fittor_store_backup_$timestamp.json',

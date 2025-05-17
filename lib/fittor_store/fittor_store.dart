@@ -35,13 +35,10 @@ class FittorStore {
 
       // Initialize secure storage first (which should always work)
       await _secureStorage.init();
-      debugPrint('Secure storage initialized successfully');
 
       // Initialize persistent storage (which might fail if file access is restricted)
       try {
         await _persistentStorage.init();
-        debugPrint('Persistent storage initialized successfully');
-
         // Load data from persistent storage
         _storage = await _persistentStorage.loadData();
       } catch (e) {
@@ -58,7 +55,6 @@ class FittorStore {
       }
 
       _initialized = true;
-      debugPrint('FittorStore initialized successfully');
     } catch (e) {
       debugPrint('FittorStore initialization error: $e');
       _storage = {};
