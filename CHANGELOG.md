@@ -1,3 +1,13 @@
+## 1.0.7
+
+- A lightweight, intuitive state management solution for Flutter applications.
+- Controller-based state management: Create reactive UIs with minimal code
+- Dependency injection: Easily register and find controllers throughout your app
+- Reactive value wrappers: Optimized UI updates with fine-grained reactivity
+- Bindings system: Organize dependencies by route or feature
+- Extension methods: Access controllers directly from BuildContext
+- Auto-disposal: Controllers are automatically managed in the widget lifecycle
+
 ## 1.0.6
 
 - Currency Converter Free API

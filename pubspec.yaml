@@ -1,6 +1,6 @@
 name: fittor
-description: A comprehensive Flutter package for creating responsive UIs that adapt to different screen sizes and orientations.
-version: 1.0.6
+description: A comprehensive Flutter package for creating responsive UIs that adapt to different screen sizes and orientations. A lightweight, intuitive state management solution for Flutter applications.
+version: 1.0.7
 repository: https://github.com/mushthakvp/fittor
 issue_tracker: https://github.com/mushthakvp/fittor/issues
 license: MIT
@@ -14,6 +14,18 @@ topics:
   - ui-design
   - layout
   - adaptive
+  - state-management
+  - currency-formatting
+  - live-currency-rate
+  - currency-converter
+  - currency-converter-app
+  - currency-converter-flutter
+  - fittor-flutter
+  - fittor-flutter-package
+  - fittor-flutter-package-for-responsive-ui
+  - fittor-flutter-package-for-responsive-ui-design
+  - fittor-flutter-package-for-responsive-ui-design-and-state-management
+  - fittor-flutter-package-for-responsive-ui-design-and-state-management-and-currency-formatting
 
 environment:
   sdk: ^3.7.2

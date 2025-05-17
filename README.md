@@ -10,6 +10,7 @@
 
 
 A comprehensive Flutter package for responsive UI design and network connectivity management.
+A lightweight, intuitive state management solution for Flutter applications.
 
 <!-- [![pub package](https://img.shields.io/pub/v/fittor.svg)](https://pub.dev/packages/fittor) -->
 
@@ -17,6 +18,11 @@ A comprehensive Flutter package for responsive UI design and network connectivit
 
 - [Features](#features)
 - [Installation](#installation)
+- [State Management](#state-management)
+  - [Getting Started](#getting-started)
+  - [Advanced Usage Controller](#advanced-usage-controller)
+  - [Auto-registration with FitBuilder](#auto-registration-with-fitBuilder)
+  - [Initialization and Disposal](#initialization-and-disposal)
 - [Usage](#usage)
   - [Responsive](#responsive)
   - [Custom Sized Box](#custom-sized-box)
@@ -278,6 +284,195 @@ Widget priceText = currencyUtils.currencyText(
   '\$1,234.56',
   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
 );
+```
+
+## State Management
+
+#### Overview
+`Fittor` is a pragmatic `state management library` designed to make Flutter development more efficient with minimal boilerplate. It offers a controller-based approach, more focused API.
+
+### Features
+
+- Controller-based state management: Create reactive UIs with minimal code
+- Dependency injection: Easily register and find controllers throughout your app
+- Reactive value wrappers: Optimized UI updates with fine-grained reactivity
+- Bindings system: Organize dependencies by route or feature
+- Extension methods: Access controllers directly from BuildContext
+- Auto-disposal: Controllers are automatically managed in the widget lifecycle
+
+### Getting Started
+
+#### 1. Initialize Fittor
+
+Initialize Fittor at the root of your application:
+
+```dart
+void main() {
+  runApp(
+    FitInitializer(
+      child: MyApp(),
+      initialBindings: [AppBindings()],
+    ),
+  );
+}
+```
+
+#### 2. Create a Controller
+
+Controllers manage your application state and business logic:
+
+```dart
+class CounterController extends FitController {
+  int count = 0;
+  
+  void increment() {
+    count++;
+    fittor(); // Notify listeners to rebuild
+  }
+  
+  @override
+  void onDelete() {
+    // Clean up resources when controller is removed
+    super.onDelete();
+  }
+}
+```
+
+#### 3. Using Reactive Values
+
+For more granular updates, use the `FitValue` class:
+
+```dart
+class UserController extends FitController {
+  final username = "".fit; // Creates a FitValue<String>
+  final isLoggedIn = false.fit; // Creates a FitValue<bool>
+  
+  void login(String name) {
+    username.val = name; // This will automatically update listeners
+    isLoggedIn.val = true;
+  }
+}
+```
+
+#### 4. Register Controllers with Bindings
+
+Create a bindings class to organize your dependencies:
+
+```dart
+class AppBindings extends FitBindings {
+  @override
+  void dependencies() {
+    lazyPut(() => CounterController());
+    lazyPut(() => UserController());
+  }
+}
+```
+
+#### 5. Using Controllers in Widgets
+
+Access your controllers in the UI using `FitBuilder:`
+
+```dart
+FitBuilder<CounterController>(
+  controller: Fit.find<CounterController>(),
+  builder: (context, controller) {
+    return Text('Count: ${controller.count}');
+  },
+)
+```
+
+For reactive values:
+
+```dart
+FitValueBuilder<String>(
+  fitValue: userController.username,
+  builder: (context, username) {
+    return Text('Hello, $username');
+  },
+)
+```
+
+#### 6. Access Controllers via BuildContext Extension
+
+```dart
+final controller = context.find<CounterController>();
+controller.increment();
+```
+
+### Core Concepts
+
+#### Controllers
+
+Controllers are the heart of your application logic. Extend `FitController` to create a controller:
+
+```dart
+class ThemeController extends FitController {
+  bool isDarkMode = false;
+  
+  void toggleTheme() {
+    isDarkMode = !isDarkMode;
+    fittor(); // Notify all listeners (will rebuild UI)
+  }
+  
+  // To update specific widgets only
+  void updateSpecificWidgets() {
+    fittor('theme-tag'); // Only rebuilds widgets with 'theme-tag'
+  }
+}
+```
+
+### Dependency Injection
+
+Fittor provides several methods to register and find controllers:
+
+- `Fit.lazyPut<T>()` : Registers a controller for lazy initialization
+- `Fit.put<T>()` : Registers an already initialized controller
+- `Fit.find<T>()` : Finds a registered controller
+- `Fit.delete<T>()` : Removes a controller and calls its onDelete method
+
+#### Advanced Usage Controller
+
+#### Tagging Controllers
+
+Register multiple instances of the same controller type:
+
+```dart
+// Registration
+Fit.put<ApiClient>(ProductApiClient(), tag: 'product');
+Fit.put<ApiClient>(UserApiClient(), tag: 'user');
+
+// Usage
+final productApi = Fit.find<ApiClient>(tag: 'product');
+final userApi = Fit.find<ApiClient>(tag: 'user');
+```
+
+#### Auto-registration with FitBuilder
+
+Controllers can be automatically registered with `FitBuilder`:
+
+```dart
+FitBuilder<DashboardController>(
+  controller: DashboardController(),
+  autoRegister: true,
+  builder: (context, controller) {
+    return DashboardView(controller: controller);
+  },
+)
+```
+
+#### Initialization and Disposal
+
+Controllers are automatically disposed when their widgets are removed from the tree. You can also manually dispose controllers:
+
+```dart
+FitBuilder<VideoController>(
+  controller: Fit.find<VideoController>(),
+  init: (controller) => controller.initialize(),
+  dispose: (controller) => controller.cleanup(),
+  builder: (context, controller) {
+    return VideoPlayer(controller);
+  },
+)
 ```
 
 
