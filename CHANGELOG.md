@@ -1,3 +1,11 @@
+## 1.0.10
+
+- Add Command Line Interface (CLI) for Fittor Store Bug Updated
+
+## 1.0.9
+
+- Add Command Line Interface (CLI) for Fittor Store Bug Updated
+
 ## 1.0.8+2
 
 - Add Command Line Interface (CLI) for Fittor Store Bug Updated

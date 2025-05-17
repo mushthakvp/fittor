@@ -1,9 +1,9 @@
-// File: lib/bin/custom_fittor_impl.dart
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:flutter/widgets.dart';
 import 'package:path/path.dart' as path;
+
+import 'string/app_urls.dart';
 
 void main(List<String> arguments) {
   final runner = CommandRunner('fittor', 'Fittor project structure generator')
@@ -12,7 +12,7 @@ void main(List<String> arguments) {
   try {
     runner.run(arguments);
   } catch (e) {
-    debugPrint('Error: $e');
+    print('Error: $e');
     runner.printUsage();
   }
 }
@@ -31,23 +31,19 @@ class CreateCommand extends Command {
 }
 
 void createFittorStructure(Directory baseDir) {
-  debugPrint('🚀 Creating Fittor project structure...');
+  print('🚀 Creating Fittor project structure...');
 
-  // Always create or overwrite main.dart with the template
+  // Create main.dart if it doesn't exist
   final mainFile = File(path.join(baseDir.path, 'lib', 'main.dart'));
-
-  // Create directory if needed
-  if (!mainFile.parent.existsSync()) {
-    mainFile.parent.createSync(recursive: true);
-  }
-
-  // Always write the template, regardless of whether the file exists
-  mainFile.writeAsStringSync(_mainDartTemplate());
-
-  if (mainFile.existsSync()) {
-    debugPrint('✅ Created/Replaced lib/main.dart with Fittor template');
+  if (!mainFile.existsSync()) {
+    mainFile.createSync(recursive: true);
+    mainFile.writeAsStringSync(_mainDartTemplate());
+    print('✅ Created lib/main.dart');
   } else {
-    debugPrint('❌ Failed to create lib/main.dart');
+    print('ℹ️ lib/main.dart already exists, skipping...');
+    mainFile.delete();
+    mainFile.createSync(recursive: true);
+    mainFile.writeAsStringSync(_mainDartTemplate());
   }
 
   // Create fittor directory structure
@@ -63,7 +59,7 @@ void createFittorStructure(Directory baseDir) {
   _createDirectory(fittorDir, 'core/routes');
   _createFile(fittorDir, 'core/routes/app_routes.dart', _appRoutesTemplate());
 
-  debugPrint('✅ Created core folder structure');
+  print('✅ Created core folder structure');
 
   // Create data folder structure
   _createDirectory(fittorDir, 'data/model');
@@ -87,7 +83,7 @@ void createFittorStructure(Directory baseDir) {
     _sampleDataSourceTemplate(),
   );
 
-  debugPrint('✅ Created data folder structure');
+  print('✅ Created data folder structure');
 
   // Create presentation folder structure
   _createDirectory(fittorDir, 'presentation/screen');
@@ -104,13 +100,13 @@ void createFittorStructure(Directory baseDir) {
     _sampleControllerTemplate(),
   );
 
-  debugPrint('✅ Created presentation folder structure');
+  print('✅ Created presentation folder structure');
 
   // Create index files for each main folder
   _createIndexFile(fittorDir, 'core', ['network', 'util', 'routes']);
   _createIndexFile(fittorDir, 'data', ['model', 'repo', 'source']);
   _createIndexFile(fittorDir, 'presentation', ['screen', 'controller']);
-  debugPrint('✅ Created index.dart files');
+  print('✅ Created index.dart files');
 
   // Create main index file for fittor directory
   final mainIndexFile = File(path.join(fittorDir.path, 'index.dart'));
@@ -124,27 +120,22 @@ export 'presentation/index.dart';
 ''');
   }
 
-  debugPrint('\n🎉 Fittor project structure created successfully!');
-  debugPrint('\nRecommended next steps:');
-  debugPrint('  1. Update your pubspec.yaml to include required dependencies');
-  debugPrint(
+  print('\n🎉 Fittor project structure created successfully!');
+  print('\nEmail: mail.musthak@gmail.com\nInstagram: @musth4k');
+  print('\nRecommended next steps:');
+  print('  1. Update your pubspec.yaml to include required dependencies');
+  print(
     '  2. Create your app routes in lib/fittor/core/routes/app_routes.dart',
   );
-  debugPrint('  3. Define your data models in lib/fittor/data/model');
-  debugPrint('  4. Run "flutter pub get" to fetch dependencies');
-  debugPrint('''
-      Email: mail.musthak@gmail.com
-      WhatsApp: +919061213930
-      LinkedIn: Mushthak VP
-      Instagram: @musth4k
-''');
+  print('  3. Define your data models in lib/fittor/data/model');
+  print('  4. Run "flutter pub get" to fetch dependencies');
 }
 
 void _createDirectory(Directory baseDir, String relativePath) {
   final directory = Directory(path.join(baseDir.path, relativePath));
   if (!directory.existsSync()) {
     directory.createSync(recursive: true);
-    debugPrint('  Created directory: $relativePath');
+    print('  Created directory: $relativePath');
   }
 }
 
@@ -153,9 +144,9 @@ void _createFile(Directory baseDir, String relativePath, String content) {
   if (!file.existsSync()) {
     file.createSync(recursive: true);
     file.writeAsStringSync(content);
-    debugPrint('  Created file: $relativePath');
+    print('  Created file: $relativePath');
   } else {
-    debugPrint('  File already exists, skipping: $relativePath');
+    print('  File already exists, skipping: $relativePath');
   }
 }
 
@@ -290,119 +281,15 @@ class ApiClient {
 }
 
 String _constantsTemplate() {
-  return '''
-/// Application constants
-class AppConstants {
-  // API URLs
-  static const String apiBaseUrl = 'https://api.example.com';
-  
-  // Asset paths
-  static const String imagePath = 'assets/images/';
-  static const String iconPath = 'assets/icons/';
-  
-  // Storage keys
-  static const String authTokenKey = 'auth_token';
-  static const String userDataKey = 'user_data';
-  
-  // Timeouts
-  static const int connectionTimeout = 30000; // milliseconds
-  static const int receiveTimeout = 30000; // milliseconds
-  
-  // Don't allow instantiation
-  AppConstants._();
-}
-''';
+  return appUrls;
 }
 
 String _appRoutesTemplate() {
-  return '''
-import 'package:flutter/material.dart';
-import '../../../fittor/presentation/screen/sample_screen.dart';
-
-/// Handles all the routes for the application
-class AppRoutes {
-  static const String home = '/';
-  static const String detail = '/detail';
-  static const String profile = '/profile';
-  
-  /// Route generator function for MaterialApp
-  static Route<dynamic> onGenerateRoute(RouteSettings settings) {
-    switch (settings.name) {
-      case home:
-        return MaterialPageRoute(
-          builder: (_) => const SampleScreen(title: 'Home'),
-        );
-      case detail:
-        return MaterialPageRoute(
-          builder: (_) => const SampleScreen(title: 'Detail'),
-        );
-      case profile:
-        return MaterialPageRoute(
-          builder: (_) => const SampleScreen(title: 'Profile'),
-        );
-      default:
-        return MaterialPageRoute(
-          builder: (_) => const Scaffold(
-            body: Center(
-              child: Text('Route not found'),
-            ),
-          ),
-        );
-    }
-  }
-  
-  // Don't allow instantiation
-  AppRoutes._();
-}
-''';
+  return appRoutes;
 }
 
 String _sampleModelTemplate() {
-  return '''
-/// Sample data model class
-class SampleModel {
-  final int id;
-  final String title;
-  final String description;
-  
-  SampleModel({
-    required this.id,
-    required this.title,
-    required this.description,
-  });
-  
-  /// Create from JSON map
-  factory SampleModel.fromJson(Map<String, dynamic> json) {
-    return SampleModel(
-      id: json['id'] as int,
-      title: json['title'] as String,
-      description: json['description'] as String,
-    );
-  }
-  
-  /// Convert to JSON map
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'description': description,
-    };
-  }
-  
-  /// Create a copy with updated fields
-  SampleModel copyWith({
-    int? id,
-    String? title,
-    String? description,
-  }) {
-    return SampleModel(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      description: description ?? this.description,
-    );
-  }
-}
-''';
+  return sampleModel;
 }
 
 String _sampleRepositoryTemplate() {
