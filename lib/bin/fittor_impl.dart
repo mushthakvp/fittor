@@ -1,4 +1,4 @@
-// File: lib/bin/fittor.dart
+// File: lib/bin/fittor_impl.dart
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
