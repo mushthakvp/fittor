@@ -4,7 +4,9 @@ import 'package:test/home.dart';
 
 import 'app/bindings/fit_bindings.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await FittorStore.init();
   runApp(const MyApp());
 }
 

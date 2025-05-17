@@ -7,11 +7,11 @@ import 'package:flutter/foundation.dart';
 import 'fittor_store.dart';
 
 /// A class that manages security aspects of the FittorStore
-class SecurityManager {
+class FittorSecure {
   // Singleton instance
-  static final SecurityManager _instance = SecurityManager._internal();
-  factory SecurityManager() => _instance;
-  SecurityManager._internal();
+  static final FittorSecure _instance = FittorSecure._internal();
+  factory FittorSecure() => _instance;
+  FittorSecure._internal();
 
   // Authentication state
   bool _authenticated = false;

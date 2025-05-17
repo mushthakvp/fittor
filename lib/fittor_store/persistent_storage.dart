@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart' as path_provider;
 
 /// A class that handles persistent storage for FittorStore
 /// This allows data to be saved to the device's file system
@@ -21,7 +20,7 @@ class PersistentStorage {
     if (_initialized) return;
 
     try {
-      // Get the application documents directory
+      // Get the application storage directory
       final directory = await _getStorageDirectory();
 
       // Create our storage file
@@ -50,26 +49,54 @@ class PersistentStorage {
     }
   }
 
-  /// Get the storage directory based on platform
+  /// Get the storage directory based on platform without using path_provider
   Future<Directory> _getStorageDirectory() async {
     try {
-      // Use the appropriate directory based on platform
+      // Get application directory based on platform
       if (Platform.isIOS || Platform.isMacOS) {
-        return await path_provider.getLibraryDirectory();
+        // iOS/macOS: Use NSLibraryDirectory
+        return Directory(
+          '${_getHomeDirectory()}/Library/Application Support/com.fittor.app',
+        );
       } else if (Platform.isAndroid) {
-        return await path_provider.getApplicationDocumentsDirectory();
-      } else if (Platform.isWindows || Platform.isLinux) {
-        return await path_provider.getApplicationSupportDirectory();
+        // Android: Use app's data directory
+        return Directory('/data/data/${_getPackageName()}/app_data');
+      } else if (Platform.isWindows) {
+        // Windows: Use AppData directory
+        final appData = Platform.environment['APPDATA'] ?? '';
+        return Directory('$appData\\Fittor');
+      } else if (Platform.isLinux) {
+        // Linux: Use ~/.config directory
+        final home = _getHomeDirectory();
+        return Directory('$home/.config/fittor');
       } else {
         // Fallback for other platforms
-        return await path_provider.getTemporaryDirectory();
+        return _getTemporaryDirectory();
       }
     } catch (e) {
       // Create a temporary directory as fallback
-      final tempDir = Directory.systemTemp.createTempSync('fittor_store');
-      debugPrint('Using fallback directory: ${tempDir.path}');
-      return tempDir;
+      return _getTemporaryDirectory();
     }
+  }
+
+  /// Get the home directory
+  String _getHomeDirectory() {
+    if (Platform.isWindows) {
+      return Platform.environment['USERPROFILE'] ?? '';
+    } else {
+      return Platform.environment['HOME'] ?? '';
+    }
+  }
+
+  /// Get package name (simplified implementation)
+  String _getPackageName() {
+    // In a real app, this would come from your app's build configuration
+    return 'com.fittor.app';
+  }
+
+  /// Get temporary directory without path_provider
+  Directory _getTemporaryDirectory() {
+    return Directory.systemTemp.createTempSync('fittor_store');
   }
 
   /// Load all data from persistent storage

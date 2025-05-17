@@ -33,11 +33,11 @@ class FittorStore {
     try {
       _autoSave = autoSave;
 
-      // Initialize secure storage
-      await _secureStorage.init();
-
       // Initialize persistent storage
       await _persistentStorage.init();
+
+      // Initialize secure storage
+      await _secureStorage.init();
 
       // Load data from persistent storage
       _storage = await _persistentStorage.loadData();
