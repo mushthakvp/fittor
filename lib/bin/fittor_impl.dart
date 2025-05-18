@@ -6,16 +6,93 @@ import 'package:path/path.dart' as path;
 import 'string/app_urls.dart';
 import 'string/main_dart_template.dart';
 
-void main(List<String> arguments) {
+void main(List<String> arguments) async {
   final runner = CommandRunner('fittor', 'Fittor project structure generator')
     ..addCommand(CreateCommand());
 
-  try {
-    runner.run(arguments);
-  } catch (e) {
-    print('Error: $e');
-    runner.printUsage();
+  if (arguments.isEmpty ||
+      arguments.contains('-h') ||
+      arguments.contains('--help')) {
+    _printHelp(runner);
+    return;
   }
+
+  try {
+    await runner.run(arguments);
+  } on UsageException catch (e) {
+    _printError('Error: ${e.message}');
+    print(e.usage);
+    final input = arguments.isNotEmpty ? arguments.first : '';
+    final suggestion = _suggestCommand(input, runner.commands.keys.toList());
+    if (suggestion != null) {
+      _printHint('Did you mean: "$suggestion"?');
+    }
+    _printHelp(runner);
+    exit(64);
+  } catch (e) {
+    _printError('Unexpected error: $e');
+    exit(1);
+  }
+}
+
+void _printHelp(CommandRunner runner) {
+  _printTitle('Available Commands:');
+  runner.commands.forEach((name, cmd) {
+    print('  \x1B[32m$name\x1B[0m\t\t${cmd.description}');
+  });
+  print('\nUsage: \x1B[34mfittor create app\x1B[0m');
+}
+
+void _printTitle(String message) => print('\n\x1B[1m$message\x1B[0m');
+void _printError(String message) => print('\x1B[31m$message\x1B[0m');
+void _printHint(String message) => print('\x1B[33m$message\x1B[0m');
+
+String? _suggestCommand(String input, List<String> validCommands) {
+  if (input.isEmpty) return null;
+
+  String? closest;
+  int minDistance = 3;
+
+  for (final command in validCommands) {
+    final distance = _levenshtein(input, command);
+    if (distance < minDistance) {
+      minDistance = distance;
+      closest = command;
+    }
+  }
+
+  return (minDistance <= 2) ? closest : null;
+}
+
+int _levenshtein(String s1, String s2) {
+  final m = s1.length;
+  final n = s2.length;
+  final dp = List.generate(m + 1, (_) => List<int>.filled(n + 1, 0));
+
+  for (var i = 0; i <= m; i++) {
+    dp[i][0] = i;
+  }
+  for (var j = 0; j <= n; j++) {
+    dp[0][j] = j;
+  }
+
+  for (var i = 1; i <= m; i++) {
+    for (var j = 1; j <= n; j++) {
+      if (s1[i - 1] == s2[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1];
+      } else {
+        dp[i][j] =
+            1 +
+            [
+              dp[i - 1][j],
+              dp[i][j - 1],
+              dp[i - 1][j - 1],
+            ].reduce((a, b) => a < b ? a : b);
+      }
+    }
+  }
+
+  return dp[m][n];
 }
 
 class CreateCommand extends Command {
@@ -113,13 +190,12 @@ void createFittorStructure(Directory baseDir) {
 
   _createDirectory(fittorDir, 'presentation/widget');
 
-  print('\n🎉 Fittor project structure created successfully!');
-  print('\nConnect me on Email: mail.musthak@gmail.com');
-  print('\nFollow me on Instagram: @musth4k');
-  print('\nFollow me on Github: @mushthakvp');
-  print('\nThank you for using Fittor! 🚀 & We are using Clean architecture');
-  print('\nRecommended next steps:');
-  print('\n1. Run "flutter pub get" to install dependencies');
+  _printTitle('\n🎉 Fittor project structure created successfully!');
+  _printHint('\n Connect me on Email: mailto:mail.musthak@gmail.com');
+  _printHint('\nConnect me on LinkedIn: https://www.linkedin.com/in/musthak/');
+  _printHint('\nConnect me on Instagram: https://www.instagram.com/musth4k/');
+  _printHint('\nConnect me on GitHub: https://github.com/mushthakvp');
+  _printTitle('\n🎉 Fittor project structure created successfully!');
 }
 
 void _createDirectory(Directory baseDir, String relativePath) {
@@ -135,7 +211,7 @@ void _createFile(Directory baseDir, String relativePath, String content) {
     file.createSync(recursive: true);
     file.writeAsStringSync(content);
   } else {
-    print('File already exists, skipping: $relativePath');
+    _printHint('To overwrite, delete the file and run the command again.');
   }
 }
 

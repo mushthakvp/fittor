@@ -1,3 +1,24 @@
+## 1.0.12
+
+- (CLI) Command Example for Fittor
+- Use Below Command to Create a New Fittor App
+
+```dart
+dart pub global activate fittor
+
+// Activate the fittor CLI globally
+```
+```dart
+fittor create app
+
+// Create a new Fittor App
+```
+```dart
+fittor -h
+
+// Usage: fittor [command] [options]
+```
+
 ## 1.0.11
 
 - (CLI) Tool Testing for Fittor Store Bug Updated
