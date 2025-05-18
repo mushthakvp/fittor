@@ -191,11 +191,10 @@ void createFittorStructure(Directory baseDir) {
   _createDirectory(fittorDir, 'presentation/widget');
 
   _printTitle('\n🎉 Fittor project structure created successfully!');
-  _printHint('\n Connect me on Email: mailto:mail.musthak@gmail.com');
-  _printHint('\nConnect me on LinkedIn: https://www.linkedin.com/in/musthak/');
-  _printHint('\nConnect me on Instagram: https://www.instagram.com/musth4k/');
-  _printHint('\nConnect me on GitHub: https://github.com/mushthakvp');
-  _printTitle('\n🎉 Fittor project structure created successfully!');
+  _printHint('Connect me on Email: mail.musthak@gmail.com');
+  _printHint('Connect me on LinkedIn: https://www.linkedin.com/in/musthak/');
+  _printHint('Connect me on Instagram: https://www.instagram.com/musth4k/');
+  _printHint('Connect me on GitHub: https://github.com/mushthakvp \n\n');
 }
 
 void _createDirectory(Directory baseDir, String relativePath) {
