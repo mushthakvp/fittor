@@ -1,3 +1,26 @@
+## 1.0.11
+
+- (CLI) Tool Testing for Fittor Store Bug Updated
+
+- # Create a new Fittor app
+- **fittor create app**
+
+- # Create a new page
+- **fittor create page --name=user_profile**
+
+- # Create a widget
+- **fittor create widget --name=custom_card**
+
+```dart
+// Activate the fittor CLI globally
+dart pub global activate fittor
+
+// Create a new Fittor Folder Structure
+fittor create app
+
+```
+
+
 ## 1.0.10
 
 - (CLI) Tool Testing for Fittor Store Bug Updated
