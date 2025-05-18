@@ -1,6 +1,6 @@
 import 'package:fittor/fittor.dart';
 
-class Store {
+class Storage {
   static const String _dbName = 'store.db';
   static const String _tableName = 'store';
 
@@ -8,6 +8,5 @@ class Store {
   static set dbName(String value) => FittorStore.setString(_dbName, value);
 
   static String get tableName => FittorStore.getString(_tableName) ?? "";
-  static set tableName(String value) =>
-      FittorStore.setString(_tableName, value);
+  static set tableName(String value) => FittorStore.setString(_tableName, value);
 }

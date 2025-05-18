@@ -1,33 +1,29 @@
 import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
-import 'package:test/home.dart';
 
-import 'app/bindings/fit_bindings.dart';
+import 'fit_bindings.dart';
+import 'presentation/screen/fitter_view.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await FittorStore.init();
-  FittorStore.getString('name');
-  runApp(MyApp());
+  runApp(FittorApp());
 }
 
-class MyApp extends StatelessWidget with FittorAppMixin {
-  MyApp({super.key});
+class FittorApp extends StatelessWidget with FittorAppMixin {
+  const FittorApp({super.key});
 
   @override
   Widget responsive(BuildContext context) {
     return FitInitializer(
       initialBindings: [AppBindings()],
       child: MaterialApp(
-        debugShowCheckedModeBanner: true,
-        title: 'Responsive Demo',
-        theme: ThemeData(primarySwatch: Colors.blue),
+        debugShowCheckedModeBanner: false,
         home: ConnectivityWrapper(
-          ignoreOfflineState: false,
           onConnectivityChanged: (status) {
-            debugPrint('Connectivity status: $status');
+            debugPrint('Connectivity status: status');
           },
-          child: const HomeScreen(),
+          child: const FittorView(),
         ),
       ),
     );

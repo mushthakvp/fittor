@@ -14,6 +14,7 @@ dependencies:
     path: ..
   flutter_highlight: ^0.7.0
   http: ^1.4.0
+  # fittor: ^1.0.12
 
 dev_dependencies:
   flutter_test:
