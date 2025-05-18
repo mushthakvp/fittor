@@ -138,6 +138,13 @@ void createFittorStructure(Directory baseDir) {
     mainFile.writeAsStringSync(_mainDartTemplate());
   }
 
+  // I want to Delete Test Folder
+
+  final testDir = Directory(path.join(baseDir.path, 'test'));
+  if (testDir.existsSync()) {
+    testDir.deleteSync(recursive: true);
+  }
+
   final fittorDir = Directory(path.join(baseDir.path, 'lib'));
   // Create FitBindings
 

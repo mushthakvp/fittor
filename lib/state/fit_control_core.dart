@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-/// The core of the FitControl state management system
+/// The core of the modified FitControl state management system
 class Fit {
   // Singleton implementation
   static final Fit _instance = Fit._internal();
@@ -36,7 +36,18 @@ class Fit {
     if (controllerOrLazy is _Lazy) {
       final instance = controllerOrLazy.create();
       _controllers[key] = instance;
+
+      // Initialize if it's a FitController
+      if (instance is FitController) {
+        instance._ensureInitialized();
+      }
+
       return instance as T;
+    }
+
+    // Initialize if it's a FitController that hasn't been initialized yet
+    if (controllerOrLazy is FitController && !controllerOrLazy._isInitialized) {
+      controllerOrLazy._ensureInitialized();
     }
 
     return controllerOrLazy as T;
@@ -46,6 +57,11 @@ class Fit {
   static void put<T>(T controller, {String? tag}) {
     final key = _getKey<T>(tag);
     _controllers[key] = controller;
+
+    // Initialize if it's a FitController
+    if (controller is FitController) {
+      controller._ensureInitialized();
+    }
   }
 
   /// Removes a controller
@@ -91,24 +107,43 @@ class _Lazy<T> {
   T create() => _creator();
 }
 
-/// Base class for all controllers in the FitControl system
+/// Base class for all controllers in the modified FitControl system
 abstract class FitController {
   final Map<String?, List<FitListener>> _listeners = {};
+  bool _isInitialized = false;
+
+  /// Called when the controller is first accessed
+  void onInit() {}
 
   /// Called when the controller is being removed
   void onDelete() {}
 
-  /// Updates the UI of all listeners
+  /// Initialize the controller if not already initialized
+  void _ensureInitialized() {
+    if (!_isInitialized) {
+      onInit();
+      _isInitialized = true;
+    }
+  }
+
+  /// Modified update method that only updates listeners:
+  /// - With no tag when no tag is specified
+  /// - With the specific tag when a tag is specified
   void fittor([String? tag]) {
     if (tag != null) {
       // Update only listeners with the specified tag
       _listeners[tag]?.forEach((listener) => listener.update());
     } else {
-      // Update all listeners
-      for (var listeners in _listeners.values) {
-        for (var listener in listeners) {
-          listener.update();
-        }
+      // Update only listeners with no tag
+      _listeners[null]?.forEach((listener) => listener.update());
+    }
+  }
+
+  /// Updates all listeners regardless of tag
+  void fitAll() {
+    for (var listeners in _listeners.values) {
+      for (var listener in listeners) {
+        listener.update();
       }
     }
   }
