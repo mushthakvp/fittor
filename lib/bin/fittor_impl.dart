@@ -25,6 +25,24 @@ class CreateCommand extends Command {
   @override
   final description = 'Creates the standard Fittor project structure';
 
+  CreateCommand() {
+    addSubcommand(AppCommand());
+  }
+
+  @override
+  void run() {
+    print('Please specify a subcommand: app');
+    print('Usage: fittor create app');
+  }
+}
+
+class AppCommand extends Command {
+  @override
+  final name = 'app';
+
+  @override
+  final description = 'Creates a new Fittor application';
+
   @override
   void run() {
     createFittorStructure(Directory.current);
@@ -108,7 +126,6 @@ void _createDirectory(Directory baseDir, String relativePath) {
   final directory = Directory(path.join(baseDir.path, relativePath));
   if (!directory.existsSync()) {
     directory.createSync(recursive: true);
-    print('  Created directory: $relativePath');
   }
 }
 
