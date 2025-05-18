@@ -43,56 +43,57 @@ void createFittorStructure(Directory baseDir) {
     mainFile.writeAsStringSync(_mainDartTemplate());
   }
 
+  final fittorDir = Directory(path.join(baseDir.path, 'lib'));
   // Create FitBindings
 
-  _createFile(baseDir, 'fit_bindings.dart', _bindingTemplate());
+  _createFile(fittorDir, 'fit_bindings.dart', _bindingTemplate());
 
   // Create core folder structure
-  _createDirectory(baseDir, 'core/network');
-  _createFile(baseDir, 'core/network/api_client.dart', _apiClientTemplate());
-  _createFile(baseDir, 'core/network/fit_urls.dart', _apiUrlTemplate());
+  _createDirectory(fittorDir, 'core/network');
+  _createFile(fittorDir, 'core/network/api_client.dart', _apiClientTemplate());
+  _createFile(fittorDir, 'core/network/fit_urls.dart', _apiUrlTemplate());
 
-  _createDirectory(baseDir, 'core/util');
-  _createFile(baseDir, 'core/util/fit_colors.dart', _fitColorsTemplate());
-  _createFile(baseDir, 'core/util/storage.dart', _fitStorageTemplate());
+  _createDirectory(fittorDir, 'core/util');
+  _createFile(fittorDir, 'core/util/fit_colors.dart', _fitColorsTemplate());
+  _createFile(fittorDir, 'core/util/storage.dart', _fitStorageTemplate());
 
-  _createDirectory(baseDir, 'core/routes');
-  _createFile(baseDir, 'core/routes/app_routes.dart', _appRoutesTemplate());
+  _createDirectory(fittorDir, 'core/routes');
+  _createFile(fittorDir, 'core/routes/app_routes.dart', _appRoutesTemplate());
 
   // Create data folder structure
-  _createDirectory(baseDir, 'data/model');
-  _createFile(baseDir, 'data/model/fit_model.dart', _sampleModelTemplate());
+  _createDirectory(fittorDir, 'data/model');
+  _createFile(fittorDir, 'data/model/fit_model.dart', _sampleModelTemplate());
 
-  _createDirectory(baseDir, 'data/repo');
+  _createDirectory(fittorDir, 'data/repo');
   _createFile(
-    baseDir,
+    fittorDir,
     'data/repo/fitter_sample_repo.dart',
     _sampleRepositoryTemplate(),
   );
 
-  _createDirectory(baseDir, 'data/source');
+  _createDirectory(fittorDir, 'data/source');
   _createFile(
-    baseDir,
+    fittorDir,
     'data/source/fitter_sample_source.dart',
     _sampleDataSourceTemplate(),
   );
 
   // Create presentation folder structure
-  _createDirectory(baseDir, 'presentation/screen');
+  _createDirectory(fittorDir, 'presentation/screen');
   _createFile(
-    baseDir,
+    fittorDir,
     'presentation/screen/fitter_view.dart',
     _sampleScreenTemplate(),
   );
 
-  _createDirectory(baseDir, 'presentation/controller');
+  _createDirectory(fittorDir, 'presentation/controller');
   _createFile(
-    baseDir,
+    fittorDir,
     'presentation/controller/sample_controller.dart',
     _sampleControllerTemplate(),
   );
 
-  _createDirectory(baseDir, 'presentation/widget');
+  _createDirectory(fittorDir, 'presentation/widget');
 
   print('\n🎉 Fittor project structure created successfully!');
   print('\nConnect me on Email: mail.musthak@gmail.com');

@@ -30,14 +30,13 @@ class FittorApp extends StatelessWidget with FittorAppMixin {
     );
   }
 }
-
 ''';
 
 String sampleDataSource = '''
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
-import '../../core/network/fit_urls.dart';
-import '../repo/sample_repository.dart';
+import '../../../core/network/fit_urls.dart';
+import '../repo/fitter_sample_repo.dart';
 
 class SampleFittorSource extends FitUrls implements FitterSampleRepo {
   @override
@@ -54,12 +53,13 @@ class SampleFittorSource extends FitUrls implements FitterSampleRepo {
     throw UnimplementedError();
   }
 }
+
 ''';
 
 String fitBinding = '''
 import 'package:fittor/fittor.dart';
 
-import 'presentation/controller/fitter_controller.dart';
+import 'presentation/controller/sample_controller.dart';
 
 class AppBindings extends FitBindings {
   @override
@@ -73,7 +73,7 @@ String sampleHomeScreen = '''
 import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
 
-import '../controller/fitter_controller.dart';
+import '../controller/sample_controller.dart';
 
 class FittorView extends StatefulWidget {
   const FittorView({super.key});
