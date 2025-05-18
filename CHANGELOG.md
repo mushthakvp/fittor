@@ -1,3 +1,41 @@
+## 1.0.13
+
+- State Management: Manage the state of your application using the StateManager class.
+- (OnInit ) : This method is called when the widget is initialized.
+
+```dart
+  @override
+  void onInit() {
+    super.onInit();
+    debugPrint('SampleController initialized'); // For debugging
+    isInitialized = true;
+
+    // You can do initial setup here, like:
+    // - Loading data from local storage
+    // - Setting up initial state
+    // - Initializing dependencies
+  }
+```
+
+- (OnDelete) : This method is called when the widget is removed from the widget tree.
+
+```dart
+  @override
+  void onDelete() {
+    debugPrint('SampleController being deleted'); // For debugging
+
+    // Clean up resources when controller is removed
+    // This is important to prevent memory leaks
+    // Examples:
+    // - Cancel subscriptions
+    // - Close streams
+    // - Dispose of animation controllers
+    // - Close database connections
+
+    super.onDelete();
+  }
+  ```
+
 ## 1.0.12
 
 - (CLI) Command Example for Fittor
