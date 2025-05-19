@@ -32,8 +32,6 @@ dev_dependencies:
   flutter_lints: ^3.0.0  # Updated for Dart 3.4.0+
 
 executables:
-  fittor -h: fittor -h
-  fittor create app: fittor create app
   fittor: fittor
 
 flutter:
