@@ -1,3 +1,9 @@
+## 1.0.15
+
+**Fittor is compatible with:**
+- Dart SDK: >=3.4.0 <4.0.0
+- Flutter: >=3.19.0
+
 ## 1.0.14
 
 - Fittor Route Management: Easily navigate between screens and manage routes in your application.
