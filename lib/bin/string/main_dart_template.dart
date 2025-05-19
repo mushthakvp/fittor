@@ -2,8 +2,8 @@ String mainDartTemplate = '''
 import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
 
+import 'core/routes/app_routes.dart';
 import 'fit_bindings.dart';
-import 'presentation/screen/fitter_view.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,14 +18,17 @@ class FittorApp extends StatelessWidget with FittorAppMixin {
   Widget responsive(BuildContext context) {
     return FitInitializer(
       initialBindings: [AppBindings()],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: ConnectivityWrapper(
-          onConnectivityChanged: (status) {
-            debugPrint('Connectivity status: status');
-          },
-          child: const FittorView(),
-        ),
+      child: FitRouterConfig(
+        initialRoute: Routes.initialRoute,
+        routes: Routes.routes,
+        builder: (context, child) {
+          return ConnectivityWrapper(
+            onConnectivityChanged: (status) {
+              debugPrint('Connectivity status: \$status');
+            },
+            child: child ?? const SizedBox(),
+          );
+        },
       ),
     );
   }
@@ -73,6 +76,7 @@ String sampleHomeScreen = '''
 import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/routes/app_routes.dart';
 import '../controller/sample_controller.dart';
 
 class FittorView extends StatefulWidget {
@@ -171,6 +175,7 @@ class _FittorViewState extends State<FittorView> {
                   ),
                   child: const Text('Update No-Tag Only'),
                 ),
+
                 ElevatedButton(
                   onPressed: () => Fit.find<SampleController>().incrementTag2(),
                   style: ElevatedButton.styleFrom(
@@ -179,6 +184,7 @@ class _FittorViewState extends State<FittorView> {
                   ),
                   child: const Text('Update Tag2 Only'),
                 ),
+
                 ElevatedButton(
                   onPressed: () => Fit.find<SampleController>().incrementAll(),
                   style: ElevatedButton.styleFrom(
@@ -188,6 +194,15 @@ class _FittorViewState extends State<FittorView> {
                   child: const Text('Update All'),
                 ),
               ],
+            ),
+            30.h,
+            ElevatedButton(
+              onPressed: () => FitRoute.go(Routes.sample, pass: 'Hello Fittor'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Test Fittor Navigator'),
             ),
             Spacer(),
             const Text(
@@ -243,7 +258,7 @@ class SampleController extends FitController {
   // This will update ALL builders regardless of tags
   void incrementAll() {
     count++;
-    updateAll(); // Updates all builders regardless of tags
+    fitAll(); // Updates all builders regardless of tags
   }
 
   @override

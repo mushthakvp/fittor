@@ -1,6 +1,7 @@
 import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/routes/app_routes.dart';
 import '../controller/sample_controller.dart';
 
 class FittorView extends StatefulWidget {
@@ -118,6 +119,17 @@ class _FittorViewState extends State<FittorView> {
                   child: const Text('Update All'),
                 ),
               ],
+            ),
+            30.h,
+            ElevatedButton(
+              onPressed: () {
+                FitRoute.go(Routes.sample, pass: 'Hello Fittor');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Test Fittor Navigator'),
             ),
             Spacer(),
             const Text(

@@ -1,3 +1,12 @@
+## 1.0.14
+
+- Fittor Route Management: Easily navigate between screens and manage routes in your application.
+- Fittor State Management: Manage the state of your application using the StateManager class.
+- Fittor Dependency Injection: Inject dependencies into your controllers and widgets.
+- Fittor Logger: Log messages to the console for debugging and monitoring.
+- Fittor Cache: Cache data for faster access and offline support.
+- Fittor Analytics: Track user
+
 ## 1.0.13
 
 - State Management: Manage the state of your application using the StateManager class.

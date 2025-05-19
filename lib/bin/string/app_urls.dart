@@ -9,32 +9,28 @@ class FitUrls {
 ''';
 
 String appRoutes = '''
-import 'package:flutter/material.dart';
+import 'package:fittor/fittor.dart';
 
 import '../../presentation/screen/fitter_view.dart';
+import '../../presentation/screen/sample_router.dart';
 
-/// Handles all the routes for the application
-class AppRoutes {
-  static const String home = '/';
-  static const String detail = '/detail';
-  static const String profile = '/profile';
+class Routes {
+  static const splash = '/';
+  static const sample = '/sample';
+  static const String initialRoute = splash;
 
-  /// Route generator function for MaterialApp
-  static Route<dynamic> onGenerateRoute(RouteSettings settings) {
-    switch (settings.name) {
-      case home:
-        return MaterialPageRoute(builder: (_) => const FittorView());
-      default:
-        return MaterialPageRoute(
-          builder:
-              (_) =>
-                  const Scaffold(body: Center(child: Text('Route not found'))),
-        );
-    }
-  }
-
-  // Don't allow instantiation
-  AppRoutes._();
+  static final routes = [
+    FitPage(
+      name: initialRoute,
+      page: () => const FittorView(),
+      transition: Transition.fade,
+    ),
+    FitPage(
+      name: sample,
+      page: () => const SampleRouter(),
+      transition: Transition.rightToLeft,
+    ),
+  ];
 }
 ''';
 
@@ -100,5 +96,50 @@ class Storage {
 
   static String get tableName => FittorStore.getString(_tableName) ?? "";
   static set tableName(String value) => FittorStore.setString(_tableName, value);
+}
+''';
+
+String sampleRouter = '''
+import 'package:fittor/fittor.dart';
+import 'package:flutter/material.dart';
+
+class SampleRouter extends StatefulWidget {
+  const SampleRouter({super.key});
+
+  @override
+  State<SampleRouter> createState() => _SampleRouterState();
+}
+
+class _SampleRouterState extends State<SampleRouter> {
+  String? args;
+
+  @override
+  void initState() {
+    super.initState();
+    args = FitRoute.arguments as String?;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.indigoAccent,
+        title: Text('Sample Router', style: TextStyle(color: Colors.white)),
+      ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Center(
+            child: Text(
+              'Sample Router',
+              style: TextStyle(fontSize: context.fs30),
+            ),
+          ),
+          Text('Args: \$args', style: TextStyle(fontSize: context.fs30)),
+        ],
+      ),
+    );
+  }
 }
 ''';

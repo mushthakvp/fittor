@@ -29,6 +29,11 @@ A lightweight, intuitive state management solution for Flutter applications.
   - [Internet Connectivity](#internet-connectivity)
   - [Currency Converter](#currency-converter)
 - [Fittor Store](#fittor-store)
+- [Fittor Router](#fittor-router)
+  - [Initialize Router](#initialize-router)
+  - [Create a Routes](#create-a-routes)
+  - [Navigate to a Route](#navigate-to-a-route)
+  - [Get route arguments](#get-route-arguments)
 - [Extension](#Extension)
 - [Contributing](#contributing)
 - [License](#license)
@@ -565,6 +570,87 @@ class Store {
   static String get tableName => FittorStore.getString(_tableName) ?? "";
   static set tableName(String value) => FittorStore.setString(_tableName, value);
 }
+```
+
+## Fittor Router
+
+### Create a Routes
+
+```dart
+import 'package:fittor/fittor.dart';
+
+import '../../presentation/screen/fitter_view.dart';
+import '../../presentation/screen/sample_router.dart';
+
+class Routes {
+  static const splash = '/';
+  static const sample = '/sample';
+  static const String initialRoute = splash;
+
+  static final routes = [
+    FitPage(
+      name: initialRoute,
+      page: () => const FittorView(),
+      transition: Transition.fade,
+    ),
+    FitPage(
+      name: sample,
+      page: () => const SampleRouter(),
+      transition: Transition.rightToLeft,
+    ),
+  ];
+}
+```
+
+### Initialize Router
+
+```dart
+class FittorApp extends StatelessWidget with FittorAppMixin {
+  const FittorApp({super.key});
+
+  @override
+  Widget responsive(BuildContext context) {
+    return FitInitializer(
+      initialBindings: [AppBindings()],
+      child: FitRouterConfig( // FitRouterConfig
+        initialRoute: Routes.initialRoute, // initialRoute
+        routes: Routes.routes, // routes
+        builder: (context, child) {
+          return ConnectivityWrapper(
+            onConnectivityChanged: (status) {
+              debugPrint('Connectivity status: $status');
+            },
+            child: child ?? const SizedBox(),
+          );
+        },
+      ),
+    );
+  }
+}
+```
+
+### Navigate to a route
+
+```dart
+FitRoute.go(Routes.sample, pass: 'Hello Fittor');
+
+FitRoute.off(Routes.sample, pass: 'Hello Fittor');
+
+FitRoute.offAll(Routes.sample, pass: 'Hello Fittor');
+
+FitRoute.back();
+```
+
+### Get route arguments
+
+```dart
+  String? args;
+
+  @override
+  void initState() {
+    super.initState();
+    args = FitRoute.arguments as String?;
+  }
 ```
 
 ## Extension

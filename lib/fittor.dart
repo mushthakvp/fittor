@@ -4,5 +4,6 @@ export 'bin/fittor_impl.dart';
 export 'connectivity/index.dart';
 export 'currency/index.dart';
 export 'fittor_store/index.dart';
+export 'router/index.dart';
 export 'src/index.dart';
 export 'state/index.dart';

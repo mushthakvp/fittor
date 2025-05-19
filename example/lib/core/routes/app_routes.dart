@@ -1,27 +1,23 @@
-import 'package:flutter/material.dart';
+import 'package:fittor/fittor.dart';
 
 import '../../presentation/screen/fitter_view.dart';
+import '../../presentation/screen/sample_router.dart';
 
-/// Handles all the routes for the application
-class AppRoutes {
-  static const String home = '/';
-  static const String detail = '/detail';
-  static const String profile = '/profile';
+class Routes {
+  static const splash = '/';
+  static const sample = '/sample';
+  static const String initialRoute = splash;
 
-  /// Route generator function for MaterialApp
-  static Route<dynamic> onGenerateRoute(RouteSettings settings) {
-    switch (settings.name) {
-      case home:
-        return MaterialPageRoute(builder: (_) => const FittorView());
-      default:
-        return MaterialPageRoute(
-          builder:
-              (_) =>
-                  const Scaffold(body: Center(child: Text('Route not found'))),
-        );
-    }
-  }
-
-  // Don't allow instantiation
-  AppRoutes._();
+  static final routes = [
+    FitPage(
+      name: initialRoute,
+      page: () => const FittorView(),
+      transition: Transition.fade,
+    ),
+    FitPage(
+      name: sample,
+      page: () => const SampleRouter(),
+      transition: Transition.rightToLeft,
+    ),
+  ];
 }
