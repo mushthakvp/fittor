@@ -1,6 +1,7 @@
 library;
 
 export 'bin/fittor_impl.dart';
+export 'blur_ash/index.dart';
 export 'connectivity/index.dart';
 export 'currency/index.dart';
 export 'fittor_store/index.dart';

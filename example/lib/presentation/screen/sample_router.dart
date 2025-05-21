@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
 
@@ -28,6 +29,28 @@ class _SampleRouterState extends State<SampleRouter> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          CachedNetworkImage(
+            imageUrl:
+                'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
+            placeholder: (context, url) {
+              return FittorBlur(
+                hash: 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH',
+                width: 300,
+                height: 200,
+              );
+            },
+            errorWidget: (context, url, error) {
+              return FittorBlur(
+                hash: 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH',
+                width: 300,
+                height: 200,
+              );
+            },
+            width: 300,
+            height: 200,
+            fit: BoxFit.cover,
+          ),
+          SizedBox(height: 20),
           Center(
             child: Text(
               'Sample Router',

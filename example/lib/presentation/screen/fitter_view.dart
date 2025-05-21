@@ -27,6 +27,7 @@ class _FittorViewState extends State<FittorView> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Spacer(),
+            30.h,
             const Text(
               'Fittor State Management Example',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),

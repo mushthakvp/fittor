@@ -51,6 +51,10 @@ class FitRouterConfig extends StatefulWidget {
   /// Enable or disable iOS swipe back gesture
   final bool enableSwipeBack;
 
+  /// Error builder for handling navigation errors
+
+  final Widget Function(BuildContext, Object?)? errorBuilder;
+
   const FitRouterConfig({
     super.key,
     this.title = '',
@@ -70,6 +74,7 @@ class FitRouterConfig extends StatefulWidget {
     this.defaultTransitionDuration = const Duration(milliseconds: 300),
     this.enableDeepLinking = false,
     this.enableSwipeBack = true,
+    this.errorBuilder,
   });
 
   @override
@@ -147,6 +152,15 @@ class _FitRouterConfigState extends State<FitRouterConfig> {
                 settings: settings,
               )
           : null,
+      // onUnknownRoute: (settings) {
+      //   // Handle truly unknown routes as a last resort
+      //   return MaterialPageRoute(
+      //     settings: settings,
+      //     builder: (context) => const FittorErrorScreen(
+      //       message: 'Route not found',
+      //     ),
+      //   );
+      // },
     );
   }
 

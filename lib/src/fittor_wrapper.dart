@@ -4,6 +4,8 @@ import '../fittor.dart';
 
 mixin FittorAppMixin on Widget {
   Widget build(BuildContext context) {
+    // FittorErrorHandler.initialize();
+    // return FittorErrorBoundary(
     return LayoutBuilder(
       builder: (context, constraints) {
         return OrientationBuilder(
@@ -13,6 +15,7 @@ mixin FittorAppMixin on Widget {
           },
         );
       },
+      // ),
     );
   }
 

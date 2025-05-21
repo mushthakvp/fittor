@@ -6,6 +6,9 @@ import 'fit_bindings.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  FlutterError.onError = (details) {
+    FlutterError.dumpErrorToConsole(details);
+  };
   await FittorStore.init();
   runApp(FittorApp());
 }
