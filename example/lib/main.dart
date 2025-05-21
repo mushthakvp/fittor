@@ -18,6 +18,7 @@ class FittorApp extends StatelessWidget with FittorAppMixin {
     return FitInitializer(
       initialBindings: [AppBindings()],
       child: FitRouterConfig(
+        enableSwipeBack: true,
         initialRoute: Routes.initialRoute,
         routes: Routes.routes,
         builder: (context, child) {

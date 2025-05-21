@@ -1,7 +1,9 @@
+import 'dart:io' show Platform;
+
 import 'package:fittor/fittor.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-/// Enum defining transition types for routes
 enum Transition {
   fade,
   rightToLeft,
@@ -40,8 +42,10 @@ class FitPage {
     Animation<double>,
     Animation<double>,
     Widget,
-  )?
-  customTransition;
+  )? customTransition;
+
+  /// Enable/disable iOS swipe back gesture for this specific route
+  final bool? allowSwipeBack;
 
   const FitPage({
     required this.name,
@@ -51,6 +55,7 @@ class FitPage {
     this.middlewares,
     this.transitionDuration,
     this.customTransition,
+    this.allowSwipeBack,
   });
 }
 
@@ -66,12 +71,17 @@ class FitRouterController extends FitController {
   final List<FitPage> pages;
   final String initialRoute;
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  final bool enableSwipeBack;
 
   // Current arguments passed to the active route
   dynamic _currentArguments;
   dynamic get arguments => _currentArguments;
 
-  FitRouterController({required this.pages, required this.initialRoute});
+  FitRouterController({
+    required this.pages,
+    required this.initialRoute,
+    this.enableSwipeBack = true,
+  });
 
   @override
   void onInit() {
@@ -107,6 +117,19 @@ class FitRouterController extends FitController {
   Route<dynamic> _buildRoute(FitPage page, dynamic arguments) {
     Widget pageWidget = page.page();
 
+    // Get the allowSwipeBack value for this specific route (default to controller setting)
+    final allowSwipeBack = page.allowSwipeBack ?? enableSwipeBack;
+
+    // On iOS, use CupertinoPageRoute for native swipe behavior if enabled
+    if (Platform.isIOS &&
+        allowSwipeBack &&
+        page.transition == Transition.none) {
+      return CupertinoPageRoute(
+        settings: RouteSettings(name: page.name, arguments: arguments),
+        builder: (context) => pageWidget,
+      );
+    }
+
     switch (page.transition ?? Transition.none) {
       case Transition.fade:
         return PageRouteBuilder(
@@ -119,11 +142,11 @@ class FitRouterController extends FitController {
           },
         );
       case Transition.rightToLeft:
-        return PageRouteBuilder(
-          settings: RouteSettings(name: page.name, arguments: arguments),
-          transitionDuration:
-              page.transitionDuration ?? const Duration(milliseconds: 300),
-          pageBuilder: (context, animation, secondaryAnimation) => pageWidget,
+        return _buildCustomRouteWithSwipe(
+          page: page,
+          arguments: arguments,
+          pageWidget: pageWidget,
+          allowSwipeBack: allowSwipeBack,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             var begin = const Offset(1.0, 0.0);
             var end = Offset.zero;
@@ -138,11 +161,11 @@ class FitRouterController extends FitController {
           },
         );
       case Transition.leftToRight:
-        return PageRouteBuilder(
-          settings: RouteSettings(name: page.name, arguments: arguments),
-          transitionDuration:
-              page.transitionDuration ?? const Duration(milliseconds: 300),
-          pageBuilder: (context, animation, secondaryAnimation) => pageWidget,
+        return _buildCustomRouteWithSwipe(
+          page: page,
+          arguments: arguments,
+          pageWidget: pageWidget,
+          allowSwipeBack: allowSwipeBack,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             var begin = const Offset(-1.0, 0.0);
             var end = Offset.zero;
@@ -157,11 +180,11 @@ class FitRouterController extends FitController {
           },
         );
       case Transition.upToDown:
-        return PageRouteBuilder(
-          settings: RouteSettings(name: page.name, arguments: arguments),
-          transitionDuration:
-              page.transitionDuration ?? const Duration(milliseconds: 300),
-          pageBuilder: (context, animation, secondaryAnimation) => pageWidget,
+        return _buildCustomRouteWithSwipe(
+          page: page,
+          arguments: arguments,
+          pageWidget: pageWidget,
+          allowSwipeBack: allowSwipeBack,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             var begin = const Offset(0.0, -1.0);
             var end = Offset.zero;
@@ -176,11 +199,11 @@ class FitRouterController extends FitController {
           },
         );
       case Transition.downToUp:
-        return PageRouteBuilder(
-          settings: RouteSettings(name: page.name, arguments: arguments),
-          transitionDuration:
-              page.transitionDuration ?? const Duration(milliseconds: 300),
-          pageBuilder: (context, animation, secondaryAnimation) => pageWidget,
+        return _buildCustomRouteWithSwipe(
+          page: page,
+          arguments: arguments,
+          pageWidget: pageWidget,
+          allowSwipeBack: allowSwipeBack,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             var begin = const Offset(0.0, 1.0);
             var end = Offset.zero;
@@ -195,31 +218,31 @@ class FitRouterController extends FitController {
           },
         );
       case Transition.scale:
-        return PageRouteBuilder(
-          settings: RouteSettings(name: page.name, arguments: arguments),
-          transitionDuration:
-              page.transitionDuration ?? const Duration(milliseconds: 300),
-          pageBuilder: (context, animation, secondaryAnimation) => pageWidget,
+        return _buildCustomRouteWithSwipe(
+          page: page,
+          arguments: arguments,
+          pageWidget: pageWidget,
+          allowSwipeBack: allowSwipeBack,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return ScaleTransition(scale: animation, child: child);
           },
         );
       case Transition.rotate:
-        return PageRouteBuilder(
-          settings: RouteSettings(name: page.name, arguments: arguments),
-          transitionDuration:
-              page.transitionDuration ?? const Duration(milliseconds: 300),
-          pageBuilder: (context, animation, secondaryAnimation) => pageWidget,
+        return _buildCustomRouteWithSwipe(
+          page: page,
+          arguments: arguments,
+          pageWidget: pageWidget,
+          allowSwipeBack: allowSwipeBack,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return RotationTransition(turns: animation, child: child);
           },
         );
       case Transition.size:
-        return PageRouteBuilder(
-          settings: RouteSettings(name: page.name, arguments: arguments),
-          transitionDuration:
-              page.transitionDuration ?? const Duration(milliseconds: 300),
-          pageBuilder: (context, animation, secondaryAnimation) => pageWidget,
+        return _buildCustomRouteWithSwipe(
+          page: page,
+          arguments: arguments,
+          pageWidget: pageWidget,
+          allowSwipeBack: allowSwipeBack,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return Align(
               child: SizeTransition(sizeFactor: animation, child: child),
@@ -227,10 +250,54 @@ class FitRouterController extends FitController {
           },
         );
       case Transition.none:
-        return MaterialPageRoute(
-          settings: RouteSettings(name: page.name, arguments: arguments),
-          builder: (context) => pageWidget,
-        );
+        // Use platform-specific route for native behavior
+        if (Platform.isIOS && allowSwipeBack) {
+          return CupertinoPageRoute(
+            settings: RouteSettings(name: page.name, arguments: arguments),
+            builder: (context) => pageWidget,
+          );
+        } else {
+          return MaterialPageRoute(
+            settings: RouteSettings(name: page.name, arguments: arguments),
+            builder: (context) => pageWidget,
+          );
+        }
+    }
+  }
+
+  // Helper method to create custom route with iOS swipe gesture support
+  Route<dynamic> _buildCustomRouteWithSwipe({
+    required FitPage page,
+    required dynamic arguments,
+    required Widget pageWidget,
+    required bool allowSwipeBack,
+    required Widget Function(
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      Widget child,
+    ) transitionsBuilder,
+  }) {
+    // For iOS with swipe back enabled, use a custom route that supports swipe gestures
+    if (Platform.isIOS && allowSwipeBack) {
+      return _SwipeBackPageRoute(
+        settings: RouteSettings(name: page.name, arguments: arguments),
+        builder: (context) => pageWidget,
+        transitionDuration:
+            page.transitionDuration ?? const Duration(milliseconds: 300),
+        reverseTransitionDuration:
+            page.transitionDuration ?? const Duration(milliseconds: 300),
+        transitionsBuilder: transitionsBuilder,
+      );
+    } else {
+      // For other platforms or when swipe back is disabled
+      return PageRouteBuilder(
+        settings: RouteSettings(name: page.name, arguments: arguments),
+        transitionDuration:
+            page.transitionDuration ?? const Duration(milliseconds: 300),
+        pageBuilder: (context, animation, secondaryAnimation) => pageWidget,
+        transitionsBuilder: transitionsBuilder,
+      );
     }
   }
 
@@ -259,9 +326,6 @@ class FitRouterController extends FitController {
 
     // Prevent duplicate navigation
     if (preventDuplicates) {
-      // if (navigatorKey.currentState?.routeSettings.name == routeName) {
-      //   return null;
-      // }
       if (navigatorKey.currentState?.canPop() == true) {
         navigatorKey.currentState?.pop();
       }
@@ -301,6 +365,75 @@ class FitRouterController extends FitController {
 
   /// Check if can go back
   bool canBack() => navigatorKey.currentState?.canPop() ?? false;
+}
+
+/// Custom page route that supports iOS swipe back gesture
+class _SwipeBackPageRoute<T> extends PageRoute<T> {
+  final WidgetBuilder builder;
+  final Widget Function(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) transitionsBuilder;
+
+  final Duration _transitionDuration;
+  final Duration _reverseTransitionDuration;
+  final bool _maintainState;
+
+  _SwipeBackPageRoute({
+    required this.builder,
+    required RouteSettings super.settings,
+    required this.transitionsBuilder,
+    Duration? transitionDuration,
+    Duration? reverseTransitionDuration,
+    bool maintainState = true,
+    super.fullscreenDialog,
+  })  : _transitionDuration =
+            transitionDuration ?? const Duration(milliseconds: 300),
+        _reverseTransitionDuration =
+            reverseTransitionDuration ?? const Duration(milliseconds: 300),
+        _maintainState = maintainState;
+
+  @override
+  bool get opaque => false;
+
+  @override
+  bool get barrierDismissible => false;
+
+  @override
+  Color? get barrierColor => null;
+
+  @override
+  String? get barrierLabel => null;
+
+  @override
+  bool get maintainState => _maintainState;
+
+  @override
+  Duration get transitionDuration => _transitionDuration;
+
+  @override
+  Duration get reverseTransitionDuration => _reverseTransitionDuration;
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    return builder(context);
+  }
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return transitionsBuilder(context, animation, secondaryAnimation, child);
+  }
 }
 
 /// Static access to router methods

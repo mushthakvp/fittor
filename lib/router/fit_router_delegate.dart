@@ -51,6 +51,9 @@ class FitRouterConfig extends StatefulWidget {
   /// Enable or disable deep linking
   final bool enableDeepLinking;
 
+  /// Enable or disable iOS swipe back gesture
+  final bool enableSwipeBack;
+
   const FitRouterConfig({
     super.key,
     this.title = '',
@@ -70,6 +73,7 @@ class FitRouterConfig extends StatefulWidget {
     this.defaultTransition = Transition.none,
     this.defaultTransitionDuration = const Duration(milliseconds: 300),
     this.enableDeepLinking = false,
+    this.enableSwipeBack = true,
   });
 
   @override
@@ -87,6 +91,7 @@ class _FitRouterConfigState extends State<FitRouterConfig> {
     routerController = FitRouterController(
       pages: widget.routes,
       initialRoute: widget.initialRoute,
+      enableSwipeBack: widget.enableSwipeBack,
     );
     Fit.put(routerController);
 
@@ -107,6 +112,7 @@ class _FitRouterConfigState extends State<FitRouterConfig> {
           transitionDuration:
               page.transitionDuration ?? widget.defaultTransitionDuration,
           customTransition: page.customTransition,
+          allowSwipeBack: page.allowSwipeBack,
         );
       }
     }
@@ -126,14 +132,22 @@ class _FitRouterConfigState extends State<FitRouterConfig> {
       locale: widget.locale,
       localizationsDelegates: widget.localizationsDelegates,
       supportedLocales: widget.supportedLocales ?? const [Locale('en', 'US')],
-      builder: widget.builder,
-      onUnknownRoute:
-          widget.onUnknownRoute != null
-              ? (settings) => MaterialPageRoute(
+      builder: (context, child) {
+        // Apply custom builder if provided
+        Widget resultChild = child ?? const SizedBox.shrink();
+
+        if (widget.builder != null) {
+          resultChild = widget.builder!(context, resultChild);
+        }
+
+        return resultChild;
+      },
+      onUnknownRoute: widget.onUnknownRoute != null
+          ? (settings) => MaterialPageRoute(
                 builder: widget.onUnknownRoute!,
                 settings: settings,
               )
-              : null,
+          : null,
     );
   }
 }

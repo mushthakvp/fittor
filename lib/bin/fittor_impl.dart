@@ -186,6 +186,11 @@ void createFittorStructure(Directory baseDir) {
     'presentation/screen/fitter_view.dart',
     _sampleScreenTemplate(),
   );
+  _createFile(
+    fittorDir,
+    'presentation/screen/sample_router.dart',
+    _sampleRouterView(),
+  );
 
   _createDirectory(fittorDir, 'presentation/controller');
   _createFile(
@@ -196,11 +201,15 @@ void createFittorStructure(Directory baseDir) {
 
   _createDirectory(fittorDir, 'presentation/widget');
 
-  _printTitle('\n🎉 Fittor project structure created successfully!');
+  _printTitle('\n🎉 Fittor project structure created successfully!\n');
   _printHint('Connect me on Email: mail.musthak@gmail.com');
   _printHint('Connect me on LinkedIn: https://www.linkedin.com/in/musthak/');
   _printHint('Connect me on Instagram: https://www.instagram.com/musth4k/');
   _printHint('Connect me on GitHub: https://github.com/mushthakvp \n\n');
+}
+
+String _sampleRouterView() {
+  return sampleRouterTemplate;
 }
 
 void _createDirectory(Directory baseDir, String relativePath) {
