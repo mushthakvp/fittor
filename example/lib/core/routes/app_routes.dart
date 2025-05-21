@@ -9,17 +9,7 @@ class Routes {
   static const String initialRoute = splash;
 
   static final routes = [
-    FitPage(
-      name: initialRoute,
-      page: () => const FittorView(),
-      transition: Transition.fade,
-      allowSwipeBack: true,
-    ),
-    FitPage(
-      name: sample,
-      page: () => const SampleRouter(),
-      transition: Transition.rightToLeft,
-      allowSwipeBack: true,
-    ),
+    FitPage(name: initialRoute, page: () => const FittorView()),
+    FitPage(name: sample, page: () => const SampleRouter()),
   ];
 }

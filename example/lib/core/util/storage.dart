@@ -8,5 +8,6 @@ class Storage {
   static set dbName(String value) => FittorStore.setString(_dbName, value);
 
   static String get tableName => FittorStore.getString(_tableName) ?? "";
-  static set tableName(String value) => FittorStore.setString(_tableName, value);
+  static set tableName(String value) =>
+      FittorStore.setString(_tableName, value);
 }

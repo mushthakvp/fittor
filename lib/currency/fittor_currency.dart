@@ -20,12 +20,11 @@ class FittorCurrency {
     int decimalPlaces = 2,
   }) {
     final symbol = _getCurrencySymbol(currencyCode);
-    final formattedNumber = amount
-        .toStringAsFixed(decimalPlaces)
-        .replaceAllMapped(
-          RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]},',
-        );
+    final formattedNumber =
+        amount.toStringAsFixed(decimalPlaces).replaceAllMapped(
+              RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+              (Match m) => '${m[1]},',
+            );
 
     return '$symbol$formattedNumber';
   }

@@ -1,3 +1,10 @@
+## 1.0.16
+
+1. `enableSwipeBack` flag in `FitRouterConfig`
+2. `allowSwipeBack` property in `FitPage` for per-route control
+3. Use of `CupertinoPageRoute` on iOS devices
+4. Custom `_SwipeBackPageRoute` for custom transitions with swipe back support
+
 ## 1.0.15
 
 **Fittor is compatible with:**

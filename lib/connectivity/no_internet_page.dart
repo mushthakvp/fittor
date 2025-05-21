@@ -35,7 +35,8 @@ class NoInternetPage extends StatelessWidget {
           children: [
             Center(
               child: Image(
-                image: AssetImage('assets/no_internet.jpg', package: 'fittor'),
+                image: const AssetImage('assets/no_internet.jpg',
+                    package: 'fittor'),
                 width: context.wp(80),
               ),
             ),

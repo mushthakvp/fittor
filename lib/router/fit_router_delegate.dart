@@ -42,9 +42,6 @@ class FitRouterConfig extends StatefulWidget {
   /// Key for the navigator
   final GlobalKey<NavigatorState>? navigatorKey;
 
-  /// Default transition for routes that don't specify one
-  final Transition defaultTransition;
-
   /// Default transition duration
   final Duration defaultTransitionDuration;
 
@@ -70,7 +67,6 @@ class FitRouterConfig extends StatefulWidget {
     this.builder,
     this.onUnknownRoute,
     this.navigatorKey,
-    this.defaultTransition = Transition.none,
     this.defaultTransitionDuration = const Duration(milliseconds: 300),
     this.enableDeepLinking = false,
     this.enableSwipeBack = true,
@@ -87,13 +83,20 @@ class _FitRouterConfigState extends State<FitRouterConfig> {
   void initState() {
     super.initState();
 
+    // Initialize bindings if provided
+    widget.initialBindings?.forEach((binding) => binding.dependencies());
+
     // Initialize the router controller
     routerController = FitRouterController(
       pages: widget.routes,
       initialRoute: widget.initialRoute,
       enableSwipeBack: widget.enableSwipeBack,
     );
-    Fit.put(routerController);
+
+    // Make controller globally accessible
+    if (!Fit.isRegistered<FitRouterController>()) {
+      Fit.put(routerController);
+    }
 
     // Process routes to ensure transitions are set
     _processRoutes();
@@ -102,19 +105,15 @@ class _FitRouterConfigState extends State<FitRouterConfig> {
   void _processRoutes() {
     for (var i = 0; i < widget.routes.length; i++) {
       final page = widget.routes[i];
-      if (page.transition == null) {
-        widget.routes[i] = FitPage(
-          name: page.name,
-          page: page.page,
-          transition: widget.defaultTransition,
-          bindings: page.bindings,
-          middlewares: page.middlewares,
-          transitionDuration:
-              page.transitionDuration ?? widget.defaultTransitionDuration,
-          customTransition: page.customTransition,
-          allowSwipeBack: page.allowSwipeBack,
-        );
-      }
+      widget.routes[i] = FitPage(
+        name: page.name,
+        page: page.page,
+        bindings: page.bindings,
+        middlewares: page.middlewares,
+        transitionDuration:
+            page.transitionDuration ?? widget.defaultTransitionDuration,
+        customTransition: page.customTransition,
+      );
     }
   }
 
@@ -149,5 +148,11 @@ class _FitRouterConfigState extends State<FitRouterConfig> {
               )
           : null,
     );
+  }
+
+  @override
+  void dispose() {
+    // Clean up if needed
+    super.dispose();
   }
 }

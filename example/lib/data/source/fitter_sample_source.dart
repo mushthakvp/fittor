@@ -18,4 +18,3 @@ class SampleFittorSource extends FitUrls implements FitterSampleRepo {
     throw UnimplementedError();
   }
 }
-

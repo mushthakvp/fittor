@@ -2,19 +2,6 @@ import 'dart:io' show Platform;
 
 import 'package:fittor/fittor.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-
-enum Transition {
-  fade,
-  rightToLeft,
-  leftToRight,
-  upToDown,
-  downToUp,
-  scale,
-  rotate,
-  size,
-  none,
-}
 
 /// Class to define a page in the router
 class FitPage {
@@ -23,9 +10,6 @@ class FitPage {
 
   /// Function that creates the page widget
   final Widget Function() page;
-
-  /// Transition animation to use for this route
-  final Transition? transition;
 
   /// Optional bindings to initialize before the page loads
   final List<FitBindings>? bindings;
@@ -45,17 +29,14 @@ class FitPage {
   )? customTransition;
 
   /// Enable/disable iOS swipe back gesture for this specific route
-  final bool? allowSwipeBack;
 
   const FitPage({
     required this.name,
     required this.page,
-    this.transition,
     this.bindings,
     this.middlewares,
     this.transitionDuration,
     this.customTransition,
-    this.allowSwipeBack,
   });
 }
 
@@ -118,155 +99,34 @@ class FitRouterController extends FitController {
     Widget pageWidget = page.page();
 
     // Get the allowSwipeBack value for this specific route (default to controller setting)
-    final allowSwipeBack = page.allowSwipeBack ?? enableSwipeBack;
+    const allowSwipeBack = true;
 
-    // On iOS, use CupertinoPageRoute for native swipe behavior if enabled
-    if (Platform.isIOS &&
-        allowSwipeBack &&
-        page.transition == Transition.none) {
-      return CupertinoPageRoute(
-        settings: RouteSettings(name: page.name, arguments: arguments),
-        builder: (context) => pageWidget,
+    // For iOS with swipe enabled and custom transition, we need special handling
+    bool isIOS = Platform.isIOS;
+
+    // Use custom transition if specified
+    if (page.customTransition != null) {
+      return _buildCustomTransitionRoute(
+        page: page,
+        arguments: arguments,
+        pageWidget: pageWidget,
+        allowSwipeBack: allowSwipeBack && isIOS,
+        transitionsBuilder: page.customTransition!,
       );
     }
 
-    switch (page.transition ?? Transition.none) {
-      case Transition.fade:
-        return PageRouteBuilder(
-          settings: RouteSettings(name: page.name, arguments: arguments),
-          transitionDuration:
-              page.transitionDuration ?? const Duration(milliseconds: 300),
-          pageBuilder: (context, animation, secondaryAnimation) => pageWidget,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(opacity: animation, child: child);
-          },
-        );
-      case Transition.rightToLeft:
-        return _buildCustomRouteWithSwipe(
-          page: page,
-          arguments: arguments,
-          pageWidget: pageWidget,
-          allowSwipeBack: allowSwipeBack,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            var begin = const Offset(1.0, 0.0);
-            var end = Offset.zero;
-            var tween = Tween(
-              begin: begin,
-              end: end,
-            ).chain(CurveTween(curve: Curves.easeInOut));
-            return SlideTransition(
-              position: animation.drive(tween),
-              child: child,
-            );
-          },
-        );
-      case Transition.leftToRight:
-        return _buildCustomRouteWithSwipe(
-          page: page,
-          arguments: arguments,
-          pageWidget: pageWidget,
-          allowSwipeBack: allowSwipeBack,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            var begin = const Offset(-1.0, 0.0);
-            var end = Offset.zero;
-            var tween = Tween(
-              begin: begin,
-              end: end,
-            ).chain(CurveTween(curve: Curves.easeInOut));
-            return SlideTransition(
-              position: animation.drive(tween),
-              child: child,
-            );
-          },
-        );
-      case Transition.upToDown:
-        return _buildCustomRouteWithSwipe(
-          page: page,
-          arguments: arguments,
-          pageWidget: pageWidget,
-          allowSwipeBack: allowSwipeBack,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            var begin = const Offset(0.0, -1.0);
-            var end = Offset.zero;
-            var tween = Tween(
-              begin: begin,
-              end: end,
-            ).chain(CurveTween(curve: Curves.easeInOut));
-            return SlideTransition(
-              position: animation.drive(tween),
-              child: child,
-            );
-          },
-        );
-      case Transition.downToUp:
-        return _buildCustomRouteWithSwipe(
-          page: page,
-          arguments: arguments,
-          pageWidget: pageWidget,
-          allowSwipeBack: allowSwipeBack,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            var begin = const Offset(0.0, 1.0);
-            var end = Offset.zero;
-            var tween = Tween(
-              begin: begin,
-              end: end,
-            ).chain(CurveTween(curve: Curves.easeInOut));
-            return SlideTransition(
-              position: animation.drive(tween),
-              child: child,
-            );
-          },
-        );
-      case Transition.scale:
-        return _buildCustomRouteWithSwipe(
-          page: page,
-          arguments: arguments,
-          pageWidget: pageWidget,
-          allowSwipeBack: allowSwipeBack,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return ScaleTransition(scale: animation, child: child);
-          },
-        );
-      case Transition.rotate:
-        return _buildCustomRouteWithSwipe(
-          page: page,
-          arguments: arguments,
-          pageWidget: pageWidget,
-          allowSwipeBack: allowSwipeBack,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return RotationTransition(turns: animation, child: child);
-          },
-        );
-      case Transition.size:
-        return _buildCustomRouteWithSwipe(
-          page: page,
-          arguments: arguments,
-          pageWidget: pageWidget,
-          allowSwipeBack: allowSwipeBack,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return Align(
-              child: SizeTransition(sizeFactor: animation, child: child),
-            );
-          },
-        );
-      case Transition.none:
-        // Use platform-specific route for native behavior
-        if (Platform.isIOS && allowSwipeBack) {
-          return CupertinoPageRoute(
-            settings: RouteSettings(name: page.name, arguments: arguments),
-            builder: (context) => pageWidget,
-          );
-        } else {
-          return MaterialPageRoute(
-            settings: RouteSettings(name: page.name, arguments: arguments),
-            builder: (context) => pageWidget,
-          );
-        }
-    }
+    // For transitions=none on iOS with swipe back enabled, use pure CupertinoPageRoute
+
+    return CupertinoPageRoute(
+      settings: RouteSettings(name: page.name, arguments: arguments),
+      builder: (context) => pageWidget,
+    );
+
+    // For other transitions
   }
 
   // Helper method to create custom route with iOS swipe gesture support
-  Route<dynamic> _buildCustomRouteWithSwipe({
+  Route<dynamic> _buildCustomTransitionRoute({
     required FitPage page,
     required dynamic arguments,
     required Widget pageWidget,
@@ -278,23 +138,24 @@ class FitRouterController extends FitController {
       Widget child,
     ) transitionsBuilder,
   }) {
-    // For iOS with swipe back enabled, use a custom route that supports swipe gestures
+    final settings = RouteSettings(name: page.name, arguments: arguments);
+    final duration =
+        page.transitionDuration ?? const Duration(milliseconds: 300);
+
+    // For iOS with swipe back enabled, use CupertinoPageRoute with custom transitions
     if (Platform.isIOS && allowSwipeBack) {
-      return _SwipeBackPageRoute(
-        settings: RouteSettings(name: page.name, arguments: arguments),
+      return _CupertinoSwipeBackPageRoute(
         builder: (context) => pageWidget,
-        transitionDuration:
-            page.transitionDuration ?? const Duration(milliseconds: 300),
-        reverseTransitionDuration:
-            page.transitionDuration ?? const Duration(milliseconds: 300),
+        settings: settings,
+        transitionDuration: duration,
+        reverseTransitionDuration: duration,
         transitionsBuilder: transitionsBuilder,
       );
     } else {
-      // For other platforms or when swipe back is disabled
+      // For other cases, use standard PageRouteBuilder
       return PageRouteBuilder(
-        settings: RouteSettings(name: page.name, arguments: arguments),
-        transitionDuration:
-            page.transitionDuration ?? const Duration(milliseconds: 300),
+        settings: settings,
+        transitionDuration: duration,
         pageBuilder: (context, animation, secondaryAnimation) => pageWidget,
         transitionsBuilder: transitionsBuilder,
       );
@@ -324,10 +185,16 @@ class FitRouterController extends FitController {
       }
     }
 
-    // Prevent duplicate navigation
-    if (preventDuplicates) {
-      if (navigatorKey.currentState?.canPop() == true) {
+    // Handle preventDuplicates - note the corrected logic here
+    if (preventDuplicates && navigatorKey.currentState != null) {
+      // Get current route name
+      final currentRoute =
+          ModalRoute.of(navigatorKey.currentContext!)?.settings.name;
+
+      // If current route is the same as requested route, pop back instead
+      if (currentRoute == routeName) {
         navigatorKey.currentState?.pop();
+        return null;
       }
     }
 
@@ -367,9 +234,8 @@ class FitRouterController extends FitController {
   bool canBack() => navigatorKey.currentState?.canPop() ?? false;
 }
 
-/// Custom page route that supports iOS swipe back gesture
-class _SwipeBackPageRoute<T> extends PageRoute<T> {
-  final WidgetBuilder builder;
+/// Custom CupertinoPageRoute that supports iOS swipe back gestures AND custom transitions
+class _CupertinoSwipeBackPageRoute<T> extends CupertinoPageRoute<T> {
   final Widget Function(
     BuildContext context,
     Animation<double> animation,
@@ -379,51 +245,22 @@ class _SwipeBackPageRoute<T> extends PageRoute<T> {
 
   final Duration _transitionDuration;
   final Duration _reverseTransitionDuration;
-  final bool _maintainState;
 
-  _SwipeBackPageRoute({
-    required this.builder,
-    required RouteSettings super.settings,
+  _CupertinoSwipeBackPageRoute({
+    required super.builder,
+    required super.settings,
     required this.transitionsBuilder,
-    Duration? transitionDuration,
-    Duration? reverseTransitionDuration,
-    bool maintainState = true,
+    required Duration transitionDuration,
+    required Duration reverseTransitionDuration,
+    super.maintainState,
     super.fullscreenDialog,
-  })  : _transitionDuration =
-            transitionDuration ?? const Duration(milliseconds: 300),
-        _reverseTransitionDuration =
-            reverseTransitionDuration ?? const Duration(milliseconds: 300),
-        _maintainState = maintainState;
-
-  @override
-  bool get opaque => false;
-
-  @override
-  bool get barrierDismissible => false;
-
-  @override
-  Color? get barrierColor => null;
-
-  @override
-  String? get barrierLabel => null;
-
-  @override
-  bool get maintainState => _maintainState;
-
+  })  : _transitionDuration = transitionDuration,
+        _reverseTransitionDuration = reverseTransitionDuration;
   @override
   Duration get transitionDuration => _transitionDuration;
 
   @override
   Duration get reverseTransitionDuration => _reverseTransitionDuration;
-
-  @override
-  Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
-    return builder(context);
-  }
 
   @override
   Widget buildTransitions(

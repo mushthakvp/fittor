@@ -149,7 +149,7 @@ class SecureStorage {
       // through platform channels
 
       // Simulate getting a device ID
-      await Future.delayed(Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 100));
       return 'device-${DateTime.now().millisecondsSinceEpoch}';
     } catch (e) {
       debugPrint('Error getting device identifier: $e');

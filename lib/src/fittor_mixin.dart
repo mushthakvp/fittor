@@ -22,7 +22,7 @@ mixin FittorMixin<T extends StatefulWidget> on State<T> {
     final mediaQuery = MediaQuery.of(context);
     final constraints =
         (context.findRenderObject() as RenderBox?)?.constraints ??
-        BoxConstraints();
+            const BoxConstraints();
     final orientation = mediaQuery.orientation;
 
     responsive.init(context, constraints, orientation);
