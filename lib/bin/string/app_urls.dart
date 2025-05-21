@@ -23,12 +23,10 @@ class Routes {
     FitPage(
       name: initialRoute,
       page: () => const FittorView(),
-      transition: Transition.fade,
     ),
     FitPage(
       name: sample,
       page: () => const SampleRouter(),
-      transition: Transition.rightToLeft,
     ),
   ];
 }
