@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'blur_hash.dart';
 
-class FittorBlur extends StatefulWidget {
+class FittorBlurAsh extends StatefulWidget {
   final String hash;
   final double? width;
   final double? height;
@@ -13,7 +13,7 @@ class FittorBlur extends StatefulWidget {
   final Widget? errorWidget;
   final int resolution;
 
-  const FittorBlur({
+  const FittorBlurAsh({
     super.key,
     required this.hash,
     this.width,
@@ -27,10 +27,10 @@ class FittorBlur extends StatefulWidget {
   });
 
   @override
-  State<FittorBlur> createState() => _FittorBlurState();
+  State<FittorBlurAsh> createState() => _FittorBlurAshState();
 }
 
-class _FittorBlurState extends State<FittorBlur> {
+class _FittorBlurAshState extends State<FittorBlurAsh> {
   late final ValueNotifier<Future<ImageProvider>> _imageFutureNotifier;
 
   @override
@@ -40,7 +40,7 @@ class _FittorBlurState extends State<FittorBlur> {
   }
 
   @override
-  void didUpdateWidget(covariant FittorBlur oldWidget) {
+  void didUpdateWidget(covariant FittorBlurAsh oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.hash != widget.hash ||
         oldWidget.resolution != widget.resolution) {

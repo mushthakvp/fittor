@@ -34,6 +34,7 @@ A lightweight, intuitive state management solution for Flutter applications.
   - [Create a Routes](#create-a-routes)
   - [Navigate to a Route](#navigate-to-a-route)
   - [Get route arguments](#get-route-arguments)
+- [Fittor Blur Ash](#fittor-blur-ash)
 - [Extension](#Extension)
 - [Contributing](#contributing)
 - [License](#license)
@@ -651,6 +652,55 @@ FitRoute.back();
     super.initState();
     args = FitRoute.arguments as String?;
   }
+```
+
+## Fittor Blur Ash
+
+You can now use the `FittorBlurAsh` widget to add a blur effect to a widget.
+
+```dart
+
+// Usage
+
+FittorBlurAsh FittorBlurAsh({
+  Key? key,
+  required String hash,
+  double? width,
+  double? height,
+  BoxFit fit = BoxFit.cover,
+  Color? color,
+  Widget? child,
+  Widget? loadingWidget,
+  Widget? errorWidget,
+  int resolution = 32,
+})
+```
+
+### Usage Example Using Cache Network Image
+
+```dart
+
+CachedNetworkImage(
+  imageUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
+  placeholder: (context, url) {
+    return  FittorBlurAsh(
+      hash: 'UbCP*BWYWWof~qWraykC_3WYjZof?bflaxoL',
+      width: 300,
+      height: 200,
+    );
+  },
+  errorWidget: (context, url, error) {
+    return FittorBlurAsh(
+      hash: 'UbCP*BWYWWof~qWraykC_3WYjZof?bflaxoL',
+      width: 300,
+      height: 200,
+    );
+  },
+  width: 300,
+  height: 200,
+  fit: BoxFit.cover,
+),
+
 ```
 
 ## Extension

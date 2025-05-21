@@ -33,15 +33,15 @@ class _SampleRouterState extends State<SampleRouter> {
             imageUrl:
                 'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
             placeholder: (context, url) {
-              return FittorBlur(
-                hash: 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH',
+              return FittorBlurAsh(
+                hash: 'UbCP*BWYWWof~qWraykC_3WYjZof?bflaxoL',
                 width: 300,
                 height: 200,
               );
             },
             errorWidget: (context, url, error) {
-              return FittorBlur(
-                hash: 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH',
+              return FittorBlurAsh(
+                hash: 'UbCP*BWYWWof~qWraykC_3WYjZof?bflaxoL',
                 width: 300,
                 height: 200,
               );

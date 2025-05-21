@@ -1,3 +1,28 @@
+## 1.0.17
+
+- **Fittor Blur Ash**: You can now use the `FittorBlurAsh` widget to add a blur effect to a widget.
+
+```dart
+FittorBlurAsh(
+  hash: 'UbCP*BWYWWof~qWraykC_3WYjZof?bflaxoL',
+  width: 300,
+  height: 200,
+);
+
+FittorBlurAsh FittorBlurAsh({
+  Key? key,
+  required String hash,
+  double? width,
+  double? height,
+  BoxFit fit = BoxFit.cover,
+  Color? color,
+  Widget? child,
+  Widget? loadingWidget,
+  Widget? errorWidget,
+  int resolution = 32,
+})
+```
+
 ## 1.0.16
 
 1. `enableSwipeBack` flag in `FitRouterConfig`
