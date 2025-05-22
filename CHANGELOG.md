@@ -1,3 +1,22 @@
+## 1.0.18
+
+- **Package Name Change**: The package name Changer added
+- **App Name Change**: The app name Changer added
+
+Usage:
+
+```dart
+// Activate the fittor CLI globally
+
+dart pub global activate fittor
+
+# Change package name
+fittor change package com.example.fittor
+
+# Change app name  
+fittor change name "My Awesome App"
+```
+
 ## 1.0.17
 
 - **Fittor Blur Ash**: You can now use the `FittorBlurAsh` widget to add a blur effect to a widget.

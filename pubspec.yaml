@@ -1,6 +1,6 @@
 name: fittor
 description: A Flutter package for responsive UIs and state management. Adapts to screen sizes and orientations.
-version: 1.0.17
+version: 1.0.18
 repository: https://github.com/mushthakvp/fittor
 license: MIT
 
@@ -15,21 +15,20 @@ topics:
   - currency-formatting
 
 environment:
-  sdk: ">=3.4.0 <4.0.0"  # Support for 3.4.0 and higher only
-  flutter: ">=3.19.0"  # Support for 3.19.0 and higher only
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.19.0"
 
 dependencies:
-  args: ^2.5.0  # Compatible with Dart 3.4.0
+  args: ^2.5.0
   flutter:
     sdk: flutter
-  path: ^1.8.3  # Compatible with Dart 3.4.0
-  path_provider: ^2.1.1  # Compatible with Dart 3.4.0
-
+  path: ^1.8.3
+  path_provider: ^2.1.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0  # Updated for Dart 3.4.0+
+  flutter_lints: ^3.0.0
 
 executables:
   fittor: fittor
