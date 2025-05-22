@@ -1,3 +1,17 @@
+## 1.0.18+1
+
+- Added More Examples to README.md
+
+```dart
+dart pub global activate fittor
+```
+```dart
+fittor change package com.example.fittor
+```
+```dart
+fittor change name "My Awesome App"
+```
+
 ## 1.0.18
 
 - **Package Name Change**: The package name Changer added
