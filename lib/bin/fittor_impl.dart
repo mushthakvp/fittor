@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:fittor/fittor.dart';
 import 'package:path/path.dart' as path;
 
 import 'string/app_urls.dart';
@@ -8,7 +9,8 @@ import 'string/main_dart_template.dart';
 
 void main(List<String> arguments) async {
   final runner = CommandRunner('fittor', 'Fittor project structure generator')
-    ..addCommand(CreateCommand());
+    ..addCommand(CreateCommand())
+    ..addCommand(RenameCommand());
 
   if (arguments.isEmpty ||
       arguments.contains('-h') ||
