@@ -1,3 +1,7 @@
+## 1.0.19
+
+**Fittor Cli Updated to New Command:**
+
 ## 1.0.18+1
 
 - Added More Examples to README.md

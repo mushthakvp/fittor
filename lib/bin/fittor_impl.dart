@@ -1,9 +1,10 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:fittor/fittor.dart';
 import 'package:path/path.dart' as path;
 
+import '../rename/index.dart';
+// Import the fittor library components individually to avoid conflicts
 import 'string/app_urls.dart';
 import 'string/main_dart_template.dart';
 
@@ -43,6 +44,8 @@ void _printHelp(CommandRunner runner) {
     print('  \x1B[32m$name\x1B[0m\t\t${cmd.description}');
   });
   print('\nUsage: \x1B[34mfittor create app\x1B[0m');
+  print('       \x1B[34mfittor change package <package_name>\x1B[0m');
+  print('       \x1B[34mfittor change name <app_name>\x1B[0m');
 }
 
 void _printTitle(String message) => print('\n\x1B[1m$message\x1B[0m');
@@ -139,8 +142,7 @@ void createFittorStructure(Directory baseDir) {
     mainFile.writeAsStringSync(_mainDartTemplate());
   }
 
-  // I want to Delete Test Folder
-
+  // Delete Test Folder
   final testDir = Directory(path.join(baseDir.path, 'test'));
   if (testDir.existsSync()) {
     testDir.deleteSync(recursive: true);
