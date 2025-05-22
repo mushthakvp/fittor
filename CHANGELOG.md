@@ -1,3 +1,7 @@
+## 1.0.20
+
+- **Removed Package Name Changer**
+
 ## 1.0.19
 
 **Fittor Cli Updated to New Command:**

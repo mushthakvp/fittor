@@ -3,15 +3,13 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
-import '../rename/index.dart';
 // Import the fittor library components individually to avoid conflicts
 import 'string/app_urls.dart';
 import 'string/main_dart_template.dart';
 
 void main(List<String> arguments) async {
   final runner = CommandRunner('fittor', 'Fittor project structure generator')
-    ..addCommand(CreateCommand())
-    ..addCommand(RenameCommand());
+    ..addCommand(CreateCommand());
 
   if (arguments.isEmpty ||
       arguments.contains('-h') ||
