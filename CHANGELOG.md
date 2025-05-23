@@ -1,3 +1,8 @@
+## 1.0.22
+
+- Fittor Storage: Storage now available on web
+- All Platforms: Storage now supports web
+
 ## 1.0.21
 
 A customizable Flutter widget that provides `"read more"` and `"read less"` functionality for long text content with support for annotations, styling, and trimming options.
