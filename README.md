@@ -13,8 +13,20 @@ A comprehensive Flutter package for responsive UI design and network connectivit
 A lightweight, intuitive state management solution for Flutter applications.
 
 <!-- [![pub package](https://img.shields.io/pub/v/fittor.svg)](https://pub.dev/packages/fittor) -->
-
 ## Table of Contents
+
+
+| Feature Category          | Key Tools                          |
+|---------------------------|------------------------------------|
+| **[⚡ Features](#features)**           | Responsive UI • Connectivity • Currency |
+| **[🛠️ Installation](#installation)**  | `pubspec.yaml` • CLI Setup         |
+| **[📱 Usage](#usage)**                | [Responsive](#responsive) • [State Management](#state-management) • [Router](#fittor-router) |
+| **[📁 Read more](#readmore)**         | [Examples](#readmore) |
+| **[🔌 Extensions](#extension)**       | [All Methods](#extension)          |
+| **[📞 Support](#support)**           | Contact • Issue Reporting          |
+
+---
+
 
 - [Features](#features)
 - [Installation](#installation)
@@ -38,7 +50,6 @@ A lightweight, intuitive state management solution for Flutter applications.
 - [Extension](#Extension)
 - [Contributing](#contributing)
 - [License](#license)
-
 
 
 ## Features
@@ -701,6 +712,70 @@ CachedNetworkImage(
   fit: BoxFit.cover,
 ),
 
+```
+
+## Read more
+
+**Features**
+
+- ✅ **Trim by length or lines: Choose between character count or line-based trimming**
+- ✅ **Rich text support: Use FitReadMore.rich() for complex text formatting**
+- ✅ **Text annotations: Support for URLs, hashtags, mentions, and custom patterns**
+- ✅ **Customizable styling: Full control over colors, fonts, and text styles**
+- ✅ **External control: Control expand/collapse state externally**
+- ✅ **Callbacks: Get notified when text is expanded or collapsed**
+- ✅ **Accessibility: Full support for text selection and screen readers**
+- ✅ **Pre/post text: Add content before and after the main text**
+
+```dart
+FitReadMore(
+  'Your very long text content goes here...',
+  trimLength: 150,
+  trimCollapsedText: 'Read more',
+  trimExpandedText: 'Show less',
+  colorClickableText: Colors.blue,
+)
+```
+```dart
+FitReadMore(
+  'Check out https://example.com and follow @username #flutter',
+  trimLength: 100,
+  annotations: [
+    // URL annotation
+    FitAnnotation(
+      regExp: RegExp(r'https?://[^\s]+'),
+      spanBuilder: ({required text, required textStyle}) => TextSpan(
+        text: text,
+        style: textStyle.copyWith(
+          color: Colors.blue,
+          decoration: TextDecoration.underline,
+        ),
+      ),
+    ),
+    // Hashtag annotation
+    FitAnnotation(
+      regExp: RegExp(r'#\w+'),
+      spanBuilder: ({required text, required textStyle}) => TextSpan(
+        text: text,
+        style: textStyle.copyWith(
+          color: Colors.blue,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ),
+    // Mention annotation
+    FitAnnotation(
+      regExp: RegExp(r'@\w+'),
+      spanBuilder: ({required text, required textStyle}) => TextSpan(
+        text: text,
+        style: textStyle.copyWith(
+          color: Colors.purple,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ),
+  ],
+)
 ```
 
 ## Extension

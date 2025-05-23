@@ -109,6 +109,7 @@ class _FittorViewState extends State<FittorView> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Spacer(),
+            30.h,
             const Text(
               'Fittor State Management Example',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -203,18 +204,31 @@ class _FittorViewState extends State<FittorView> {
             ),
             30.h,
             ElevatedButton(
-              onPressed: () => FitRoute.go(Routes.sample, pass: 'Hello Fittor'),
+              onPressed: () {
+                context.go(Routes.sample, pass: 'Using Fittor Navigator');
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
                 foregroundColor: Colors.white,
               ),
               child: const Text('Test Fittor Navigator'),
             ),
+            30.h,
+            ElevatedButton(
+              onPressed: () {
+                FitRoute.go(Routes.readmore);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Test Readmore Text'),
+            ),
             Spacer(),
-            const Text(
+            Text(
               'Powered By: Fittor',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: context.fs16,
                 fontWeight: FontWeight.bold,
                 color: Colors.indigoAccent,
               ),

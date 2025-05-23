@@ -1,3 +1,18 @@
+## 1.0.21
+
+A customizable Flutter widget that provides `"read more"` and `"read less"` functionality for long text content with support for annotations, styling, and trimming options.
+
+**Features**
+
+- ✅ Trim by length or lines: Choose between character count or line-based trimming
+- ✅ Rich text support: Use FitReadMore.rich() for complex text formatting
+- ✅ Text annotations: Support for URLs, hashtags, mentions, and custom patterns
+- ✅ Customizable styling: Full control over colors, fonts, and text styles
+- ✅ External control: Control expand/collapse state externally
+- ✅ Callbacks: Get notified when text is expanded or collapsed
+- ✅ Accessibility: Full support for text selection and screen readers
+- ✅ Pre/post text: Add content before and after the main text
+
 ## 1.0.20
 
 - **Removed Package Name Changer**
