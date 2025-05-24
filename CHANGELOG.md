@@ -1,3 +1,9 @@
+## 1.0.24
+
+- Removed the `FittorStorage` class from the `fittor_storage` package.
+- Removed the `FittorRoutes` class from the `fittor_routes` package.
+- Removed the `FittorCli` class from the `fittor_cli` package.
+
 ## 1.0.23
 
 - Fittor Storage: Storage now available on web (Web)
