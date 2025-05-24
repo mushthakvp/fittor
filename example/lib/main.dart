@@ -1,12 +1,11 @@
 import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
 
-import 'core/routes/app_routes.dart';
 import 'fit_bindings.dart';
+import 'presentation/screen/fitter_view.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await FittorStore.init();
   runApp(FittorApp());
 }
 
@@ -18,18 +17,14 @@ class FittorApp extends StatelessWidget with FittorAppMixin {
     debugPrint('FittorApp.responsive');
     return FitInitializer(
       initialBindings: [AppBindings()],
-      child: FitRouterConfig(
-        enableSwipeBack: true,
-        initialRoute: Routes.initialRoute,
-        routes: Routes.routes,
-        builder: (context, child) {
-          return ConnectivityWrapper(
-            onConnectivityChanged: (status) {
-              debugPrint('Connectivity status: $status');
-            },
-            child: child ?? const SizedBox(),
-          );
-        },
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: ConnectivityWrapper(
+          onConnectivityChanged: (status) {
+            debugPrint('Connectivity status: $status');
+          },
+          child: FittorView(),
+        ),
       ),
     );
   }

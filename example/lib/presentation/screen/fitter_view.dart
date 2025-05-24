@@ -1,9 +1,7 @@
-import 'dart:developer';
-
 import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
+import 'package:test/presentation/screen/readmore.dart';
 
-import '../../core/routes/app_routes.dart';
 import '../controller/sample_controller.dart';
 
 class FittorView extends StatefulWidget {
@@ -115,15 +113,7 @@ class _FittorViewState extends State<FittorView> {
 
                 ElevatedButton(
                   onPressed: () async {
-                    // // Fit.find<SampleController>().incrementAll();
-                    // bool res = await FittorStore.setString(
-                    //   'test_key',
-                    //   'Hello, FittorStore!',
-                    // );
-                    // log("String stored $res");
-                    log(
-                      "Fetch From local storage: ${FittorStore.getString('test_key')} jj",
-                    );
+                    Fit.find<SampleController>().incrementAll();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
@@ -136,18 +126,12 @@ class _FittorViewState extends State<FittorView> {
             30.h,
             ElevatedButton(
               onPressed: () {
-                context.go(Routes.sample, pass: 'Using Fittor Navigator');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Test Fittor Navigator'),
-            ),
-            30.h,
-            ElevatedButton(
-              onPressed: () {
-                FitRoute.go(Routes.readmore);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FitReadMoreExample(),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
