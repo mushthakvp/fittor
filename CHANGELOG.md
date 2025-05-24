@@ -1,3 +1,8 @@
+## 1.0.25
+
+- Currency Converter Now Available On Web
+- You can now use the `FittorCurrencyConverter` widget to convert currencies in your Flutter app.
+
 ## 1.0.24
 
 - Removed the `FittorStorage` class from the `fittor_storage` package.
