@@ -12,7 +12,7 @@ abstract class StorageInterface {
   /// Clear all data from storage
   Future<void> clearData();
 
-  /// Check if storage is initialized
+  /// Check if storage exists
   Future<bool> exists();
 
   /// Get the size of the storage
@@ -21,9 +21,12 @@ abstract class StorageInterface {
   /// Backup the storage
   Future<String?> backup();
 
-  /// Restore the storage
+  /// Restore from backup
   Future<bool> restore(String backupData);
 
   /// Check if storage is initialized
   bool get isInitialized;
+
+  /// Get storage type name
+  String get storageType;
 }

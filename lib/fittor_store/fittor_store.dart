@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
 
+import 'platform/platform_info.dart';
 import 'secure_storage.dart';
 import 'storage_factory.dart';
 import 'storage_interface.dart';
@@ -34,32 +35,37 @@ class FittorStore {
     try {
       _autoSave = autoSave;
 
+      debugPrint('Initializing FittorStore for ${PlatformInfo.platformName}');
+
       // Create platform-specific storage
       _platformStorage = StorageFactory.createStorage();
 
-      // Initialize secure storage first (which should always work)
+      // Initialize secure storage first
       await _secureStorage.init();
 
-      // Initialize platform storage (which might fail if access is restricted)
+      // Initialize platform storage
       try {
         await _platformStorage.init();
-        // Load data from platform storage
-        _storage = await _platformStorage.loadData();
-        debugPrint('Initialized ${StorageFactory.platformName} storage');
+
+        if (_platformStorage.isInitialized) {
+          // Load data from platform storage
+          _storage = await _platformStorage.loadData();
+          debugPrint(
+              'Loaded data from ${_platformStorage.storageType} storage');
+        }
       } catch (e) {
-        debugPrint('Warning: Platform storage initialization failed: $e');
-        debugPrint(
-          'Using in-memory storage only (data will not persist between app runs)',
-        );
+        debugPrint('Platform storage initialization failed: $e');
+        debugPrint('Using in-memory storage only');
         _storage = {};
       }
 
-      // Set up auto-save timer if enabled
+      // Set up auto-save timer if enabled and storage is available
       if (_autoSave && _platformStorage.isInitialized) {
         _autoSaveTimer = Timer.periodic(_autoSaveDuration, (_) => save());
       }
 
       _initialized = true;
+      debugPrint('FittorStore initialized successfully');
     } catch (e) {
       debugPrint('FittorStore initialization error: $e');
       _storage = {};
@@ -75,6 +81,19 @@ class FittorStore {
   static bool get isPlatformStorageAvailable =>
       _initialized && _platformStorage.isInitialized;
 
+  /// Get current platform information
+  static Map<String, dynamic> get platformInfo => {
+        'platform': PlatformInfo.platformName,
+        'isWeb': PlatformInfo.isWeb,
+        'isMobile': PlatformInfo.isMobile,
+        'isDesktop': PlatformInfo.isDesktop,
+        'hasFileSystemAccess': PlatformInfo.hasFileSystemAccess,
+        'hasLocalStorage': PlatformInfo.hasLocalStorage,
+        'storageType': _platformStorage.storageType,
+        'persistentStorageSupported':
+            StorageFactory.isPersistentStorageSupported,
+      };
+
   /// Ensures FittorStore is initialized before any operation
   static void _ensureInitialized() {
     if (!_initialized) {
@@ -88,8 +107,7 @@ class FittorStore {
   static Future<void> save() async {
     if (!_initialized) {
       debugPrint(
-        'Warning: Attempted to save when FittorStore is not initialized',
-      );
+          'Warning: Attempted to save when FittorStore is not initialized');
       return;
     }
 
@@ -105,6 +123,9 @@ class FittorStore {
       // Continue execution - we don't want to crash the app for storage errors
     }
   }
+
+  // ... [Rest of the existing methods remain the same] ...
+  // [Include all the existing getter/setter methods from your original code]
 
   /// Reload stored preferences from platform storage
   static Future<void> reload() async {
@@ -451,14 +472,15 @@ class FittorStore {
     }
   }
 
-  /// Get storage information
+  /// Get storage information including platform details
   static Map<String, dynamic> getStorageInfo() {
     return {
       'initialized': _initialized,
       'platformStorageAvailable': isPlatformStorageAvailable,
-      'platform': StorageFactory.platformName,
+      'platformInfo': platformInfo,
       'autoSave': _autoSave,
       'keyCount': _storage.length,
+      'storageType': _initialized ? _platformStorage.storageType : 'None',
     };
   }
 
@@ -468,4 +490,7 @@ class FittorStore {
     _autoSaveTimer = null;
     _initialized = false;
   }
+
+  // [Include all your existing methods: getString, setString, getInt, setInt, etc.]
+  // They remain exactly the same as in your original code
 }
