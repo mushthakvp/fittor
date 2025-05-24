@@ -1,3 +1,7 @@
+## 1.0.22+1
+
+- Fittor Storage: Storage now available on web (Web) 
+
 ## 1.0.22
 
 - Fittor Storage: Storage now available on web
