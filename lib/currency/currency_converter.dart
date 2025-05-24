@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+
+import 'fetch_data.dart';
 
 /// Currency converter service that uses the Exchange Rate API
 /// https://open.er-api.com/
@@ -111,28 +112,30 @@ class CurrencyConverter {
 
   /// Fetch data from URL using built-in Dart functionality
   Future<String> _fetchData(String url) async {
-    final uri = Uri.parse(url);
-    final completer = Completer<String>();
+    // final uri = Uri.parse(url);
+    // final completer = Completer<String>();
 
-    // Create HTTP client using dart:io functionality
-    final request = await HttpClient().getUrl(uri);
-    final response = await request.close();
+    // // Create HTTP client using dart:io functionality
+    // final request = await HttpClient().getUrl(uri);
+    // final response = await request.close();
 
-    if (response.statusCode != 200) {
-      completer.completeError(
-        Exception('Failed to load data: ${response.statusCode}'),
-      );
-      return completer.future;
-    }
+    // if (response.statusCode != 200) {
+    //   completer.completeError(
+    //     Exception('Failed to load data: ${response.statusCode}'),
+    //   );
+    //   return completer.future;
+    // }
 
-    // Read response
-    final contents = StringBuffer();
-    await for (var data in response.transform(utf8.decoder)) {
-      contents.write(data);
-    }
+    // // Read response
+    // final contents = StringBuffer();
+    // await for (var data in response.transform(utf8.decoder)) {
+    //   contents.write(data);
+    // }
 
-    completer.complete(contents.toString());
-    return completer.future;
+    // completer.complete(contents.toString());
+    // return completer.future;
+
+    return await fetchData(url);
   }
 
   /// Get information about the cache status

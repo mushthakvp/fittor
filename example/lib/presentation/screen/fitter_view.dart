@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:test/presentation/screen/readmore.dart';
 
 import '../controller/sample_controller.dart';
+import 'currency.dart';
 
 class FittorView extends StatefulWidget {
   const FittorView({super.key});
@@ -138,6 +139,22 @@ class _FittorViewState extends State<FittorView> {
                 foregroundColor: Colors.white,
               ),
               child: const Text('Test Readmore Text'),
+            ),
+            30.h,
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CurrencyConverterPage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Currency Converter'),
             ),
             Spacer(),
             Text(
