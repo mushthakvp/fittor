@@ -6,9 +6,6 @@ import 'fit_bindings.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  FlutterError.onError = (details) {
-    FlutterError.dumpErrorToConsole(details);
-  };
   await FittorStore.init();
   runApp(FittorApp());
 }
@@ -18,6 +15,7 @@ class FittorApp extends StatelessWidget with FittorAppMixin {
 
   @override
   Widget responsive(BuildContext context) {
+    debugPrint('FittorApp.responsive');
     return FitInitializer(
       initialBindings: [AppBindings()],
       child: FitRouterConfig(

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
 
@@ -112,7 +114,17 @@ class _FittorViewState extends State<FittorView> {
                 ),
 
                 ElevatedButton(
-                  onPressed: () => Fit.find<SampleController>().incrementAll(),
+                  onPressed: () async {
+                    // // Fit.find<SampleController>().incrementAll();
+                    // bool res = await FittorStore.setString(
+                    //   'test_key',
+                    //   'Hello, FittorStore!',
+                    // );
+                    // log("String stored $res");
+                    log(
+                      "Fetch From local storage: ${FittorStore.getString('test_key')} jj",
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,

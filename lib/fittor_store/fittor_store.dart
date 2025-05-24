@@ -3,18 +3,16 @@ import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
 
-import 'platform/platform_info.dart';
+import 'persistent_storage.dart';
 import 'secure_storage.dart';
-import 'storage_factory.dart';
-import 'storage_interface.dart';
 
 class FittorStore {
   // In-memory storage map
   static Map<String, dynamic> _storage = {};
   static bool _initialized = false;
 
-  // Platform-specific storage handler
-  static late StorageInterface _platformStorage;
+  // Persistent storage handler
+  static final PersistentStorage _persistentStorage = PersistentStorage();
 
   // Secure storage handler
   static final SecureStorage _secureStorage = SecureStorage();
@@ -35,37 +33,28 @@ class FittorStore {
     try {
       _autoSave = autoSave;
 
-      debugPrint('Initializing FittorStore for ${PlatformInfo.platformName}');
-
-      // Create platform-specific storage
-      _platformStorage = StorageFactory.createStorage();
-
-      // Initialize secure storage first
+      // Initialize secure storage first (which should always work)
       await _secureStorage.init();
 
-      // Initialize platform storage
+      // Initialize persistent storage (which might fail if file access is restricted)
       try {
-        await _platformStorage.init();
-
-        if (_platformStorage.isInitialized) {
-          // Load data from platform storage
-          _storage = await _platformStorage.loadData();
-          debugPrint(
-              'Loaded data from ${_platformStorage.storageType} storage');
-        }
+        await _persistentStorage.init();
+        // Load data from persistent storage
+        _storage = await _persistentStorage.loadData();
       } catch (e) {
-        debugPrint('Platform storage initialization failed: $e');
-        debugPrint('Using in-memory storage only');
+        debugPrint('Warning: Persistent storage initialization failed: $e');
+        debugPrint(
+          'Using in-memory storage only (data will not persist between app runs)',
+        );
         _storage = {};
       }
 
-      // Set up auto-save timer if enabled and storage is available
-      if (_autoSave && _platformStorage.isInitialized) {
+      // Set up auto-save timer if enabled
+      if (_autoSave) {
         _autoSaveTimer = Timer.periodic(_autoSaveDuration, (_) => save());
       }
 
       _initialized = true;
-      debugPrint('FittorStore initialized successfully');
     } catch (e) {
       debugPrint('FittorStore initialization error: $e');
       _storage = {};
@@ -77,23 +66,6 @@ class FittorStore {
   /// Check if FittorStore is initialized
   static bool get isInitialized => _initialized;
 
-  /// Check if platform storage is available
-  static bool get isPlatformStorageAvailable =>
-      _initialized && _platformStorage.isInitialized;
-
-  /// Get current platform information
-  static Map<String, dynamic> get platformInfo => {
-        'platform': PlatformInfo.platformName,
-        'isWeb': PlatformInfo.isWeb,
-        'isMobile': PlatformInfo.isMobile,
-        'isDesktop': PlatformInfo.isDesktop,
-        'hasFileSystemAccess': PlatformInfo.hasFileSystemAccess,
-        'hasLocalStorage': PlatformInfo.hasLocalStorage,
-        'storageType': _platformStorage.storageType,
-        'persistentStorageSupported':
-            StorageFactory.isPersistentStorageSupported,
-      };
-
   /// Ensures FittorStore is initialized before any operation
   static void _ensureInitialized() {
     if (!_initialized) {
@@ -103,41 +75,28 @@ class FittorStore {
     }
   }
 
-  /// Save the current state to platform storage
+  /// Save the current state to persistent storage
   static Future<void> save() async {
     if (!_initialized) {
       debugPrint(
-          'Warning: Attempted to save when FittorStore is not initialized');
-      return;
-    }
-
-    if (!_platformStorage.isInitialized) {
-      debugPrint('Warning: Platform storage not available, data not persisted');
+        'Warning: Attempted to save when FittorStore is not initialized',
+      );
       return;
     }
 
     try {
-      await _platformStorage.saveData(_storage);
+      await _persistentStorage.saveData(_storage);
     } catch (e) {
       debugPrint('Error saving data: $e');
       // Continue execution - we don't want to crash the app for storage errors
     }
   }
 
-  // ... [Rest of the existing methods remain the same] ...
-  // [Include all the existing getter/setter methods from your original code]
-
-  /// Reload stored preferences from platform storage
+  /// Reload stored preferences from persistent storage
   static Future<void> reload() async {
     _ensureInitialized();
-
-    if (!_platformStorage.isInitialized) {
-      debugPrint('Warning: Platform storage not available for reload');
-      return;
-    }
-
     try {
-      _storage = await _platformStorage.loadData();
+      _storage = await _persistentStorage.loadData();
     } catch (e) {
       debugPrint('Error reloading data: $e');
     }
@@ -147,13 +106,10 @@ class FittorStore {
   static Future<void> clear() async {
     _ensureInitialized();
     _storage.clear();
-
-    if (_platformStorage.isInitialized) {
-      try {
-        await _platformStorage.clearData();
-      } catch (e) {
-        debugPrint('Error clearing platform storage: $e');
-      }
+    try {
+      await _persistentStorage.clearData();
+    } catch (e) {
+      debugPrint('Error clearing persistent storage: $e');
     }
   }
 
@@ -162,7 +118,7 @@ class FittorStore {
     _ensureInitialized();
     _storage.remove(key);
 
-    if (_autoSave && _platformStorage.isInitialized) {
+    if (_autoSave) {
       await save();
     }
 
@@ -223,7 +179,7 @@ class FittorStore {
     _ensureInitialized();
     _storage[key] = _processValueForStorage(key, value);
 
-    if (_autoSave && _platformStorage.isInitialized) {
+    if (_autoSave) {
       await save();
     }
 
@@ -241,7 +197,7 @@ class FittorStore {
     _ensureInitialized();
     _storage[key] = value;
 
-    if (_autoSave && _platformStorage.isInitialized) {
+    if (_autoSave) {
       await save();
     }
 
@@ -259,7 +215,7 @@ class FittorStore {
     _ensureInitialized();
     _storage[key] = value;
 
-    if (_autoSave && _platformStorage.isInitialized) {
+    if (_autoSave) {
       await save();
     }
 
@@ -277,7 +233,7 @@ class FittorStore {
     _ensureInitialized();
     _storage[key] = value;
 
-    if (_autoSave && _platformStorage.isInitialized) {
+    if (_autoSave) {
       await save();
     }
 
@@ -298,7 +254,7 @@ class FittorStore {
     _ensureInitialized();
     _storage[key] = value;
 
-    if (_autoSave && _platformStorage.isInitialized) {
+    if (_autoSave) {
       await save();
     }
 
@@ -323,7 +279,7 @@ class FittorStore {
     _ensureInitialized();
     _storage[key] = value.toIso8601String();
 
-    if (_autoSave && _platformStorage.isInitialized) {
+    if (_autoSave) {
       await save();
     }
 
@@ -376,7 +332,7 @@ class FittorStore {
       _storage[key] = value;
     }
 
-    if (_autoSave && _platformStorage.isInitialized) {
+    if (_autoSave) {
       await save();
     }
 
@@ -386,54 +342,20 @@ class FittorStore {
   /// Create a backup of the store
   static Future<String?> createBackup() async {
     _ensureInitialized();
-
-    if (!_platformStorage.isInitialized) {
-      debugPrint('Warning: Platform storage not available for backup');
-      return null;
-    }
-
     try {
-      return await _platformStorage.backup();
+      final backupFile = await _persistentStorage.backup();
+      return backupFile?.path;
     } catch (e) {
       debugPrint('Error creating backup: $e');
       return null;
     }
   }
 
-  /// Restore from a backup
-  static Future<bool> restoreBackup(String backupData) async {
-    _ensureInitialized();
-
-    if (!_platformStorage.isInitialized) {
-      debugPrint('Warning: Platform storage not available for restore');
-      return false;
-    }
-
-    try {
-      final success = await _platformStorage.restore(backupData);
-      if (success) {
-        // Reload data after successful restore
-        await reload();
-      }
-      return success;
-    } catch (e) {
-      debugPrint('Error restoring backup: $e');
-      return false;
-    }
-  }
-
   /// Get the size of the stored data in bytes
   static Future<int> getSize() async {
     _ensureInitialized();
-
-    if (!_platformStorage.isInitialized) {
-      // Calculate in-memory size
-      final jsonString = jsonEncode(_storage);
-      return jsonString.length;
-    }
-
     try {
-      return await _platformStorage.getSize();
+      return _persistentStorage.getSize();
     } catch (e) {
       debugPrint('Error getting store size: $e');
       return 0;
@@ -467,21 +389,7 @@ class FittorStore {
     }
 
     // Save changes
-    if (_platformStorage.isInitialized) {
-      await save();
-    }
-  }
-
-  /// Get storage information including platform details
-  static Map<String, dynamic> getStorageInfo() {
-    return {
-      'initialized': _initialized,
-      'platformStorageAvailable': isPlatformStorageAvailable,
-      'platformInfo': platformInfo,
-      'autoSave': _autoSave,
-      'keyCount': _storage.length,
-      'storageType': _initialized ? _platformStorage.storageType : 'None',
-    };
+    await save();
   }
 
   /// Dispose resources used by FittorStore
@@ -490,7 +398,4 @@ class FittorStore {
     _autoSaveTimer = null;
     _initialized = false;
   }
-
-  // [Include all your existing methods: getString, setString, getInt, setInt, etc.]
-  // They remain exactly the same as in your original code
 }
