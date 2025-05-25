@@ -27,7 +27,7 @@ class ConnectivityWrapper extends StatefulWidget {
     this.offlineWidget,
     this.ignoreOfflineState = false,
     this.onConnectivityChanged,
-    this.checkInterval = const Duration(seconds: 1),
+    this.checkInterval = const Duration(seconds: 5),
   });
 
   @override
@@ -79,42 +79,24 @@ class _ConnectivityWrapperState extends State<ConnectivityWrapper> {
     if (_connectivityStatus == ConnectivityStatus.online) {
       return widget.child;
     } else {
-      // If no custom offline widget is provided, import and use the default NoInternetPage
-      if (widget.offlineWidget != null) {
-        return widget.offlineWidget!;
-      } else {
-        // Import dynamically to avoid circular dependencies
-        return _buildDefaultOfflineWidget();
-      }
+      return widget.offlineWidget ?? _buildDefaultOfflineWidget();
     }
   }
 
   Widget _buildDefaultOfflineWidget() {
-    // Import dynamically to avoid circular dependencies
-    return Builder(
-      builder: (context) {
-        // Use NoInternetPage with retry functionality
-        return Material(
-          child: GestureDetector(
-            onTap: () {
-              // Manual connectivity check on tap
-              _connectivityManager.checkNow();
-            },
-            child: Stack(
-              children: [
-                // Import the NoInternetPage from the same directory
-                // We use dynamic import to avoid circular dependencies
-                NoInternetPage(
-                  onRetry: () {
-                    // Manual connectivity check on retry button press
-                    _connectivityManager.checkNow();
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+    return Material(
+      child: GestureDetector(
+        onTap: () {
+          // Manual connectivity check on tap
+          _connectivityManager.checkNow();
+        },
+        child: NoInternetPage(
+          onRetry: () {
+            // Manual connectivity check on retry button press
+            _connectivityManager.checkNow();
+          },
+        ),
+      ),
     );
   }
 }

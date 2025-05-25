@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../connectivity/connectivity_manager.dart';
+import 'connectivity_manager.dart';
 
 /// A mixin that provides connectivity status to StatefulWidget classes
 mixin ConnectivityMixin<T extends StatefulWidget> on State<T> {

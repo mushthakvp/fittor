@@ -1,7 +1,10 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+
+// Conditional import using the proper pattern
+import 'platform/connectivity_checker_io.dart'
+    if (dart.library.html) 'platform/connectivity_checker_web.dart';
 
 enum ConnectivityStatus { online, offline }
 
@@ -24,58 +27,66 @@ class ConnectivityManager {
 
   // Timer for periodic checks
   Timer? _periodicCheckTimer;
-
-  // URLs to ping for connectivity check
-  final List<String> _lookupAddresses = [
-    'google.com',
-    'apple.com',
-    'cloudflare.com',
-  ];
+  StreamSubscription? _webConnectivitySubscription;
 
   // Initialize connectivity monitoring
   void initialize({Duration checkInterval = const Duration(seconds: 5)}) {
     // Initial connectivity check
     _checkConnectivity();
 
-    // Set up periodic connectivity checks
-    _periodicCheckTimer = Timer.periodic(checkInterval, (_) {
-      _checkConnectivity();
-    });
+    if (kIsWeb) {
+      // For web, listen to browser events and do periodic checks
+      _initializeWebConnectivity(checkInterval);
+    } else {
+      // For mobile/desktop, use periodic checks only
+      _periodicCheckTimer = Timer.periodic(checkInterval, (_) {
+        _checkConnectivity();
+      });
+    }
+  }
+
+  // Initialize web-specific connectivity monitoring
+  void _initializeWebConnectivity(Duration checkInterval) {
+    if (kIsWeb) {
+      try {
+        // Set initial status
+        _updateConnectionStatus(ConnectivityCheckerImpl.isOnline
+            ? ConnectivityStatus.online
+            : ConnectivityStatus.offline);
+
+        // Listen to connectivity changes (only available on web)
+        _webConnectivitySubscription =
+            ConnectivityCheckerImpl.onConnectivityChanged.listen(
+          (isOnline) {
+            _updateConnectionStatus(isOnline
+                ? ConnectivityStatus.online
+                : ConnectivityStatus.offline);
+          },
+        );
+
+        // Also do periodic checks for web (less frequent)
+        _periodicCheckTimer = Timer.periodic(
+          const Duration(seconds: 30),
+          (_) => _checkConnectivity(),
+        );
+      } catch (e) {
+        // Fallback to periodic checks only
+        _periodicCheckTimer = Timer.periodic(
+          checkInterval,
+          (_) => _checkConnectivity(),
+        );
+      }
+    }
   }
 
   // Check current connectivity status
   Future<void> _checkConnectivity() async {
-    if (kIsWeb) {
-      // For web platform, we can't easily check connectivity
-      // So we'll assume it's online
-      _updateConnectionStatus(ConnectivityStatus.online);
-      return;
-    }
-
     try {
-      // Try to lookup multiple hosts to ensure reliable connectivity check
-      bool isConnected = false;
-
-      for (final address in _lookupAddresses) {
-        try {
-          final result = await InternetAddress.lookup(
-            address,
-          ).timeout(const Duration(seconds: 3));
-
-          if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-            isConnected = true;
-            break;
-          }
-        } catch (_) {
-          // Continue trying with other addresses
-          continue;
-        }
-      }
-
+      final isConnected = await ConnectivityCheckerImpl.checkConnectivity();
       _updateConnectionStatus(
         isConnected ? ConnectivityStatus.online : ConnectivityStatus.offline,
       );
-    } catch (_) {
+    } catch (e) {
       _updateConnectionStatus(ConnectivityStatus.offline);
     }
   }
@@ -98,6 +109,7 @@ class ConnectivityManager {
   // Dispose resources when no longer needed
   void dispose() {
     _periodicCheckTimer?.cancel();
+    _webConnectivitySubscription?.cancel();
     _connectivityController.close();
   }
 }

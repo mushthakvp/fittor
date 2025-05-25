@@ -1,8 +1,8 @@
 import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
-import 'package:test/presentation/screen/readmore.dart';
 
 import '../controller/sample_controller.dart';
+import '../screen/readmore.dart';
 import 'currency.dart';
 
 class FittorView extends StatefulWidget {
@@ -28,7 +28,7 @@ class _FittorViewState extends State<FittorView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Spacer(),
+            const Spacer(),
             30.h,
             const Text(
               'Fittor State Management Example',
@@ -94,15 +94,14 @@ class _FittorViewState extends State<FittorView> {
               alignment: WrapAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed:
-                      () => Fit.find<SampleController>().incrementNormal(),
+                  onPressed: () =>
+                      Fit.find<SampleController>().incrementNormal(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
                   ),
                   child: const Text('Update No-Tag Only'),
                 ),
-
                 ElevatedButton(
                   onPressed: () => Fit.find<SampleController>().incrementTag2(),
                   style: ElevatedButton.styleFrom(
@@ -111,7 +110,6 @@ class _FittorViewState extends State<FittorView> {
                   ),
                   child: const Text('Update Tag2 Only'),
                 ),
-
                 ElevatedButton(
                   onPressed: () async {
                     Fit.find<SampleController>().incrementAll();
@@ -156,7 +154,7 @@ class _FittorViewState extends State<FittorView> {
               ),
               child: const Text('Currency Converter'),
             ),
-            Spacer(),
+            const Spacer(),
             Text(
               'Powered By: Fittor',
               style: TextStyle(

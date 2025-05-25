@@ -1,4 +1,3 @@
-import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
 
 class NoInternetPage extends StatelessWidget {
@@ -25,63 +24,69 @@ class NoInternetPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: backgroundColor ?? Colors.white,
       body: Padding(
-        padding: EdgeInsets.all(context.p20),
+        padding: EdgeInsets.all(screenWidth * 0.05),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Center(
-              child: Image(
-                image: const AssetImage('assets/no_internet.jpg',
-                    package: 'fittor'),
-                width: context.wp(80),
+              child: Icon(
+                Icons.wifi_off_rounded,
+                size: screenWidth * 0.2,
+                color: Colors.grey[400],
               ),
             ),
-            30.h,
+            SizedBox(height: screenHeight * 0.03),
             Text(
               title,
               style: TextStyle(
-                fontSize: context.fs24,
+                fontSize: screenWidth * 0.06,
                 fontWeight: FontWeight.bold,
                 color: textColor ?? Colors.black,
               ),
             ),
-            8.h,
+            SizedBox(height: screenHeight * 0.01),
             Text(
               message,
               style: TextStyle(
-                fontSize: context.fs14,
-                color: textColor ?? Colors.black,
+                fontSize: screenWidth * 0.035,
+                color: textColor ?? Colors.grey[600],
               ),
               textAlign: TextAlign.center,
             ),
-            30.h,
+            SizedBox(height: screenHeight * 0.04),
             if (onRetry != null)
-              GestureDetector(
-                onTap: onRetry,
-                child: Container(
-                  width: context.wp(100),
-                  height: context.hp(6),
-                  decoration: BoxDecoration(
-                    color: buttonColor,
-                    borderRadius: BorderRadius.circular(context.p12),
-                    border: Border.all(color: Colors.black, width: 1),
+              SizedBox(
+                width: screenWidth * 0.6,
+                height: screenHeight * 0.06,
+                child: ElevatedButton(
+                  onPressed: onRetry,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        buttonColor ?? Theme.of(context).primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                  alignment: Alignment.center,
                   child: Text(
                     retryButtonText,
                     style: TextStyle(
-                      fontSize: context.fs16,
-                      color: Colors.black,
+                      fontSize: screenWidth * 0.04,
+                      color: Colors.white,
                     ),
                   ),
                 ),
               ),
-            16.h,
-            if (child != null) child!,
+            if (child != null) ...[
+              SizedBox(height: screenHeight * 0.02),
+              child!,
+            ],
           ],
         ),
       ),

@@ -6,7 +6,7 @@ import 'presentation/screen/fitter_view.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(FittorApp());
+  runApp(const FittorApp());
 }
 
 class FittorApp extends StatelessWidget with FittorAppMixin {
@@ -14,7 +14,6 @@ class FittorApp extends StatelessWidget with FittorAppMixin {
 
   @override
   Widget responsive(BuildContext context) {
-    debugPrint('FittorApp.responsive');
     return FitInitializer(
       initialBindings: [AppBindings()],
       child: MaterialApp(
@@ -23,7 +22,7 @@ class FittorApp extends StatelessWidget with FittorAppMixin {
           onConnectivityChanged: (status) {
             debugPrint('Connectivity status: $status');
           },
-          child: FittorView(),
+          child: const FittorView(),
         ),
       ),
     );
