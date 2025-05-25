@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:html' as html;
 
-class WebConnectivityChecker {
+class ConnectivityCheckerImpl {
   static bool get isOnline {
     try {
       return html.window.navigator.onLine ?? true;
