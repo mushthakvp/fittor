@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:html' as html;
 
 class ConnectivityCheckerImpl {
+  static StreamController<bool>? _controller;
+
   static bool get isOnline {
     try {
       return html.window.navigator.onLine ?? true;
@@ -11,25 +13,23 @@ class ConnectivityCheckerImpl {
   }
 
   static Stream<bool> get onConnectivityChanged {
-    late StreamController<bool> controller;
-
-    controller = StreamController<bool>.broadcast(
+    _controller ??= StreamController<bool>.broadcast(
       onListen: () {
         html.window.addEventListener('online', (event) {
-          if (!controller.isClosed) {
-            controller.add(true);
+          if (_controller != null && !_controller!.isClosed) {
+            _controller!.add(true);
           }
         });
 
         html.window.addEventListener('offline', (event) {
-          if (!controller.isClosed) {
-            controller.add(false);
+          if (_controller != null && !_controller!.isClosed) {
+            _controller!.add(false);
           }
         });
       },
     );
 
-    return controller.stream;
+    return _controller!.stream;
   }
 
   static Future<bool> checkConnectivity() async {
@@ -66,5 +66,11 @@ class ConnectivityCheckerImpl {
     } catch (e) {
       return false;
     }
+  }
+
+  // Cleanup method
+  static void dispose() {
+    _controller?.close();
+    _controller = null;
   }
 }

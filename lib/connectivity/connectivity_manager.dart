@@ -22,21 +22,20 @@ class ConnectivityManager {
   ConnectivityStatus get currentStatus => _currentStatus;
 
   Timer? _periodicCheckTimer;
-  StreamSubscription? _webConnectivitySubscription;
+  StreamSubscription? _connectivitySubscription;
   bool _isInitialized = false;
 
-  void initialize({Duration checkInterval = const Duration(seconds: 5)}) {
+  void initialize({Duration checkInterval = const Duration(seconds: 3)}) {
     if (_isInitialized) return;
     _isInitialized = true;
 
-    // _checkConnectivity();
+    // Check initial connectivity
+    _checkConnectivity();
 
     if (kIsWeb) {
       _initializeWebConnectivity(checkInterval);
     } else {
-      _periodicCheckTimer = Timer.periodic(checkInterval, (_) {
-        _checkConnectivity();
-      });
+      _initializeMobileConnectivity(checkInterval);
     }
   }
 
@@ -46,7 +45,7 @@ class ConnectivityManager {
           ? ConnectivityStatus.online
           : ConnectivityStatus.offline);
 
-      _webConnectivitySubscription =
+      _connectivitySubscription =
           ConnectivityCheckerImpl.onConnectivityChanged.listen(
         (isOnline) {
           _updateConnectionStatus(isOnline
@@ -55,11 +54,38 @@ class ConnectivityManager {
         },
       );
 
+      // Less frequent checks for web since we have event listeners
       _periodicCheckTimer = Timer.periodic(
-        const Duration(seconds: 30),
+        const Duration(seconds: 3),
         (_) => _checkConnectivity(),
       );
     } catch (e) {
+      _periodicCheckTimer = Timer.periodic(
+        checkInterval,
+        (_) => _checkConnectivity(),
+      );
+    }
+  }
+
+  void _initializeMobileConnectivity(Duration checkInterval) {
+    try {
+      // Subscribe to connectivity changes from the platform implementation
+      _connectivitySubscription =
+          ConnectivityCheckerImpl.onConnectivityChanged.listen(
+        (isOnline) {
+          _updateConnectionStatus(isOnline
+              ? ConnectivityStatus.online
+              : ConnectivityStatus.offline);
+        },
+      );
+
+      // Additional periodic checks for mobile (less frequent since platform handles most detection)
+      _periodicCheckTimer = Timer.periodic(
+        const Duration(seconds: 3), // Less frequent
+        (_) => _checkConnectivity(),
+      );
+    } catch (e) {
+      // Fallback to periodic checks only
       _periodicCheckTimer = Timer.periodic(
         checkInterval,
         (_) => _checkConnectivity(),
@@ -94,10 +120,18 @@ class ConnectivityManager {
 
   void dispose() {
     _periodicCheckTimer?.cancel();
-    _webConnectivitySubscription?.cancel();
+    _connectivitySubscription?.cancel();
     if (!_connectivityController.isClosed) {
       _connectivityController.close();
     }
+
+    // Cleanup platform-specific resources
+    if (!kIsWeb) {
+      try {
+        ConnectivityCheckerImpl.dispose();
+      } catch (_) {}
+    }
+
     _isInitialized = false;
   }
 }

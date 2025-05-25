@@ -8,4 +8,9 @@ class ConnectivityCheckerImpl {
       const Stream<bool>.empty().asBroadcastStream();
 
   static Future<bool> checkConnectivity() async => true;
+
+  // Cleanup method
+  static void dispose() {
+    // Nothing to dispose in stub implementation
+  }
 }
