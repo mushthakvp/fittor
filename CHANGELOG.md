@@ -1,3 +1,7 @@
+## 1.0.26
+
+- Fittor Currency and no internet connection and Responsive Helper now available on web
+
 ## 1.0.25
 
 - Currency Converter Now Available On Web

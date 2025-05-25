@@ -15,7 +15,6 @@ class ConnectivityCheckerImpl {
 
     controller = StreamController<bool>.broadcast(
       onListen: () {
-        // Listen to browser online/offline events
         html.window.addEventListener('online', (event) {
           if (!controller.isClosed) {
             controller.add(true);
@@ -34,17 +33,12 @@ class ConnectivityCheckerImpl {
   }
 
   static Future<bool> checkConnectivity() async {
-    // For web, we can use multiple approaches
     try {
-      // First check navigator.onLine
       if (!html.window.navigator.onLine!) {
         return false;
       }
 
-      // Try to fetch a small resource to verify actual connectivity
       final completer = Completer<bool>();
-
-      // Create a small image request to test connectivity
       final img = html.ImageElement();
 
       img.onLoad.listen((_) {
@@ -59,11 +53,9 @@ class ConnectivityCheckerImpl {
         }
       });
 
-      // Use a reliable CDN endpoint with cache busting
       img.src =
           'https://www.google.com/favicon.ico?t=${DateTime.now().millisecondsSinceEpoch}';
 
-      // Timeout after 5 seconds
       Timer(const Duration(seconds: 5), () {
         if (!completer.isCompleted) {
           completer.complete(false);
