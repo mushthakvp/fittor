@@ -42,6 +42,10 @@ mixin ConnectivityMixin<T extends StatefulWidget> on State<T> {
     return await _connectivityManager.checkNow();
   }
 
+  Future<ConnectivityStatus> quickConnectivityCheck() async {
+    return await _connectivityManager.quickCheck();
+  }
+
   @override
   void dispose() {
     _connectivitySubscription?.cancel();
