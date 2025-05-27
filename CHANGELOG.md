@@ -1,3 +1,7 @@
+## 1.0.29
+
+- Currency Api Change to Fittor Api
+
 ## 1.0.28
 
 - Fittor Api Now Available On Web
