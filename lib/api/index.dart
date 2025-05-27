@@ -19,4 +19,4 @@ export 'utils/constants.dart';
 export 'utils/helpers.dart';
 export 'utils/validators.dart';
 // WASM support
-export 'wasm/wasm_bridge.dart';
+export 'wasm/wasm_web.dart';

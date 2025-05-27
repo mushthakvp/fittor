@@ -28,6 +28,7 @@ class MobileAdapter implements PlatformAdapter {
       );
 
       // Set timeout
+      final timeout = request.timeout ?? const Duration(seconds: 30);
 
       // Set headers
       request.headers.toMultiMap().forEach((key, values) {
@@ -52,7 +53,7 @@ class MobileAdapter implements PlatformAdapter {
       }
 
       // Send request and get response
-      final httpResponse = await httpRequest.close();
+      final httpResponse = await httpRequest.close().timeout(timeout);
 
       // Read response body
       final bodyBytes = await httpResponse.fold<List<int>>(

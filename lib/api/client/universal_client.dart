@@ -6,10 +6,11 @@ import '../models/headers.dart';
 import '../models/request.dart';
 import '../models/response.dart';
 import '../platform/platform_adapter.dart';
-import '../wasm/wasm_bridge.dart'
-    if (dart.library.js_interop) '../wasm/wasm_bridge.dart';
+import '../wasm/wasm_bridge_stub.dart'
+    if (dart.library.js_interop) '../wasm/wasm_web.dart';
 import 'base_client.dart';
 
+// ../wasm/wasm_bridge_web.dart
 class FittorClient extends FittorBaseClient {
   static FittorClient? _instance;
   final PlatformAdapter _platformAdapter;
@@ -33,7 +34,12 @@ class FittorClient extends FittorBaseClient {
       WasmBridge? wasmBridge;
 
       if (useWasm && platformAdapter.supportsWasm) {
-        wasmBridge = WasmBridge();
+        try {
+          wasmBridge = WasmBridge();
+        } catch (e) {
+          // WASM not supported on this platform, continue without it
+          wasmBridge = null;
+        }
       }
 
       _instance = FittorClient._internal(

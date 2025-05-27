@@ -21,7 +21,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  web:
 
 dev_dependencies:
   flutter_test:
