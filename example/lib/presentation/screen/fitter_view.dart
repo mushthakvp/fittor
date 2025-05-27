@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../controller/sample_controller.dart';
 import '../screen/readmore.dart';
 import 'currency.dart';
+import 'demo_api.dart';
 
 class FittorView extends StatefulWidget {
   const FittorView({super.key});
@@ -94,8 +95,8 @@ class _FittorViewState extends State<FittorView> {
               alignment: WrapAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () =>
-                      Fit.find<SampleController>().incrementNormal(),
+                  onPressed:
+                      () => Fit.find<SampleController>().incrementNormal(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
@@ -122,7 +123,7 @@ class _FittorViewState extends State<FittorView> {
                 ),
               ],
             ),
-            30.h,
+            10.h,
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -138,7 +139,7 @@ class _FittorViewState extends State<FittorView> {
               ),
               child: const Text('Test Readmore Text'),
             ),
-            30.h,
+            10.h,
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -153,6 +154,20 @@ class _FittorViewState extends State<FittorView> {
                 foregroundColor: Colors.white,
               ),
               child: const Text('Currency Converter'),
+            ),
+            10.h,
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const DemoApi()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Demo API'),
             ),
             const Spacer(),
             Text(
