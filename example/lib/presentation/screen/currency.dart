@@ -50,6 +50,9 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage> {
         child: Column(
           children: [
             TextField(
+              onTapOutside: (_) {
+                FocusScope.of(context).unfocus();
+              },
               controller: _amountController,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(

@@ -1,3 +1,4 @@
+// lib/api/index.dart
 library;
 
 export 'client/base_client.dart';
@@ -18,5 +19,5 @@ export 'platform/platform_adapter.dart';
 export 'utils/constants.dart';
 export 'utils/helpers.dart';
 export 'utils/validators.dart';
-// WASM support
-export 'wasm/wasm_web.dart';
+// WASM support (conditional)
+export 'wasm/wasm_bridge.dart';

@@ -1,3 +1,4 @@
+// lib/api/platform/web_adapter.dart
 import 'dart:async';
 import 'dart:html' as html;
 import 'dart:typed_data';

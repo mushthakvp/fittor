@@ -3,6 +3,7 @@ import 'dart:js_interop';
 import 'dart:js_util';
 
 import '../models/exceptions.dart';
+import 'wasm_bridge.dart';
 
 @JS('WasmHttpClient')
 external JSObject get wasmHttpClient;
@@ -13,18 +14,20 @@ external JSPromise _initializeWasm();
 @JS('WasmHttpClient.performRequest')
 external JSPromise _performWasmRequest(JSObject options);
 
-class WasmBridge {
+class WasmBridgeImpl implements WasmBridge {
   bool _isInitialized = false;
-  static WasmBridge? _instance;
+  static WasmBridgeImpl? _instance;
 
-  WasmBridge._internal();
+  WasmBridgeImpl._internal();
 
-  factory WasmBridge() {
-    return _instance ??= WasmBridge._internal();
+  factory WasmBridgeImpl() {
+    return _instance ??= WasmBridgeImpl._internal();
   }
 
+  @override
   bool get isInitialized => _isInitialized;
 
+  @override
   Future<void> initialize() async {
     if (_isInitialized) return;
 
@@ -36,6 +39,7 @@ class WasmBridge {
     }
   }
 
+  @override
   Future<Map<String, dynamic>> performHttpRequest({
     required String method,
     required String url,
@@ -63,6 +67,7 @@ class WasmBridge {
     }
   }
 
+  @override
   void dispose() {
     _isInitialized = false;
   }

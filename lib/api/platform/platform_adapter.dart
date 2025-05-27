@@ -1,7 +1,9 @@
+// lib/api/platform/platform_adapter.dart
 import 'dart:async';
 
 import '../models/request.dart';
 import '../models/response.dart';
+import 'mobile_adapter.dart';
 
 abstract class PlatformAdapter {
   bool get supportsWasm;
@@ -11,12 +13,6 @@ abstract class PlatformAdapter {
   void close();
 
   factory PlatformAdapter.create() {
-    // This will be replaced by conditional imports
     return createPlatformAdapter();
   }
-}
-
-// This function will be implemented differently in web_adapter.dart and mobile_adapter.dart
-PlatformAdapter createPlatformAdapter() {
-  throw UnsupportedError('Platform not supported');
 }
