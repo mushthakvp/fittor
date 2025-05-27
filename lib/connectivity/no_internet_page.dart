@@ -1,3 +1,4 @@
+import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
 
 class NoInternetPage extends StatelessWidget {
@@ -24,13 +25,16 @@ class NoInternetPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
       backgroundColor: backgroundColor ?? Colors.white,
+      appBar: AppBar(
+        backgroundColor: backgroundColor ?? Colors.white,
+        foregroundColor: buttonColor ?? Colors.black,
+        leading: const BackButton(),
+        elevation: 0,
+      ),
       body: Padding(
-        padding: EdgeInsets.all(screenWidth * 0.05),
+        padding: EdgeInsets.all(context.p16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -38,55 +42,29 @@ class NoInternetPage extends StatelessWidget {
             Center(
               child: Icon(
                 Icons.wifi_off_rounded,
-                size: screenWidth * 0.2,
+                size: context.hp(10),
                 color: Colors.grey[400],
               ),
             ),
-            SizedBox(height: screenHeight * 0.03),
+            20.h,
             Text(
               title,
               style: TextStyle(
-                fontSize: screenWidth * 0.06,
+                fontSize: context.fs28,
                 fontWeight: FontWeight.bold,
                 color: textColor ?? Colors.black,
               ),
             ),
-            SizedBox(height: screenHeight * 0.01),
+            5.h,
             Text(
               message,
               style: TextStyle(
-                fontSize: screenWidth * 0.035,
+                fontSize: context.fs14,
                 color: textColor ?? Colors.grey[600],
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: screenHeight * 0.04),
-            if (onRetry != null)
-              SizedBox(
-                width: screenWidth * 0.6,
-                height: screenHeight * 0.06,
-                child: ElevatedButton(
-                  onPressed: onRetry,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        buttonColor ?? Theme.of(context).primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    retryButtonText,
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.04,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            if (child != null) ...[
-              SizedBox(height: screenHeight * 0.02),
-              child!,
-            ],
+            70.h,
           ],
         ),
       ),
