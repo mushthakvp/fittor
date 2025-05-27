@@ -1,6 +1,7 @@
 ## 1.0.29
 
 - Currency Api Change to Fittor Api
+- Fittor Api Documents [Click here](https://medium.com/@mail.musthak/fittor-api-complete-documentation-1286950e3d65)
 
 ## 1.0.28
 
