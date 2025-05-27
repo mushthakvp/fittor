@@ -1,3 +1,8 @@
+## 1.0.28
+
+- Fittor Api Now Available On Web
+- `(WASM)` Supported
+
 ## 1.0.27
 
 - Fittor Api Now Available On Web

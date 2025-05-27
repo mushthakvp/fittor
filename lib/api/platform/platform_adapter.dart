@@ -3,7 +3,10 @@ import 'dart:async';
 
 import '../models/request.dart';
 import '../models/response.dart';
-import 'mobile_adapter.dart';
+// Conditional imports - this is the key fix
+import 'platform_adapter_stub.dart'
+    if (dart.library.io) 'mobile_adapter.dart'
+    if (dart.library.html) 'web_adapter.dart';
 
 abstract class PlatformAdapter {
   bool get supportsWasm;
