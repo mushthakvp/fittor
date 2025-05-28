@@ -1,109 +1,121 @@
 import 'dart:async';
+import 'dart:developer';
 
-import 'connectivity_checker.dart';
+import 'package:flutter/foundation.dart';
 
-enum ConnectivityStatus { online, offline, unknown }
+import '../api/client/universal_client.dart';
+
+enum ConnectivityStatus { online, offline }
 
 class ConnectivityManager {
+  // Singleton instance
   static final ConnectivityManager _instance = ConnectivityManager._internal();
   factory ConnectivityManager() => _instance;
   ConnectivityManager._internal();
 
+  final client = FittorClient(
+    defaultTimeout: const Duration(seconds: 45),
+    enableLogging: true,
+    useWasm: true, // Enable WASM support for web
+  );
+
+  // Stream controller for broadcasting connectivity status
   final _connectivityController =
       StreamController<ConnectivityStatus>.broadcast();
+
+  // Stream getter for consumers to listen to connectivity changes
   Stream<ConnectivityStatus> get statusStream => _connectivityController.stream;
 
-  ConnectivityStatus _currentStatus = ConnectivityStatus.unknown;
+  // Current connectivity status
+  ConnectivityStatus _currentStatus = ConnectivityStatus.online;
   ConnectivityStatus get currentStatus => _currentStatus;
 
+  // Timer for periodic checks
   Timer? _periodicCheckTimer;
-  StreamSubscription<bool>? _connectivitySubscription;
-  bool _isInitialized = false;
-  late final ConnectivityChecker _checker;
 
-  void initialize({
-    Duration checkInterval = const Duration(seconds: 10),
-    Duration quickCheckTimeout = const Duration(seconds: 5),
-    List<String>? customTestUrls,
-  }) {
-    if (_isInitialized) return;
-    _isInitialized = true;
+  // URLs to ping for connectivity check
+  final List<String> _lookupAddresses = [
+    'google.com',
+    'apple.com',
+    'cloudflare.com',
+  ];
 
-    _checker = ConnectivityChecker(
-      checkInterval: checkInterval,
-      quickCheckTimeout: quickCheckTimeout,
-      testUrls: customTestUrls,
-    );
-
-    // Check initial connectivity
+  // Initialize connectivity monitoring
+  void initialize({Duration checkInterval = const Duration(seconds: 5)}) {
+    // Initial connectivity check
     _checkConnectivity();
 
-    // Subscribe to connectivity changes
-    _connectivitySubscription = _checker.onConnectivityChanged.listen(
-      (isOnline) {
-        _updateConnectionStatus(
-          isOnline ? ConnectivityStatus.online : ConnectivityStatus.offline,
-        );
-      },
-      onError: (error) {
-        _updateConnectionStatus(ConnectivityStatus.offline);
-      },
-    );
-
-    // Periodic checks as backup
-    _periodicCheckTimer = Timer.periodic(
-      checkInterval,
-      (_) => _checkConnectivity(),
-    );
+    // Set up periodic connectivity checks
+    _periodicCheckTimer = Timer.periodic(checkInterval, (_) {
+      _checkConnectivity();
+    });
   }
 
+  // Check current connectivity status
   Future<void> _checkConnectivity() async {
+    if (kIsWeb) {
+      // For web platform, we can't easily check connectivity
+      // So we'll assume it's online
+      _updateConnectionStatus(ConnectivityStatus.online);
+      return;
+    }
+
     try {
-      final isConnected = await _checker.checkConnectivity();
+      // Try to lookup multiple hosts to ensure reliable connectivity check
+      bool isConnected = false;
+
+      for (final address in _lookupAddresses) {
+        try {
+          // final result = await InternetAddress.lookup(
+          //   address,
+          // ).timeout(const Duration(seconds: 3));
+
+          // if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+          //   isConnected = true;
+          //   break;
+          // }
+          final result = await client.get(
+            'https://$address',
+            headers: {'User-Agent': 'Fittor Connectivity Check'},
+          );
+          log('Connectivity check result: ${result.statusCode} for $address (${result.body})');
+          if (result.isServerError) {
+            isConnected = true;
+            break;
+          }
+          throw Exception('Failed to connect to $address');
+        } catch (_) {
+          // Continue trying with other addresses
+          continue;
+        }
+      }
+
       _updateConnectionStatus(
         isConnected ? ConnectivityStatus.online : ConnectivityStatus.offline,
       );
-    } catch (e) {
+    } catch (_) {
       _updateConnectionStatus(ConnectivityStatus.offline);
     }
   }
 
+  // Force a connectivity check (can be called manually)
   Future<ConnectivityStatus> checkNow() async {
     await _checkConnectivity();
     return _currentStatus;
   }
 
-  Future<ConnectivityStatus> quickCheck() async {
-    try {
-      final isConnected = await _checker.quickConnectivityTest();
-      _updateConnectionStatus(
-        isConnected ? ConnectivityStatus.online : ConnectivityStatus.offline,
-      );
-      return _currentStatus;
-    } catch (e) {
-      _updateConnectionStatus(ConnectivityStatus.offline);
-      return ConnectivityStatus.offline;
-    }
-  }
-
+  // Update and broadcast connectivity status
   void _updateConnectionStatus(ConnectivityStatus status) {
+    // Only broadcast if status actually changed
     if (_currentStatus != status) {
       _currentStatus = status;
-      if (!_connectivityController.isClosed) {
-        _connectivityController.add(status);
-      }
+      _connectivityController.add(status);
     }
   }
 
+  // Dispose resources when no longer needed
   void dispose() {
     _periodicCheckTimer?.cancel();
-    _connectivitySubscription?.cancel();
-
-    if (!_connectivityController.isClosed) {
-      _connectivityController.close();
-    }
-
-    _checker.dispose();
-    _isInitialized = false;
+    _connectivityController.close();
   }
 }

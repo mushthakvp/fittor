@@ -19,8 +19,8 @@ class FittorApp extends StatelessWidget with FittorAppMixin {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         home: ConnectivityWrapper(
-          onConnectivityChanged: (status) {
-            debugPrint('Connectivity status: $status');
+          onConnectivityChanged: (ConnectivityStatus status) {
+            debugPrint('Connectivity changed: $status');
           },
           child: const FittorView(),
         ),

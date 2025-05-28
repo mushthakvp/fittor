@@ -1,16 +1,15 @@
-// lib/connectivity/no_internet_page.dart
+import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
 
 class NoInternetPage extends StatelessWidget {
   final Widget? child;
-  final Future<void> Function()? onRetry;
+  final VoidCallback? onRetry;
   final String title;
   final String message;
   final String retryButtonText;
   final Color? backgroundColor;
   final Color? textColor;
   final Color? buttonColor;
-  final EdgeInsets? padding;
 
   const NoInternetPage({
     super.key,
@@ -22,68 +21,66 @@ class NoInternetPage extends StatelessWidget {
     this.backgroundColor,
     this.textColor,
     this.buttonColor,
-    this.padding,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor:
-            backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
-        foregroundColor:
-            textColor ?? Theme.of(context).textTheme.bodyLarge?.color,
-        elevation: 0,
-      ),
+      backgroundColor: backgroundColor ?? Colors.white,
       body: Padding(
-        padding: padding ?? const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(context.p20),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Center(
-              child: Icon(
-                Icons.wifi_off_rounded,
-                size: 80,
-                color: Colors.grey[400],
+              child: Image(
+                image: AssetImage('assets/no_internet.jpg', package: 'fittor'),
+                width: context.wp(80),
               ),
             ),
-            const SizedBox(height: 20),
+            30.h,
             Text(
               title,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: context.fs24,
                 fontWeight: FontWeight.bold,
-                color:
-                    textColor ?? Theme.of(context).textTheme.bodyLarge?.color,
+                color: textColor ?? Colors.black,
               ),
-              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            8.h,
             Text(
               message,
               style: TextStyle(
-                fontSize: 16,
-                color: textColor?.withOpacity(0.7) ?? Colors.grey[600],
+                fontSize: context.fs14,
+                color: textColor ?? Colors.black,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 40),
+            30.h,
             if (onRetry != null)
-              ElevatedButton.icon(
-                onPressed: onRetry,
-                icon: const Icon(Icons.refresh),
-                label: Text(retryButtonText),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      buttonColor ?? Theme.of(context).primaryColor,
-                  foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              GestureDetector(
+                onTap: onRetry,
+                child: Container(
+                  width: context.wp(100),
+                  height: context.hp(6),
+                  decoration: BoxDecoration(
+                    color: buttonColor,
+                    borderRadius: BorderRadius.circular(context.p12),
+                    border: Border.all(color: Colors.black, width: 1),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    retryButtonText,
+                    style: TextStyle(
+                      fontSize: context.fs16,
+                      color: Colors.black,
+                    ),
+                  ),
                 ),
               ),
+            16.h,
+            if (child != null) child!,
           ],
         ),
       ),

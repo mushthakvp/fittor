@@ -1,33 +1,33 @@
-// lib/connectivity/connectivity_wrapper.dart
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import 'connectivity_manager.dart';
 import 'no_internet_page.dart';
 
 class ConnectivityWrapper extends StatefulWidget {
+  /// The child widget to display when there is internet connectivity
   final Widget child;
+
+  /// Optional custom widget to show when there is no internet connection
+  /// If not provided, a default NoInternetPage will be shown
   final Widget? offlineWidget;
-  final Widget? unknownWidget;
+
+  /// If set to true, offline state will be ignored and the child will always be shown
+  /// This allows users to handle connectivity themselves
   final bool ignoreOfflineState;
+
+  /// Optional callback when connectivity status changes
   final Function(ConnectivityStatus)? onConnectivityChanged;
+
+  /// Duration between connectivity checks
   final Duration checkInterval;
-  final Duration quickCheckTimeout;
-  final List<String>? customTestUrls;
-  final bool showLoadingOnUnknown;
 
   const ConnectivityWrapper({
     super.key,
     required this.child,
     this.offlineWidget,
-    this.unknownWidget,
     this.ignoreOfflineState = false,
     this.onConnectivityChanged,
-    this.checkInterval = const Duration(seconds: 10),
-    this.quickCheckTimeout = const Duration(seconds: 5),
-    this.customTestUrls,
-    this.showLoadingOnUnknown = true,
+    this.checkInterval = const Duration(seconds: 1),
   });
 
   @override
@@ -37,7 +37,6 @@ class ConnectivityWrapper extends StatefulWidget {
 class _ConnectivityWrapperState extends State<ConnectivityWrapper> {
   late ConnectivityManager _connectivityManager;
   late ConnectivityStatus _connectivityStatus;
-  StreamSubscription<ConnectivityStatus>? _subscription;
 
   @override
   void initState() {
@@ -45,18 +44,11 @@ class _ConnectivityWrapperState extends State<ConnectivityWrapper> {
     _connectivityManager = ConnectivityManager();
     _connectivityStatus = _connectivityManager.currentStatus;
 
-    _connectivityManager.initialize(
-      checkInterval: widget.checkInterval,
-      quickCheckTimeout: widget.quickCheckTimeout,
-      customTestUrls: widget.customTestUrls,
-    );
+    // Initialize connectivity manager
+    _connectivityManager.initialize(checkInterval: widget.checkInterval);
 
-    _subscription = _connectivityManager.statusStream.listen(
-      _updateConnectivityStatus,
-      onError: (error) {
-        _updateConnectivityStatus(ConnectivityStatus.offline);
-      },
-    );
+    // Listen for connectivity changes
+    _connectivityManager.statusStream.listen(_updateConnectivityStatus);
   }
 
   void _updateConnectivityStatus(ConnectivityStatus status) {
@@ -64,50 +56,65 @@ class _ConnectivityWrapperState extends State<ConnectivityWrapper> {
       setState(() {
         _connectivityStatus = status;
       });
+
+      // Call the callback if provided
       widget.onConnectivityChanged?.call(status);
     }
   }
 
   @override
   void dispose() {
-    _subscription?.cancel();
+    _connectivityManager.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Always show child if ignoreOfflineState is true
     if (widget.ignoreOfflineState) {
       return widget.child;
     }
 
-    switch (_connectivityStatus) {
-      case ConnectivityStatus.online:
-        return widget.child;
-      case ConnectivityStatus.offline:
-        return widget.offlineWidget ?? _buildDefaultOfflineWidget();
-      case ConnectivityStatus.unknown:
-        if (widget.showLoadingOnUnknown) {
-          return widget.unknownWidget ?? _buildDefaultUnknownWidget();
-        }
-        return widget.child;
+    // Show appropriate widget based on connectivity status
+    if (_connectivityStatus == ConnectivityStatus.online) {
+      return widget.child;
+    } else {
+      // If no custom offline widget is provided, import and use the default NoInternetPage
+      if (widget.offlineWidget != null) {
+        return widget.offlineWidget!;
+      } else {
+        // Import dynamically to avoid circular dependencies
+        return _buildDefaultOfflineWidget();
+      }
     }
   }
 
   Widget _buildDefaultOfflineWidget() {
-    return Material(
-      child: NoInternetPage(
-        onRetry: () async {
-          await _connectivityManager.checkNow();
-        },
-      ),
-    );
-  }
-
-  Widget _buildDefaultUnknownWidget() {
-    return const Material(
-      child: Center(
-        child: CircularProgressIndicator(),
-      ),
+    // Import dynamically to avoid circular dependencies
+    return Builder(
+      builder: (context) {
+        // Use NoInternetPage with retry functionality
+        return Material(
+          child: GestureDetector(
+            onTap: () {
+              // Manual connectivity check on tap
+              _connectivityManager.checkNow();
+            },
+            child: Stack(
+              children: [
+                // Import the NoInternetPage from the same directory
+                // We use dynamic import to avoid circular dependencies
+                NoInternetPage(
+                  onRetry: () {
+                    // Manual connectivity check on retry button press
+                    _connectivityManager.checkNow();
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
