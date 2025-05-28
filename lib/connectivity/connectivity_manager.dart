@@ -1,13 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'connectivity_checker.dart';
 
-// Conditional import - this is the correct way
-import 'platform/connectivity_checker_stub.dart'
-    if (dart.library.io) 'platform/connectivity_checker_io.dart'
-    if (dart.library.html) 'platform/connectivity_checker_web.dart';
-
-enum ConnectivityStatus { online, offline }
+enum ConnectivityStatus { online, offline, unknown }
 
 class ConnectivityManager {
   static final ConnectivityManager _instance = ConnectivityManager._internal();
@@ -18,84 +13,53 @@ class ConnectivityManager {
       StreamController<ConnectivityStatus>.broadcast();
   Stream<ConnectivityStatus> get statusStream => _connectivityController.stream;
 
-  ConnectivityStatus _currentStatus = ConnectivityStatus.online;
+  ConnectivityStatus _currentStatus = ConnectivityStatus.unknown;
   ConnectivityStatus get currentStatus => _currentStatus;
 
   Timer? _periodicCheckTimer;
-  StreamSubscription? _connectivitySubscription;
+  StreamSubscription<bool>? _connectivitySubscription;
   bool _isInitialized = false;
+  late final ConnectivityChecker _checker;
 
-  void initialize({Duration checkInterval = const Duration(seconds: 3)}) {
+  void initialize({
+    Duration checkInterval = const Duration(seconds: 10),
+    Duration quickCheckTimeout = const Duration(seconds: 5),
+    List<String>? customTestUrls,
+  }) {
     if (_isInitialized) return;
     _isInitialized = true;
+
+    _checker = ConnectivityChecker(
+      checkInterval: checkInterval,
+      quickCheckTimeout: quickCheckTimeout,
+      testUrls: customTestUrls,
+    );
 
     // Check initial connectivity
     _checkConnectivity();
 
-    if (kIsWeb) {
-      _initializeWebConnectivity(checkInterval);
-    } else {
-      _initializeMobileConnectivity(checkInterval);
-    }
-  }
+    // Subscribe to connectivity changes
+    _connectivitySubscription = _checker.onConnectivityChanged.listen(
+      (isOnline) {
+        _updateConnectionStatus(
+          isOnline ? ConnectivityStatus.online : ConnectivityStatus.offline,
+        );
+      },
+      onError: (error) {
+        _updateConnectionStatus(ConnectivityStatus.offline);
+      },
+    );
 
-  void _initializeWebConnectivity(Duration checkInterval) {
-    try {
-      _updateConnectionStatus(ConnectivityCheckerImpl.isOnline
-          ? ConnectivityStatus.online
-          : ConnectivityStatus.offline);
-
-      _connectivitySubscription =
-          ConnectivityCheckerImpl.onConnectivityChanged.listen(
-        (isOnline) {
-          _updateConnectionStatus(isOnline
-              ? ConnectivityStatus.online
-              : ConnectivityStatus.offline);
-        },
-      );
-
-      // Less frequent checks for web since we have event listeners
-      _periodicCheckTimer = Timer.periodic(
-        const Duration(seconds: 3),
-        (_) => _checkConnectivity(),
-      );
-    } catch (e) {
-      _periodicCheckTimer = Timer.periodic(
-        checkInterval,
-        (_) => _checkConnectivity(),
-      );
-    }
-  }
-
-  void _initializeMobileConnectivity(Duration checkInterval) {
-    try {
-      // Subscribe to connectivity changes from the platform implementation
-      _connectivitySubscription =
-          ConnectivityCheckerImpl.onConnectivityChanged.listen(
-        (isOnline) {
-          _updateConnectionStatus(isOnline
-              ? ConnectivityStatus.online
-              : ConnectivityStatus.offline);
-        },
-      );
-
-      // Additional periodic checks for mobile (less frequent since platform handles most detection)
-      _periodicCheckTimer = Timer.periodic(
-        const Duration(seconds: 3), // Less frequent
-        (_) => _checkConnectivity(),
-      );
-    } catch (e) {
-      // Fallback to periodic checks only
-      _periodicCheckTimer = Timer.periodic(
-        checkInterval,
-        (_) => _checkConnectivity(),
-      );
-    }
+    // Periodic checks as backup
+    _periodicCheckTimer = Timer.periodic(
+      checkInterval,
+      (_) => _checkConnectivity(),
+    );
   }
 
   Future<void> _checkConnectivity() async {
     try {
-      final isConnected = await ConnectivityCheckerImpl.checkConnectivity();
+      final isConnected = await _checker.checkConnectivity();
       _updateConnectionStatus(
         isConnected ? ConnectivityStatus.online : ConnectivityStatus.offline,
       );
@@ -107,6 +71,19 @@ class ConnectivityManager {
   Future<ConnectivityStatus> checkNow() async {
     await _checkConnectivity();
     return _currentStatus;
+  }
+
+  Future<ConnectivityStatus> quickCheck() async {
+    try {
+      final isConnected = await _checker.quickConnectivityTest();
+      _updateConnectionStatus(
+        isConnected ? ConnectivityStatus.online : ConnectivityStatus.offline,
+      );
+      return _currentStatus;
+    } catch (e) {
+      _updateConnectionStatus(ConnectivityStatus.offline);
+      return ConnectivityStatus.offline;
+    }
   }
 
   void _updateConnectionStatus(ConnectivityStatus status) {
@@ -121,17 +98,12 @@ class ConnectivityManager {
   void dispose() {
     _periodicCheckTimer?.cancel();
     _connectivitySubscription?.cancel();
+
     if (!_connectivityController.isClosed) {
       _connectivityController.close();
     }
 
-    // Cleanup platform-specific resources
-    if (!kIsWeb) {
-      try {
-        ConnectivityCheckerImpl.dispose();
-      } catch (_) {}
-    }
-
+    _checker.dispose();
     _isInitialized = false;
   }
 }

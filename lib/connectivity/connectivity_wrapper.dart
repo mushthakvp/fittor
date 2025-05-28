@@ -1,3 +1,4 @@
+// lib/connectivity/connectivity_wrapper.dart
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -8,17 +9,25 @@ import 'no_internet_page.dart';
 class ConnectivityWrapper extends StatefulWidget {
   final Widget child;
   final Widget? offlineWidget;
+  final Widget? unknownWidget;
   final bool ignoreOfflineState;
   final Function(ConnectivityStatus)? onConnectivityChanged;
   final Duration checkInterval;
+  final Duration quickCheckTimeout;
+  final List<String>? customTestUrls;
+  final bool showLoadingOnUnknown;
 
   const ConnectivityWrapper({
     super.key,
     required this.child,
     this.offlineWidget,
+    this.unknownWidget,
     this.ignoreOfflineState = false,
     this.onConnectivityChanged,
-    this.checkInterval = const Duration(seconds: 5),
+    this.checkInterval = const Duration(seconds: 10),
+    this.quickCheckTimeout = const Duration(seconds: 5),
+    this.customTestUrls,
+    this.showLoadingOnUnknown = true,
   });
 
   @override
@@ -36,9 +45,18 @@ class _ConnectivityWrapperState extends State<ConnectivityWrapper> {
     _connectivityManager = ConnectivityManager();
     _connectivityStatus = _connectivityManager.currentStatus;
 
-    _connectivityManager.initialize(checkInterval: widget.checkInterval);
-    _subscription =
-        _connectivityManager.statusStream.listen(_updateConnectivityStatus);
+    _connectivityManager.initialize(
+      checkInterval: widget.checkInterval,
+      quickCheckTimeout: widget.quickCheckTimeout,
+      customTestUrls: widget.customTestUrls,
+    );
+
+    _subscription = _connectivityManager.statusStream.listen(
+      _updateConnectivityStatus,
+      onError: (error) {
+        _updateConnectivityStatus(ConnectivityStatus.offline);
+      },
+    );
   }
 
   void _updateConnectivityStatus(ConnectivityStatus status) {
@@ -62,24 +80,33 @@ class _ConnectivityWrapperState extends State<ConnectivityWrapper> {
       return widget.child;
     }
 
-    if (_connectivityStatus == ConnectivityStatus.online) {
-      return widget.child;
-    } else {
-      return widget.offlineWidget ?? _buildDefaultOfflineWidget();
+    switch (_connectivityStatus) {
+      case ConnectivityStatus.online:
+        return widget.child;
+      case ConnectivityStatus.offline:
+        return widget.offlineWidget ?? _buildDefaultOfflineWidget();
+      case ConnectivityStatus.unknown:
+        if (widget.showLoadingOnUnknown) {
+          return widget.unknownWidget ?? _buildDefaultUnknownWidget();
+        }
+        return widget.child;
     }
   }
 
   Widget _buildDefaultOfflineWidget() {
     return Material(
-      child: GestureDetector(
-        onTap: () {
-          _connectivityManager.checkNow();
+      child: NoInternetPage(
+        onRetry: () async {
+          await _connectivityManager.checkNow();
         },
-        child: NoInternetPage(
-          onRetry: () {
-            _connectivityManager.checkNow();
-          },
-        ),
+      ),
+    );
+  }
+
+  Widget _buildDefaultUnknownWidget() {
+    return const Material(
+      child: Center(
+        child: CircularProgressIndicator(),
       ),
     );
   }
