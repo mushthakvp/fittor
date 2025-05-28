@@ -1,10 +1,12 @@
 import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
 
-import '../controller/sample_controller.dart';
 import '../screen/readmore.dart';
+import 'counter_section.dart';
 import 'currency.dart';
 import 'demo_api.dart';
+import 'selectors_section.dart';
+import 'user_section.dart';
 
 class FittorView extends StatefulWidget {
   const FittorView({super.key});
@@ -25,104 +27,22 @@ class _FittorViewState extends State<FittorView> {
           style: TextStyle(color: Colors.white),
         ),
       ),
-      body: Center(
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(context.p12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Spacer(),
             30.h,
             const Text(
               'Fittor State Management Example',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             30.h,
-            FitBuilder<SampleController>(
-              controller: Fit.find<SampleController>(),
-              builder: (context, ctrl) {
-                return Container(
-                  padding: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.blue),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    children: [
-                      const Text('Builder WITHOUT Tag'),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Count: ${ctrl.count}',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-            20.h,
-            FitBuilder<SampleController>(
-              tag: 'tag2',
-              controller: Fit.find<SampleController>(),
-              builder: (context, ctrl) {
-                return Container(
-                  padding: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.red),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    children: [
-                      const Text('Builder WITH Tag2'),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Count: ${ctrl.count} ',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-            30.h,
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              alignment: WrapAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed:
-                      () => Fit.find<SampleController>().incrementNormal(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Update No-Tag Only'),
-                ),
-                ElevatedButton(
-                  onPressed: () => Fit.find<SampleController>().incrementTag2(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Update Tag2 Only'),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    Fit.find<SampleController>().incrementAll();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Update All'),
-                ),
-              ],
-            ),
+            SizedBox(width: context.wp(95), child: CounterSection()),
+            10.h,
+            SizedBox(width: context.wp(95), child: UserSection()),
+            10.h,
+            SizedBox(width: context.wp(95), child: SelectorsSection()),
             10.h,
             ElevatedButton(
               onPressed: () {
@@ -169,7 +89,7 @@ class _FittorViewState extends State<FittorView> {
               ),
               child: const Text('Demo API'),
             ),
-            const Spacer(),
+            10.h,
             Text(
               'Powered By: Fittor',
               style: TextStyle(

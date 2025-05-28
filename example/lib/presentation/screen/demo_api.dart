@@ -1,4 +1,4 @@
-import 'package:fittor/state/fit_control_core.dart';
+import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
 import 'package:test/presentation/controller/api_controller.dart';
 

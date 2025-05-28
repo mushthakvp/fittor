@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:fittor/fittor.dart';
 import 'package:flutter/cupertino.dart';
 
-class ApiController extends FitController {
+class ApiController extends FitState {
   final client = FittorClient.instance;
 
   Future<void> getPosts() async {

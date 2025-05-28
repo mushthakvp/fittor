@@ -14,8 +14,8 @@ class FittorApp extends StatelessWidget with FittorAppMixin {
 
   @override
   Widget responsive(BuildContext context) {
-    return FitInitializer(
-      initialBindings: [AppBindings()],
+    return FitExplore(
+      fitStates: AppBindings(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         home: ConnectivityWrapper(
