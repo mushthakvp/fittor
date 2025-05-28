@@ -1,7 +1,10 @@
 // lib/api/platform/web_adapter.dart
 import 'dart:async';
-import 'dart:html' as html;
+import 'dart:convert';
+import 'dart:js_interop';
 import 'dart:typed_data';
+
+import 'package:web/web.dart' as web;
 
 import '../models/exceptions.dart';
 import '../models/headers.dart';
@@ -18,113 +21,103 @@ class WebAdapter implements PlatformAdapter {
       FittorRequest request, Stopwatch stopwatch) async {
     final completer = Completer<FittorResponse>();
 
-    final xhr = html.HttpRequest();
+    final xhr = web.XMLHttpRequest();
 
     // Set timeout
     final timeout = request.timeout ?? const Duration(seconds: 30);
     xhr.timeout = timeout.inMilliseconds;
 
-    // Set response type to handle binary data properly
-    xhr.responseType = 'arraybuffer';
+    // Use text response type for simplicity and compatibility
+    xhr.responseType = 'text';
 
-    // Handle completion
-    xhr.onLoad.listen((_) {
+    // Handle load event
+    xhr.onload = (web.Event event) {
       stopwatch.stop();
 
       try {
         final responseHeaders = FittorHeaders();
-        xhr.responseHeaders.forEach((key, value) {
-          responseHeaders.set(key, value);
-        });
-
-        // Handle response body properly based on response type
-        Uint8List bodyBytes;
-        if (xhr.response != null) {
-          if (xhr.response is ByteBuffer) {
-            // For arraybuffer response type
-            bodyBytes = Uint8List.view(xhr.response as ByteBuffer);
-          } else if (xhr.response is String) {
-            // Fallback for text responses
-            final responseText = xhr.response as String;
-            bodyBytes = Uint8List.fromList(responseText.codeUnits);
-          } else if (xhr.response is List<int>) {
-            bodyBytes = Uint8List.fromList(xhr.response as List<int>);
-          } else {
-            // Last resort - convert to string then to bytes
-            final responseText = xhr.response.toString();
-            bodyBytes = Uint8List.fromList(responseText.codeUnits);
+        final allHeaders = xhr.getAllResponseHeaders();
+        if (allHeaders.isNotEmpty) {
+          final headerLines = allHeaders.split('\r\n');
+          for (final line in headerLines) {
+            if (line.trim().isNotEmpty && line.contains(':')) {
+              final colonIndex = line.indexOf(':');
+              final key = line.substring(0, colonIndex).trim();
+              final value = line.substring(colonIndex + 1).trim();
+              if (key.isNotEmpty) {
+                responseHeaders.set(key, value);
+              }
+            }
           }
-        } else {
-          bodyBytes = Uint8List(0);
         }
 
-        final response = FittorResponse(
-          statusCode: xhr.status ?? 0,
-          statusMessage: xhr.statusText ?? '',
+        // Get response body as text and convert to bytes
+        final responseText = xhr.responseText;
+        final bodyBytes = Uint8List.fromList(utf8.encode(responseText));
+
+        final fittorResponse = FittorResponse(
+          statusCode: xhr.status,
+          statusMessage: xhr.statusText,
           headers: responseHeaders,
           bodyBytes: bodyBytes,
           requestDuration: stopwatch.elapsed,
         );
 
-        completer.complete(response);
+        completer.complete(fittorResponse);
       } catch (e) {
         stopwatch.stop();
         completer.completeError(
           FittorNetworkException('Failed to process response: $e', e),
         );
       }
-    });
+    }.toJS;
 
-    // Handle errors
-    xhr.onError.listen((_) {
+    // Handle error
+    xhr.onerror = (web.Event event) {
       stopwatch.stop();
+      final errorMessage =
+          xhr.statusText.isNotEmpty ? xhr.statusText : 'Network error occurred';
       completer.completeError(
-        FittorNetworkException(
-          'Network error occurred: ${xhr.statusText ?? "Unknown error"} (${xhr.status ?? 0})',
-        ),
+        FittorNetworkException('$errorMessage (${xhr.status})'),
       );
-    });
+    }.toJS;
 
-    xhr.onTimeout.listen((_) {
+    // Handle timeout
+    xhr.ontimeout = (web.Event event) {
       stopwatch.stop();
       completer.completeError(
         FittorTimeoutException('Request timeout', timeout),
       );
-    });
+    }.toJS;
 
     // Handle abort
-    xhr.onAbort.listen((_) {
+    xhr.onabort = (web.Event event) {
       stopwatch.stop();
       completer.completeError(
         const FittorNetworkException('Request was aborted'),
       );
-    });
+    }.toJS;
 
     try {
-      // Open request with proper URL
+      // Open the request
       xhr.open(request.methodName, request.uri.toString());
 
-      // Set headers after opening the request
+      // Set headers
       request.headers.toMap().forEach((key, value) {
         try {
           xhr.setRequestHeader(key, value);
         } catch (e) {
-          // Some headers might be restricted by the browser, ignore them
-          // e.g., User-Agent, Host, etc.
+          // Some headers are restricted by browsers, silently ignore
         }
       });
 
-      // Send request with proper body handling
+      // Send the request
       if (request.body != null) {
         if (request.body is String) {
-          xhr.send(request.body);
-        } else if (request.body is List<int>) {
-          xhr.send(Uint8List.fromList(request.body));
-        } else if (request.body is Uint8List) {
-          xhr.send(request.body);
+          xhr.send((request.body as String).toJS);
         } else {
-          // Convert other types to string
-          xhr.send(request.body.toString());
+          // Convert other body types to string for simplicity
+          xhr.send(request.body.toString().toJS);
         }
       } else {
         xhr.send();
@@ -141,7 +134,7 @@ class WebAdapter implements PlatformAdapter {
 
   @override
   void close() {
-    // No cleanup needed for web
+    // No cleanup needed for web platform
   }
 }
 

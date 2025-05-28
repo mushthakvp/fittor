@@ -35,14 +35,12 @@ class ConnectivityManager {
 
   // URLs to ping for connectivity check (using different approaches)
   final List<String> _lookupAddresses = [
-    'https://www.google.com/generate_204', // Google's connectivity check endpoint
     'https://cloudflare.com/cdn-cgi/trace', // Cloudflare's trace endpoint
     'https://httpbin.org/status/200', // Simple status endpoint
   ];
 
   // Web-specific endpoints (CORS-friendly)
   final List<String> _webLookupAddresses = [
-    'https://www.google.com/generate_204', // Google's endpoint allows CORS
     'https://httpbin.org/get', // Httpbin allows CORS
     'https://jsonplaceholder.typicode.com/posts/1', // Public API that allows CORS
   ];

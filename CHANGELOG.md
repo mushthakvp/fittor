@@ -1,3 +1,8 @@
+## 1.1.0+1 (Stable)
+
+- Fittor Now Stable `(All Platforms)`
+- Api Client Now Available On Web `(WASM)`
+
 ## 1.1.0 (Stable)
 
 - Fittor Now Stable `(All Platforms)`
