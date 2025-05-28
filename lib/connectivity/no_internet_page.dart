@@ -27,60 +27,44 @@ class NoInternetPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor ?? Colors.white,
+      appBar: AppBar(
+        backgroundColor: backgroundColor ?? Colors.white,
+        foregroundColor: buttonColor ?? Colors.black,
+        leading: const BackButton(),
+        elevation: 0,
+      ),
       body: Padding(
-        padding: EdgeInsets.all(context.p20),
+        padding: EdgeInsets.all(context.p16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Center(
-              child: Image(
-                image: AssetImage('assets/no_internet.jpg', package: 'fittor'),
-                width: context.wp(80),
+              child: Icon(
+                Icons.wifi_off_rounded,
+                size: context.hp(10),
+                color: Colors.grey[400],
               ),
             ),
-            30.h,
+            20.h,
             Text(
               title,
               style: TextStyle(
-                fontSize: context.fs24,
+                fontSize: context.fs28,
                 fontWeight: FontWeight.bold,
                 color: textColor ?? Colors.black,
               ),
             ),
-            8.h,
+            5.h,
             Text(
               message,
               style: TextStyle(
                 fontSize: context.fs14,
-                color: textColor ?? Colors.black,
+                color: textColor ?? Colors.grey[600],
               ),
               textAlign: TextAlign.center,
             ),
-            30.h,
-            if (onRetry != null)
-              GestureDetector(
-                onTap: onRetry,
-                child: Container(
-                  width: context.wp(100),
-                  height: context.hp(6),
-                  decoration: BoxDecoration(
-                    color: buttonColor,
-                    borderRadius: BorderRadius.circular(context.p12),
-                    border: Border.all(color: Colors.black, width: 1),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    retryButtonText,
-                    style: TextStyle(
-                      fontSize: context.fs16,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-              ),
-            16.h,
-            if (child != null) child!,
+            70.h,
           ],
         ),
       ),

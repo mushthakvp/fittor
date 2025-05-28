@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 
@@ -14,9 +13,10 @@ class ConnectivityManager {
   ConnectivityManager._internal();
 
   final client = FittorClient(
-    defaultTimeout: const Duration(seconds: 45),
-    enableLogging: true,
-    useWasm: true, // Enable WASM support for web
+    defaultTimeout:
+        const Duration(seconds: 10), // Reduced timeout for connectivity checks
+    enableLogging: kDebugMode, // Enable logging only in debug mode
+    useWasm: false, // Disable WASM for better compatibility
   );
 
   // Stream controller for broadcasting connectivity status
@@ -33,11 +33,18 @@ class ConnectivityManager {
   // Timer for periodic checks
   Timer? _periodicCheckTimer;
 
-  // URLs to ping for connectivity check
+  // URLs to ping for connectivity check (using different approaches)
   final List<String> _lookupAddresses = [
-    'google.com',
-    'apple.com',
-    'cloudflare.com',
+    'https://www.google.com/generate_204', // Google's connectivity check endpoint
+    'https://cloudflare.com/cdn-cgi/trace', // Cloudflare's trace endpoint
+    'https://httpbin.org/status/200', // Simple status endpoint
+  ];
+
+  // Web-specific endpoints (CORS-friendly)
+  final List<String> _webLookupAddresses = [
+    'https://www.google.com/generate_204', // Google's endpoint allows CORS
+    'https://httpbin.org/get', // Httpbin allows CORS
+    'https://jsonplaceholder.typicode.com/posts/1', // Public API that allows CORS
   ];
 
   // Initialize connectivity monitoring
@@ -54,51 +61,89 @@ class ConnectivityManager {
   // Check current connectivity status
   Future<void> _checkConnectivity() async {
     if (kIsWeb) {
-      // For web platform, we can't easily check connectivity
-      // So we'll assume it's online
-      _updateConnectionStatus(ConnectivityStatus.online);
-      return;
-    }
-
-    try {
-      // Try to lookup multiple hosts to ensure reliable connectivity check
-      bool isConnected = false;
-
-      for (final address in _lookupAddresses) {
-        try {
-          // final result = await InternetAddress.lookup(
-          //   address,
-          // ).timeout(const Duration(seconds: 3));
-
-          // if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-          //   isConnected = true;
-          //   break;
-          // }
-          final result = await client.get(
-            'https://$address',
-            headers: {'User-Agent': 'Fittor Connectivity Check'},
-          );
-          log('Connectivity check result: ${result.statusCode} for $address (${result.body})');
-          if (result.isServerError) {
-            isConnected = true;
-            break;
-          }
-          throw Exception('Failed to connect to $address');
-        } catch (_) {
-          // Continue trying with other addresses
-          continue;
-        }
-      }
-
-      _updateConnectionStatus(
-        isConnected ? ConnectivityStatus.online : ConnectivityStatus.offline,
-      );
-    } catch (_) {
-      _updateConnectionStatus(ConnectivityStatus.offline);
+      // For web platform, use web-specific connectivity check
+      await _checkWebConnectivity();
+    } else {
+      // For mobile/desktop platforms, use mobile connectivity check
+      await _checkMobileConnectivity();
     }
   }
 
-  // Force a connectivity check (can be called manually)
+  // Web-specific connectivity check
+  Future<void> _checkWebConnectivity() async {
+    bool isConnected = false;
+
+    // Use web-friendly endpoints that allow CORS
+    for (final address in _webLookupAddresses) {
+      try {
+        final result = await client.get(
+          address,
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Accept': '*/*',
+          },
+        );
+
+        // For web, consider any successful HTTP response as connected
+        // Even 404 or other errors mean we have connectivity
+        if (result.statusCode > 0 && result.statusCode < 600) {
+          isConnected = true;
+          break;
+        }
+      } catch (e) {
+        continue;
+      }
+    }
+
+    // Fallback: try a simple fetch to a reliable endpoint
+    if (!isConnected) {
+      try {
+        final result = await client.get(
+          'https://www.google.com/favicon.ico',
+          headers: {'Cache-Control': 'no-cache'},
+        );
+
+        if (result.statusCode > 0) {
+          isConnected = true;
+        }
+      } catch (e) {
+        debugPrint('Fallback connectivity check failed: $e');
+      }
+    }
+
+    _updateConnectionStatus(
+      isConnected ? ConnectivityStatus.online : ConnectivityStatus.offline,
+    );
+  }
+
+  // Mobile-specific connectivity check
+  Future<void> _checkMobileConnectivity() async {
+    bool isConnected = false;
+
+    for (final address in _lookupAddresses) {
+      try {
+        final result = await client.get(
+          address,
+          headers: {
+            'User-Agent': 'Fittor-Connectivity-Check/1.0',
+            'Cache-Control': 'no-cache',
+          },
+        );
+        if (result.statusCode > 0 && result.statusCode < 600) {
+          isConnected = true;
+          break;
+        }
+      } catch (e) {
+        debugPrint('HTTP connectivity check failed for $address: $e');
+        continue;
+      }
+    }
+
+    _updateConnectionStatus(
+      isConnected ? ConnectivityStatus.online : ConnectivityStatus.offline,
+    );
+  }
+
   Future<ConnectivityStatus> checkNow() async {
     await _checkConnectivity();
     return _currentStatus;
@@ -108,7 +153,9 @@ class ConnectivityManager {
   void _updateConnectionStatus(ConnectivityStatus status) {
     // Only broadcast if status actually changed
     if (_currentStatus != status) {
+      final oldStatus = _currentStatus;
       _currentStatus = status;
+      debugPrint('Connectivity status changed: $oldStatus -> $status');
       _connectivityController.add(status);
     }
   }
@@ -117,5 +164,6 @@ class ConnectivityManager {
   void dispose() {
     _periodicCheckTimer?.cancel();
     _connectivityController.close();
+    client.close();
   }
 }

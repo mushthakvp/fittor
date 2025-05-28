@@ -22,38 +22,11 @@ class MobileAdapter implements PlatformAdapter {
   Future<FittorResponse> performRequest(
       FittorRequest request, Stopwatch stopwatch) async {
     try {
-      // Create HTTP request - Fix: Use proper method conversion
-      final HttpClientRequest httpRequest;
-      switch (request.method) {
-        case HttpMethod.get:
-          httpRequest = await _httpClient.get(
-              request.uri.host, request.uri.port, request.uri.path);
-          break;
-        case HttpMethod.post:
-          httpRequest = await _httpClient.post(
-              request.uri.host, request.uri.port, request.uri.path);
-          break;
-        case HttpMethod.put:
-          httpRequest = await _httpClient.put(
-              request.uri.host, request.uri.port, request.uri.path);
-          break;
-        case HttpMethod.delete:
-          httpRequest = await _httpClient.delete(
-              request.uri.host, request.uri.port, request.uri.path);
-          break;
-        case HttpMethod.patch:
-          httpRequest = await _httpClient.patch(
-              request.uri.host, request.uri.port, request.uri.path);
-          break;
-        case HttpMethod.head:
-          httpRequest = await _httpClient.head(
-              request.uri.host, request.uri.port, request.uri.path);
-          break;
-        case HttpMethod.options:
-          httpRequest = await _httpClient.open(
-              'OPTIONS', request.uri.host, request.uri.port, request.uri.path);
-          break;
-      }
+      // Create HTTP request using the full URI to preserve scheme (HTTP/HTTPS)
+      final HttpClientRequest httpRequest = await _httpClient.openUrl(
+        request.methodName,
+        request.uri,
+      );
 
       // Set timeout
       final timeout = request.timeout ?? const Duration(seconds: 30);
@@ -80,7 +53,7 @@ class MobileAdapter implements PlatformAdapter {
         }
       }
 
-      // Send request and get response
+      // Send request and get response with timeout
       final httpResponse = await httpRequest.close().timeout(timeout);
 
       // Read response body

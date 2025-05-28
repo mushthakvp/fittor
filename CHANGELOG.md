@@ -1,3 +1,19 @@
+## 1.1.0 (Stable)
+
+- Fittor Now Stable `(All Platforms)`
+- Fittor Api Client Now Available On Web `(WASM)`
+- Fittor Api Client Now Available On Desktop `(Windows, MacOS, Linux)`
+- Fittor Api Client Now Available On Mobile `(Android, iOS)`
+- Fittor Connectivity Now Available On Web `(WASM)`
+- Fittor Connectivity Now Available On Desktop `(Windows, MacOS, Linux)`
+- Fittor Connectivity Now Available On Mobile `(Android, iOS)`
+- Fittor Currency Converter Now Available On Web `(WASM)`
+- Fittor Currency Converter Now Available On Desktop `(Windows, MacOS, Linux)`
+- Fittor Currency Converter Now Available On Mobile `(Android, iOS)`
+- Fittor Responsive Helper Now Available On Web `(WASM)`
+- Fittor Responsive Helper Now Available On Desktop `(Windows, MacOS, Linux)`
+- Fittor Responsive Helper Now Available On Mobile `(Android, iOS)`
+
 ## 1.0.29
 
 - Currency Api Change to Fittor Api
