@@ -1,4 +1,4 @@
-## 1.1.0+2 (Stable)
+## 1.1.1 (Stable)
 
 - Fittor Now Stable `(All Platforms)`
 - State Manager Now Available On Web `(WASM)`
