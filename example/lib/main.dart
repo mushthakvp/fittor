@@ -22,6 +22,7 @@ class FittorApp extends StatelessWidget with FittorAppMixin {
           onConnectivityChanged: (ConnectivityStatus status) {
             debugPrint('Connectivity changed: $status');
           },
+          // ignoreOfflineState: true,
           child: const FittorView(),
         ),
       ),

@@ -1,3 +1,10 @@
+## 1.1.2 (Stable)
+
+- Fittor Syntax Visualizer Now Available On Web `(WASM)`
+- Fittor Syntax Visualizer Now Available On Desktop `(Windows, MacOS, Linux)`
+- Fittor Syntax Visualizer Now Available On Mobile `(Android, iOS)`
+- `FittorCode` Widget
+
 ## 1.1.1 (Stable)
 
 - Fittor Now Stable `(All Platforms)`

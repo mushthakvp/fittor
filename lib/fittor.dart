@@ -2,6 +2,7 @@ library;
 
 export 'api/index.dart';
 export 'blur_ash/index.dart';
+export 'code_view/index.dart';
 export 'connectivity/index.dart';
 export 'currency/index.dart';
 export 'fit-state/index.dart';
