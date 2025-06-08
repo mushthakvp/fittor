@@ -5,6 +5,7 @@ import '../screen/readmore.dart';
 import 'counter_section.dart';
 import 'currency.dart';
 import 'demo_api.dart';
+import 'demo_code.dart';
 import 'selectors_section.dart';
 import 'user_section.dart';
 
@@ -90,6 +91,20 @@ class _FittorViewState extends State<FittorView> {
               child: const Text('Demo API'),
             ),
             10.h,
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const DemoCodeView()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Demo Code View'),
+            ),
+            20.h,
             Text(
               'Powered By: Fittor',
               style: TextStyle(
