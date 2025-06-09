@@ -31,6 +31,14 @@ class _DemoCodeViewState extends State<DemoCodeView> {
         child: Column(
           children: [
             FittorCode(language: 'dart', title: 'Demo Code', code: co),
+            20.h,
+            FittorCode(
+              code: 'print("Hello, Python!")',
+              language: 'python',
+              launch: true,
+              onLaunch: () => debugPrint('Launching'),
+              url: 'https://www.python.org/',
+            ),
           ],
         ),
       ),

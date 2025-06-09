@@ -1,3 +1,3 @@
 library;
 
-export 'code_view.dart';
+export 'fittor_code.dart';

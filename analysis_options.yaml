@@ -3,7 +3,6 @@ analyzer:
   errors:
     avoid_print: ignore
     avoid_web_libraries_in_flutter: ignore
-    deprecated_member_use: ignore
   # errors:
     # deprecated_member_use: ignore
 

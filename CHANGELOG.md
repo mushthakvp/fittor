@@ -1,3 +1,36 @@
+## 1.1.3 (Stable)
+
+- Fittor Syntax Visualizer Now Available On Web `(WASM)`
+- Fittor Syntax Visualizer Now Available On Desktop `(Windows, MacOS, Linux)`
+- Fittor Syntax Visualizer Now Available On Mobile `(Android, iOS)`
+- ***Experimental***
+```yaml
+dependencies:
+  fittor_code: ^1.0.0
+  url_launcher: ^6.2.0
+```
+```dart
+import 'package:fittor_code/fittor_code.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+FittorCode(
+  code: '''
+console.log("Hello, World!");
+const numbers = [1, 2, 3, 4, 5];
+  ''',
+  language: 'javascript',
+  launch: true,
+  // Deprecated:
+  url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript',
+  onLaunch: () async {
+    final url = Uri.parse('https://developer.mozilla.org/en-US/docs/Web/JavaScript');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    }
+  },
+)
+```
+
 ## 1.1.2 (Stable)
 
 - Fittor Syntax Visualizer Now Available On Web `(WASM)`
