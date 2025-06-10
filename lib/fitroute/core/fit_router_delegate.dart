@@ -43,14 +43,14 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
     required String initialRoute,
     required FitRoute? notFoundRoute,
     required List<NavigatorObserver> observers,
-    required GlobalKey<NavigatorState> navigatorKey,
+    required GlobalKey<NavigatorState> navigatorKeys,
     required RouteStorage storage,
   })  : _routes = routes,
         _initialRoute = initialRoute,
         _notFoundRoute = notFoundRoute,
         _observers = observers,
         _storage = storage,
-        navigatorKey = navigatorKey {
+        navigatorKey = navigatorKeys {
     _initializeInitialRoute();
   }
 

@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import '../core/index.dart';
 import 'route_utils.dart';
 

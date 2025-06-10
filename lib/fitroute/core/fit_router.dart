@@ -1,9 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'fit_route.dart';
-import 'fit_page.dart';
 import 'fit_router_delegate.dart';
 import 'fit_route_information_parser.dart';
 import '../storage/index.dart';
@@ -50,7 +48,7 @@ class FitRouter {
       initialRoute: _initialRoute!,
       notFoundRoute: _notFoundRoute,
       observers: _observers,
-      navigatorKey: _navigatorKey!,
+      navigatorKeys: _navigatorKey!,
       storage: _storage,
     );
 
