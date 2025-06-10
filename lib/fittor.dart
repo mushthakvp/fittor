@@ -8,3 +8,4 @@ export 'currency/index.dart';
 export 'fit-state/index.dart';
 export 'read_more/index.dart';
 export 'src/index.dart';
+export 'fitroute/index.dart';
