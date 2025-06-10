@@ -82,7 +82,8 @@ class WebUrlUtils {
 
     try {
       // Check if navigation type indicates a reload
-      return web.window.performance.navigation.type == 1;
+      final performance = web.window.performance;
+      return performance.navigation.type == 1;
     } catch (e) {
       debugPrint('Error checking page refresh status: $e');
       return false;
@@ -168,7 +169,7 @@ class WebUrlUtils {
     if (!kIsWeb) return false;
 
     try {
-      return web.window.history.pushState != false;
+      return web.window.history.pushState != null;
     } catch (e) {
       debugPrint('History API not supported: $e');
       return false;

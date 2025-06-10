@@ -25,8 +25,9 @@ class WebStorage implements IStorage {
   bool get _isLocalStorageAvailable {
     try {
       if (!kIsWeb) return false;
-      web.window.localStorage.setItem('test', 'test');
-      web.window.localStorage.removeItem('test');
+      final localStorage = web.window.localStorage;
+      localStorage.setItem('test', 'test');
+      localStorage.removeItem('test');
       return true;
     } catch (e) {
       debugPrint('localStorage not available: $e');
@@ -38,8 +39,9 @@ class WebStorage implements IStorage {
   bool get _isSessionStorageAvailable {
     try {
       if (!kIsWeb) return false;
-      web.window.sessionStorage.setItem('test', 'test');
-      web.window.sessionStorage.removeItem('test');
+      final sessionStorage = web.window.sessionStorage;
+      sessionStorage.setItem('test', 'test');
+      sessionStorage.removeItem('test');
       return true;
     } catch (e) {
       debugPrint('sessionStorage not available: $e');

@@ -44,7 +44,7 @@ class MobileRouteUtils {
         false;
   }
 
-  /// Create a WillPopScope wrapper for handling back button
+  /// Create a PopScope wrapper for handling back button (replaces deprecated WillPopScope)
   static Widget wrapWithBackHandler({
     required Widget child,
     required BuildContext context,
@@ -52,8 +52,18 @@ class MobileRouteUtils {
     required void Function() pop,
     bool showExitDialog = true,
   }) {
-    return WillPopScope(
-      onWillPop: () => handleSystemBack(context, canPop, pop),
+    return PopScope(
+      canPop: false, // We handle the pop ourselves
+      // onPopInvoked: (bool didPop) async {
+      //   if (!didPop) {
+      //     await handleSystemBack(context, canPop, pop);
+      //   }
+      // },
+      onPopInvokedWithResult: (bool didPop, dynamic result) async {
+        if (!didPop) {
+          await handleSystemBack(context, canPop, pop);
+        }
+      },
       child: child,
     );
   }
@@ -85,8 +95,14 @@ class MobileRouteUtils {
       fullscreenDialog: fullscreenDialog,
       pageBuilder: (context, animation, secondaryAnimation) => child,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        // Create a temporary route for the transition builder
+        final route = PageRouteBuilder<T>(
+          settings: settings,
+          pageBuilder: (context, animation, secondaryAnimation) => child,
+        );
+
         return getPlatformTransition().buildTransitions(
-          null,
+          route,
           context,
           animation,
           secondaryAnimation,

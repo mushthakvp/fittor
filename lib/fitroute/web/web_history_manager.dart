@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:js_interop';
 import 'package:flutter/foundation.dart';
 import 'package:web/web.dart' as web;
 
@@ -14,8 +16,10 @@ class WebHistoryManager {
     if (!kIsWeb) return;
 
     try {
+      // Convert state to JSAny compatible format
+      final stateData = state != null ? jsonEncode(state).toJS : null;
       web.window.history.pushState(
-        state?.toString(),
+        stateData,
         '',
         path,
       );
@@ -29,8 +33,10 @@ class WebHistoryManager {
     if (!kIsWeb) return;
 
     try {
+      // Convert state to JSAny compatible format
+      final stateData = state != null ? jsonEncode(state).toJS : null;
       web.window.history.replaceState(
-        state?.toString(),
+        stateData,
         '',
         path,
       );
@@ -125,10 +131,13 @@ class WebHistoryManager {
     if (!kIsWeb) return;
 
     try {
-      web.window.addEventListener('popstate', (web.Event event) {
+      // Create a proper EventListener
+      web.EventListener listener = (web.Event event) {
         final path = currentPath;
         onPopstate(path);
-      });
+      }.toJS;
+
+      web.window.addEventListener('popstate', listener);
     } catch (e) {
       debugPrint('Error setting up popstate listener: $e');
     }
