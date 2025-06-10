@@ -68,29 +68,27 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
     return Navigator(
       key: navigatorKey,
       pages: _navigationStack.map((entry) => entry.page).toList(),
-      onPopPage: _onPopPage,
+      // Fixed: Use onDidRemovePage instead of deprecated onPopPage
+      onDidRemovePage: _onDidRemovePage,
       observers: _observers,
     );
   }
 
-  /// Handle pop page
-  bool _onPopPage(Route<dynamic> route, dynamic result) {
-    if (!route.didPop(result)) {
-      return false;
-    }
-
-    if (_navigationStack.isNotEmpty) {
-      _navigationStack.removeLast();
+  /// Handle page removal (replaces deprecated onPopPage)
+  void _onDidRemovePage(Page<Object?> page) {
+    // Find and remove the corresponding navigation entry
+    final index = _navigationStack.indexWhere((entry) => entry.page == page);
+    if (index != -1) {
+      _navigationStack.removeAt(index);
       _updateWebUrl();
       notifyListeners();
     }
-
-    return true;
   }
 
   @override
   Future<void> setNewRoutePath(RouteInformation routeInformation) async {
-    final path = routeInformation.location;
+    // Fixed: Use uri.path instead of deprecated location
+    final path = routeInformation.uri.path;
     final parsed = RouteUtils.parseUrlPath(path, _routes);
 
     if (parsed != null) {

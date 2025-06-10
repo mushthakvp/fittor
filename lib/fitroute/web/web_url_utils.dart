@@ -20,10 +20,6 @@ class WebUrlUtils {
 
   /// Parse URL path to extract route and parameters
   static ParsedRoute? parseUrlPath(String path, Map<String, FitRoute> routes) {
-    // Remove leading and trailing slashes for consistency
-    // final cleanPath = path.startsWith('/') ? path.substring(1) : path;
-    // final segments = cleanPath.split('/').where((s) => s.isNotEmpty).toList();
-
     // Try to match against each route
     for (final entry in routes.entries) {
       final routeName = entry.key;
@@ -169,7 +165,8 @@ class WebUrlUtils {
     if (!kIsWeb) return false;
 
     try {
-      return web.window.history.pushState != null;
+      // Fixed: Removed unnecessary null comparison
+      return true; // History API is supported in all modern browsers
     } catch (e) {
       debugPrint('History API not supported: $e');
       return false;

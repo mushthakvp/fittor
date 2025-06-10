@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../utils/route_utils.dart';
 import 'fit_route.dart';
-import '../utils/index.dart';
 
 /// Route information parser for FitRouter
 class FitRouteInformationParser
@@ -14,7 +14,8 @@ class FitRouteInformationParser
   @override
   Future<RouteInformation> parseRouteInformation(
       RouteInformation routeInformation) async {
-    final path = routeInformation.location;
+    // Fixed: Use uri.path instead of deprecated location
+    final path = routeInformation.uri.path;
 
     // Parse the URL path and extract route information
     final parsed = RouteUtils.parseUrlPath(path, _routes);
