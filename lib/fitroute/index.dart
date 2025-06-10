@@ -12,3 +12,6 @@ export 'storage/index.dart';
 
 // Utilities
 export 'utils/index.dart';
+
+// FitApp widget
+export 'fit_app.dart';
