@@ -34,5 +34,28 @@
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('copy', function(e) {
+      e.preventDefault();
+      return false;
+    });
+    
+    document.addEventListener('cut', function(e) {
+      e.preventDefault();
+      return false;
+    });
+    
+    document.addEventListener('paste', function(e) {
+      e.preventDefault();
+      return false;
+    });
+    
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      return false;
+    });
+  });
+</script>
 </body>
 </html>

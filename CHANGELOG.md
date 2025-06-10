@@ -1,3 +1,7 @@
+## 1.1.3+1
+
+- Fittor Syntax Visualizer Border Color Changed
+
 ## 1.1.3 (Stable)
 
 - Fittor Syntax Visualizer Now Available On Web `(WASM)`

@@ -26,6 +26,7 @@ class _DemoCodeViewState extends State<DemoCodeView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(title: const Text('Demo Code')),
       body: SingleChildScrollView(
         child: Column(

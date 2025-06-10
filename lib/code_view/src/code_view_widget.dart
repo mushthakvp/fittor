@@ -180,28 +180,26 @@ class _FittorCodeState extends State<FittorCode> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 8,
-      shadowColor: const Color.fromARGB(77, 156, 39, 176),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: FittorColorScheme.backgroundGradient,
+    return SelectionArea(
+      child: Card(
+        elevation: 8,
+        shadowColor: const Color.fromARGB(77, 156, 39, 176),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: FittorColorScheme.backgroundGradient,
+            ),
+            borderRadius: BorderRadius.circular(12),
           ),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: const Color.fromARGB(77, 156, 39, 176),
-            width: 1,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              buildHeader(),
+              buildCodeArea(),
+            ],
           ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            buildHeader(),
-            buildCodeArea(),
-          ],
         ),
       ),
     );
