@@ -24,6 +24,26 @@ class NavigationEntry {
   }
 }
 
+class _ContextAwarePage extends Page {
+  final FitRoute route;
+  final Map<String, dynamic> routeArguments;
+
+  const _ContextAwarePage({
+    required this.route,
+    required this.routeArguments,
+    super.key,
+    super.name,
+    super.arguments,
+  });
+
+  @override
+  Route createRoute(BuildContext context) {
+    // Create the actual page with the correct context
+    final fitPage = route.pageBuilder!(context, routeArguments);
+    return fitPage.createRoute(context);
+  }
+}
+
 /// Router delegate that manages navigation stack
 class FitRouterDelegate extends RouterDelegate<RouteInformation>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<RouteInformation> {
@@ -220,10 +240,19 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
   /// Create page for route
   Page _createPage(
       String routeName, FitRoute route, Map<String, dynamic> arguments) {
-    final key = ValueKey('$routeName-${arguments.hashCode}');
+    // Create a unique key to avoid duplicate GlobalKey issues
+    final key = ValueKey(
+        '$routeName-${arguments.hashCode}-${DateTime.now().microsecondsSinceEpoch}');
 
     if (route.pageBuilder != null) {
-      return route.pageBuilder!(navigatorKey.currentContext!, arguments);
+      // Fix: Create a wrapper page that calls pageBuilder with proper context
+      return _ContextAwarePage(
+        key: key,
+        name: routeName,
+        arguments: arguments,
+        route: route,
+        routeArguments: arguments,
+      );
     }
 
     // Create default page with route's transition settings
@@ -231,7 +260,9 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
       key: key,
       name: routeName,
       arguments: arguments,
-      child: route.builder(navigatorKey.currentContext!, arguments),
+      child: Builder(
+        builder: (context) => route.builder(context, arguments),
+      ),
       transitionType: _getTransitionType(route),
       transitionDuration:
           route.transitionDuration ?? const Duration(milliseconds: 300),
