@@ -1,10 +1,13 @@
 // lib/fitroute/fit_app.dart
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:web/web.dart' as web;
 
 import '../connectivity/connectivity_wrapper.dart';
 import 'core/index.dart';
+// Conditional import for web functionality
+import 'fit_app_interface.dart'
+    if (dart.library.js_interop) 'fit_app_web.dart'
+    if (dart.library.io) 'fit_app_stub.dart';
 import 'utils/platform_utils.dart';
 import 'utils/route_utils.dart';
 
@@ -63,10 +66,12 @@ class _FitAppState extends State<FitApp> {
   late FitRouter _router;
   String? _initialRouteFromUrl;
   bool _isInitialized = false;
+  late FitAppInterface _implementation;
 
   @override
   void initState() {
     super.initState();
+    _implementation = createFitAppImplementation();
     _processInitialUrl();
     _initializeRouter();
   }
@@ -75,24 +80,7 @@ class _FitAppState extends State<FitApp> {
   void _processInitialUrl() {
     if (!kIsWeb) return;
 
-    try {
-      final currentUrl = web.window.location.href;
-      final currentPath = web.window.location.pathname;
-      // Clean up hash-based URLs
-      if (currentUrl.contains('#/')) {
-        final hashPath = currentUrl.split('#/')[1];
-        final cleanPath = '/$hashPath';
-
-        // Replace the URL without the hash
-        web.window.history.replaceState(null, '', cleanPath);
-        _initialRouteFromUrl = _parsePathToRouteName(cleanPath);
-      } else if (currentPath != '/' && currentPath.isNotEmpty) {
-        // Direct path access
-        _initialRouteFromUrl = _parsePathToRouteName(currentPath);
-      }
-    } catch (e) {
-      debugPrint('Error processing initial URL: $e');
-    }
+    _initialRouteFromUrl = _implementation.processInitialUrl(widget.routes);
   }
 
   /// Parse path to determine route name
@@ -186,13 +174,7 @@ class _FitAppState extends State<FitApp> {
     // Get initial route information for web
     RouteInformation? initialRouteInfo;
     if (kIsWeb) {
-      final currentPath = web.window.location.pathname;
-      final currentSearch = web.window.location.search;
-      final fullPath = currentPath + currentSearch;
-
-      if (fullPath != '/' && fullPath.isNotEmpty) {
-        initialRouteInfo = RouteInformation(uri: Uri.parse(fullPath));
-      }
+      initialRouteInfo = _implementation.getInitialRouteInfo();
     }
 
     return MaterialApp.router(

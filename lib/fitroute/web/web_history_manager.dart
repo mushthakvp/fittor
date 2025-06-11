@@ -1,24 +1,20 @@
-// lib/fitroute/web/web_history_manager.dart
+// lib/fitroute/web/web_history_manager_web.dart
 import 'dart:convert';
 import 'dart:js_interop';
 
 import 'package:flutter/foundation.dart';
 import 'package:web/web.dart' as web;
 
-/// Manages browser history for web platform with improved integration
-class WebHistoryManager {
-  static WebHistoryManager? _instance;
-  static WebHistoryManager get instance =>
-      _instance ??= WebHistoryManager._internal();
+import 'web_history_manager_interface.dart';
 
-  WebHistoryManager._internal();
-
+/// Web-specific implementation of WebHistoryManagerInterface
+class WebHistoryManagerWeb implements WebHistoryManagerInterface {
   web.EventListener? _popstateListener;
   bool _isNavigating = false;
 
-  /// Push a new state to browser history
+  @override
   void pushState(String path, {Map<String, dynamic>? state}) {
-    if (!kIsWeb || _isNavigating) return;
+    if (_isNavigating) return;
 
     try {
       _isNavigating = true;
@@ -37,9 +33,9 @@ class WebHistoryManager {
     }
   }
 
-  /// Replace current state in browser history
+  @override
   void replaceState(String path, {Map<String, dynamic>? state}) {
-    if (!kIsWeb || _isNavigating) return;
+    if (_isNavigating) return;
 
     try {
       _isNavigating = true;
@@ -58,10 +54,8 @@ class WebHistoryManager {
     }
   }
 
-  /// Go back in browser history
+  @override
   void back() {
-    if (!kIsWeb) return;
-
     try {
       web.window.history.back();
     } catch (e) {
@@ -69,10 +63,8 @@ class WebHistoryManager {
     }
   }
 
-  /// Go forward in browser history
+  @override
   void forward() {
-    if (!kIsWeb) return;
-
     try {
       web.window.history.forward();
     } catch (e) {
@@ -80,10 +72,8 @@ class WebHistoryManager {
     }
   }
 
-  /// Go to a specific position in history
+  @override
   void go(int delta) {
-    if (!kIsWeb) return;
-
     try {
       web.window.history.go(delta);
     } catch (e) {
@@ -91,10 +81,8 @@ class WebHistoryManager {
     }
   }
 
-  /// Get current URL path
+  @override
   String get currentPath {
-    if (!kIsWeb) return '/';
-
     try {
       return web.window.location.pathname;
     } catch (e) {
@@ -103,10 +91,8 @@ class WebHistoryManager {
     }
   }
 
-  /// Get current URL search parameters
+  @override
   String get currentSearch {
-    if (!kIsWeb) return '';
-
     try {
       return web.window.location.search;
     } catch (e) {
@@ -115,10 +101,8 @@ class WebHistoryManager {
     }
   }
 
-  /// Get current URL hash
+  @override
   String get currentHash {
-    if (!kIsWeb) return '';
-
     try {
       return web.window.location.hash;
     } catch (e) {
@@ -127,10 +111,8 @@ class WebHistoryManager {
     }
   }
 
-  /// Get full current URL
+  @override
   String get currentUrl {
-    if (!kIsWeb) return '';
-
     try {
       return web.window.location.href;
     } catch (e) {
@@ -139,10 +121,8 @@ class WebHistoryManager {
     }
   }
 
-  /// Set up popstate listener with improved handling
+  @override
   void setupPopstateListener(void Function(String path) onPopstate) {
-    if (!kIsWeb) return;
-
     try {
       // Remove existing listener if any
       if (_popstateListener != null) {
@@ -170,7 +150,7 @@ class WebHistoryManager {
     }
   }
 
-  /// Parse query parameters from URL
+  @override
   Map<String, String> parseQueryParameters([String? search]) {
     search ??= currentSearch;
     if (search.isEmpty || !search.startsWith('?')) {
@@ -192,7 +172,7 @@ class WebHistoryManager {
     return params;
   }
 
-  /// Build query string from parameters
+  @override
   String buildQueryString(Map<String, String> params) {
     if (params.isEmpty) return '';
 
@@ -205,11 +185,9 @@ class WebHistoryManager {
     return '?${pairs.join('&')}';
   }
 
-  /// Update URL without triggering navigation
+  @override
   void updateUrl(String path,
       {Map<String, String>? queryParams, bool replace = true}) {
-    if (!kIsWeb) return;
-
     String fullPath = _normalizePath(path);
     if (queryParams != null && queryParams.isNotEmpty) {
       fullPath += buildQueryString(queryParams);
@@ -222,10 +200,8 @@ class WebHistoryManager {
     }
   }
 
-  /// Navigate to URL (triggers page reload)
+  @override
   void navigateToUrl(String url) {
-    if (!kIsWeb) return;
-
     try {
       web.window.location.href = url;
     } catch (e) {
@@ -233,10 +209,8 @@ class WebHistoryManager {
     }
   }
 
-  /// Reload current page
+  @override
   void reload() {
-    if (!kIsWeb) return;
-
     try {
       web.window.location.reload();
     } catch (e) {
@@ -244,10 +218,8 @@ class WebHistoryManager {
     }
   }
 
-  /// Clean up hash-based URLs and convert to proper paths
+  @override
   void cleanupHashUrl() {
-    if (!kIsWeb) return;
-
     try {
       final currentUrl = web.window.location.href;
       if (currentUrl.contains('#/')) {
@@ -260,10 +232,8 @@ class WebHistoryManager {
     }
   }
 
-  /// Check if we can go back in history
+  @override
   bool canGoBack() {
-    if (!kIsWeb) return false;
-
     try {
       // This is a simple check - in a real app you might want to track this
       return web.window.history.length > 1;
@@ -273,10 +243,8 @@ class WebHistoryManager {
     }
   }
 
-  /// Get browser history length
+  @override
   int get historyLength {
-    if (!kIsWeb) return 0;
-
     try {
       return web.window.history.length;
     } catch (e) {
@@ -285,7 +253,7 @@ class WebHistoryManager {
     }
   }
 
-  /// Dispose resources
+  @override
   void dispose() {
     if (_popstateListener != null) {
       web.window.removeEventListener('popstate', _popstateListener!);
@@ -315,4 +283,9 @@ class WebHistoryManager {
 
     return path;
   }
+}
+
+/// Factory function for web platform
+WebHistoryManagerInterface createWebHistoryManager() {
+  return WebHistoryManagerWeb();
 }
