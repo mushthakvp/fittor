@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:web/web.dart' as web;
+
 import 'core/index.dart';
 
 /// FitApp - A replacement for MaterialApp that uses FitRouter
@@ -76,12 +78,21 @@ class FitApp extends StatefulWidget {
 }
 
 class _FitAppState extends State<FitApp> {
+  void _removeHashFromUrl() {
+    final currentUrl = web.window.location.href;
+    if (currentUrl.contains('#/')) {
+      final cleanPath = '/${currentUrl.split('#/')[1]}';
+      web.window.history.replaceState(null, '', cleanPath);
+    }
+  }
+
   late FitRouter _router;
 
   @override
   void initState() {
     super.initState();
     _initializeRouter();
+    _removeHashFromUrl();
   }
 
   void _initializeRouter() {

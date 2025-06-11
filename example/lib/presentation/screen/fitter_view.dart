@@ -1,11 +1,11 @@
 import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
+import 'package:test/core/routes/app_routes.dart';
 
 import '../screen/readmore.dart';
 import 'counter_section.dart';
 import 'currency.dart';
 import 'demo_api.dart';
-import 'demo_code.dart';
 import 'selectors_section.dart';
 import 'user_section.dart';
 
@@ -97,6 +97,7 @@ class _FittorViewState extends State<FittorView> {
                 //   context,
                 //   MaterialPageRoute(builder: (context) => const DemoCodeView()),
                 // );
+                FitRouteNavigation.push(Routes.demoCodeView);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
