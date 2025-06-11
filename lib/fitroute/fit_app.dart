@@ -84,7 +84,7 @@ class _FitAppState extends State<FitApp> {
   }
 
   /// Parse path to determine route name
-  String? _parsePathToRouteName(String path) {
+  String? parsePathToRouteName(String path) {
     try {
       // Try to find matching route using RouteUtils
       final parsed = RouteUtils.parseUrlPath(path, widget.routes);

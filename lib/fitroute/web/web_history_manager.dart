@@ -1,291 +1,102 @@
-// lib/fitroute/web/web_history_manager_web.dart
-import 'dart:convert';
-import 'dart:js_interop';
+// lib/fitroute/web/web_history_manager.dart
+// Conditional imports - only import web libraries on web platform
+import 'web_history_manager_interface.dart'
+    if (dart.library.js_interop) 'web_history_manager_web.dart'
+    if (dart.library.io) 'web_history_manager_stub.dart';
 
-import 'package:flutter/foundation.dart';
-import 'package:web/web.dart' as web;
+/// Manages browser history for web platform with improved integration
+class WebHistoryManager {
+  static WebHistoryManager? _instance;
+  static WebHistoryManager get instance =>
+      _instance ??= WebHistoryManager._internal();
 
-import 'web_history_manager_interface.dart';
+  WebHistoryManager._internal();
 
-/// Web-specific implementation of WebHistoryManagerInterface
-class WebHistoryManagerWeb implements WebHistoryManagerInterface {
-  web.EventListener? _popstateListener;
-  bool _isNavigating = false;
+  final WebHistoryManagerInterface _implementation = createWebHistoryManager();
 
-  @override
+  /// Push a new state to browser history
   void pushState(String path, {Map<String, dynamic>? state}) {
-    if (_isNavigating) return;
-
-    try {
-      _isNavigating = true;
-      final cleanPath = _normalizePath(path);
-      final stateData = state != null ? jsonEncode(state).toJS : null;
-
-      web.window.history.pushState(stateData, '', cleanPath);
-
-      // Small delay to prevent rapid successive calls
-      Future.delayed(const Duration(milliseconds: 10), () {
-        _isNavigating = false;
-      });
-    } catch (e) {
-      _isNavigating = false;
-      debugPrint('Error pushing state to history: $e');
-    }
+    _implementation.pushState(path, state: state);
   }
 
-  @override
+  /// Replace current state in browser history
   void replaceState(String path, {Map<String, dynamic>? state}) {
-    if (_isNavigating) return;
-
-    try {
-      _isNavigating = true;
-      final cleanPath = _normalizePath(path);
-      final stateData = state != null ? jsonEncode(state).toJS : null;
-
-      web.window.history.replaceState(stateData, '', cleanPath);
-
-      // Small delay to prevent rapid successive calls
-      Future.delayed(const Duration(milliseconds: 10), () {
-        _isNavigating = false;
-      });
-    } catch (e) {
-      _isNavigating = false;
-      debugPrint('Error replacing state in history: $e');
-    }
+    _implementation.replaceState(path, state: state);
   }
 
-  @override
+  /// Go back in browser history
   void back() {
-    try {
-      web.window.history.back();
-    } catch (e) {
-      debugPrint('Error going back in history: $e');
-    }
+    _implementation.back();
   }
 
-  @override
+  /// Go forward in browser history
   void forward() {
-    try {
-      web.window.history.forward();
-    } catch (e) {
-      debugPrint('Error going forward in history: $e');
-    }
+    _implementation.forward();
   }
 
-  @override
+  /// Go to a specific position in history
   void go(int delta) {
-    try {
-      web.window.history.go(delta);
-    } catch (e) {
-      debugPrint('Error navigating in history: $e');
-    }
+    _implementation.go(delta);
   }
 
-  @override
-  String get currentPath {
-    try {
-      return web.window.location.pathname;
-    } catch (e) {
-      debugPrint('Error getting current path: $e');
-      return '/';
-    }
-  }
+  /// Get current URL path
+  String get currentPath => _implementation.currentPath;
 
-  @override
-  String get currentSearch {
-    try {
-      return web.window.location.search;
-    } catch (e) {
-      debugPrint('Error getting current search: $e');
-      return '';
-    }
-  }
+  /// Get current URL search parameters
+  String get currentSearch => _implementation.currentSearch;
 
-  @override
-  String get currentHash {
-    try {
-      return web.window.location.hash;
-    } catch (e) {
-      debugPrint('Error getting current hash: $e');
-      return '';
-    }
-  }
+  /// Get current URL hash
+  String get currentHash => _implementation.currentHash;
 
-  @override
-  String get currentUrl {
-    try {
-      return web.window.location.href;
-    } catch (e) {
-      debugPrint('Error getting current URL: $e');
-      return '';
-    }
-  }
+  /// Get full current URL
+  String get currentUrl => _implementation.currentUrl;
 
-  @override
+  /// Set up popstate listener with improved handling
   void setupPopstateListener(void Function(String path) onPopstate) {
-    try {
-      // Remove existing listener if any
-      if (_popstateListener != null) {
-        web.window.removeEventListener('popstate', _popstateListener!);
-      }
-
-      // Create new listener
-      _popstateListener = (web.Event event) {
-        // Prevent handling if we're currently navigating
-        if (_isNavigating) return;
-
-        final path = currentPath;
-        debugPrint('Browser popstate event: $path');
-
-        // Use a small delay to ensure the URL has updated
-        Future.delayed(const Duration(milliseconds: 50), () {
-          onPopstate(path);
-        });
-      }.toJS;
-
-      web.window.addEventListener('popstate', _popstateListener!);
-      debugPrint('Popstate listener setup complete');
-    } catch (e) {
-      debugPrint('Error setting up popstate listener: $e');
-    }
+    _implementation.setupPopstateListener(onPopstate);
   }
 
-  @override
+  /// Parse query parameters from URL
   Map<String, String> parseQueryParameters([String? search]) {
-    search ??= currentSearch;
-    if (search.isEmpty || !search.startsWith('?')) {
-      return {};
-    }
-
-    final params = <String, String>{};
-    final pairs = search.substring(1).split('&');
-
-    for (final pair in pairs) {
-      final parts = pair.split('=');
-      if (parts.length == 2) {
-        final key = Uri.decodeComponent(parts[0]);
-        final value = Uri.decodeComponent(parts[1]);
-        params[key] = value;
-      }
-    }
-
-    return params;
+    return _implementation.parseQueryParameters(search);
   }
 
-  @override
+  /// Build query string from parameters
   String buildQueryString(Map<String, String> params) {
-    if (params.isEmpty) return '';
-
-    final pairs = params.entries.map((entry) {
-      final key = Uri.encodeComponent(entry.key);
-      final value = Uri.encodeComponent(entry.value);
-      return '$key=$value';
-    });
-
-    return '?${pairs.join('&')}';
+    return _implementation.buildQueryString(params);
   }
 
-  @override
+  /// Update URL without triggering navigation
   void updateUrl(String path,
       {Map<String, String>? queryParams, bool replace = true}) {
-    String fullPath = _normalizePath(path);
-    if (queryParams != null && queryParams.isNotEmpty) {
-      fullPath += buildQueryString(queryParams);
-    }
-
-    if (replace) {
-      replaceState(fullPath);
-    } else {
-      pushState(fullPath);
-    }
+    _implementation.updateUrl(path, queryParams: queryParams, replace: replace);
   }
 
-  @override
+  /// Navigate to URL (triggers page reload)
   void navigateToUrl(String url) {
-    try {
-      web.window.location.href = url;
-    } catch (e) {
-      debugPrint('Error navigating to URL: $e');
-    }
+    _implementation.navigateToUrl(url);
   }
 
-  @override
+  /// Reload current page
   void reload() {
-    try {
-      web.window.location.reload();
-    } catch (e) {
-      debugPrint('Error reloading page: $e');
-    }
+    _implementation.reload();
   }
 
-  @override
+  /// Clean up hash-based URLs and convert to proper paths
   void cleanupHashUrl() {
-    try {
-      final currentUrl = web.window.location.href;
-      if (currentUrl.contains('#/')) {
-        final hashPath = currentUrl.split('#/')[1];
-        final cleanPath = '/$hashPath';
-        replaceState(cleanPath);
-      }
-    } catch (e) {
-      debugPrint('Error cleaning up hash URL: $e');
-    }
+    _implementation.cleanupHashUrl();
   }
 
-  @override
+  /// Check if we can go back in history
   bool canGoBack() {
-    try {
-      // This is a simple check - in a real app you might want to track this
-      return web.window.history.length > 1;
-    } catch (e) {
-      debugPrint('Error checking if can go back: $e');
-      return false;
-    }
+    return _implementation.canGoBack();
   }
 
-  @override
-  int get historyLength {
-    try {
-      return web.window.history.length;
-    } catch (e) {
-      debugPrint('Error getting history length: $e');
-      return 0;
-    }
-  }
+  /// Get browser history length
+  int get historyLength => _implementation.historyLength;
 
-  @override
+  /// Dispose resources
   void dispose() {
-    if (_popstateListener != null) {
-      web.window.removeEventListener('popstate', _popstateListener!);
-      _popstateListener = null;
-    }
+    _implementation.dispose();
   }
-
-  /// Normalize path to ensure it starts with /
-  String _normalizePath(String path) {
-    if (path.isEmpty) return '/';
-
-    // Remove hash fragments if present
-    final hashIndex = path.indexOf('#');
-    if (hashIndex != -1) {
-      path = path.substring(0, hashIndex);
-    }
-
-    // Ensure starts with /
-    if (!path.startsWith('/')) {
-      path = '/$path';
-    }
-
-    // Remove trailing / except for root
-    if (path.length > 1 && path.endsWith('/')) {
-      path = path.substring(0, path.length - 1);
-    }
-
-    return path;
-  }
-}
-
-/// Factory function for web platform
-WebHistoryManagerInterface createWebHistoryManager() {
-  return WebHistoryManagerWeb();
 }

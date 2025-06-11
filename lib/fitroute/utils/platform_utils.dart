@@ -4,63 +4,48 @@ import 'package:flutter/material.dart';
 
 import '../core/index.dart';
 import '../mobile/index.dart';
-import '../web/index.dart';
+// Conditional imports for platform-specific utilities
+import 'platform_utils_interface.dart'
+    if (dart.library.js_interop) 'platform_utils_web.dart'
+    if (dart.library.io) 'platform_utils_stub.dart';
 
 /// Platform-specific utilities with improved browser integration
 class PlatformUtils {
+  static final PlatformUtilsInterface _implementation = createPlatformUtils();
+
   /// Update URL with proper browser history management
   static void updateUrl(String path, {bool replace = true}) {
-    if (kIsWeb) {
-      if (replace) {
-        WebHistoryManager.instance.replaceState(path);
-      } else {
-        WebHistoryManager.instance.pushState(path);
-      }
-    }
+    _implementation.updateUrl(path, replace: replace);
   }
 
   /// Push new URL to browser history
   static void pushUrl(String path) {
-    if (kIsWeb) {
-      WebHistoryManager.instance.pushState(path);
-    }
+    _implementation.pushUrl(path);
   }
 
   /// Replace current URL in browser history
   static void replaceUrl(String path) {
-    if (kIsWeb) {
-      WebHistoryManager.instance.replaceState(path);
-    }
+    _implementation.replaceUrl(path);
   }
 
   /// Get current path (web only)
   static String? getCurrentPath() {
-    if (kIsWeb) {
-      return WebHistoryManager.instance.currentPath;
-    }
-    return null;
+    return _implementation.getCurrentPath();
   }
 
   /// Check if browser can go back
   static bool canGoBack() {
-    if (kIsWeb) {
-      return WebHistoryManager.instance.canGoBack();
-    }
-    return false;
+    return _implementation.canGoBack();
   }
 
   /// Go back in browser history
   static void goBack() {
-    if (kIsWeb) {
-      WebHistoryManager.instance.back();
-    }
+    _implementation.goBack();
   }
 
   /// Go forward in browser history
   static void goForward() {
-    if (kIsWeb) {
-      WebHistoryManager.instance.forward();
-    }
+    _implementation.goForward();
   }
 
   /// Generate deep link based on platform
@@ -146,12 +131,7 @@ class PlatformUtils {
 
   /// Handle platform-specific initialization
   static void platformSpecificInit() {
-    if (kIsWeb) {
-      debugPrint('Initializing FitRouter for web platform');
-      WebHistoryManager.instance.cleanupHashUrl();
-    } else {
-      debugPrint('Initializing FitRouter for ${getPlatformName()} platform');
-    }
+    _implementation.platformSpecificInit();
   }
 
   /// Get platform capabilities
@@ -181,42 +161,17 @@ class PlatformUtils {
 
   /// Handle platform-specific URL changes with improved browser integration
   static void handleUrlChange(String initialUrl, Function(String) callback) {
-    if (kIsWeb) {
-      WebHistoryManager.instance.setupPopstateListener((path) {
-        debugPrint('URL changed to: $path');
-        callback(path);
-      });
-    } else {
-      MobileDeepLinkHandler.instance.initialize(
-        onDeepLink: (link) {
-          callback(link);
-        },
-      );
-    }
+    _implementation.handleUrlChange(initialUrl, callback);
   }
 
   /// Get current URL or route state
   static String getCurrentUrlOrState() {
-    if (kIsWeb) {
-      return WebHistoryManager.instance.currentUrl;
-    } else {
-      return 'mobile://current';
-    }
+    return _implementation.getCurrentUrlOrState();
   }
 
   /// Share content based on platform
   static Future<bool> shareContent(String content, {String? subject}) async {
-    if (kIsWeb) {
-      try {
-        return true;
-      } catch (e) {
-        debugPrint('Error sharing on web: $e');
-        return false;
-      }
-    } else {
-      return await MobileDeepLinkHandler.instance
-          .shareDeepLink(content, subject: subject);
-    }
+    return _implementation.shareContent(content, subject: subject);
   }
 
   /// Get platform-specific error message
@@ -241,7 +196,7 @@ class PlatformUtils {
       'capabilities': getPlatformCapabilities(),
       'currentUrl': getCurrentUrlOrState(),
       'canGoBack': canGoBack(),
-      'historyLength': kIsWeb ? WebHistoryManager.instance.historyLength : 0,
+      'historyLength': _implementation.getHistoryLength(),
       'timestamp': DateTime.now().toIso8601String(),
     };
   }
