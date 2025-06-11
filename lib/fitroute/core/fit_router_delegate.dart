@@ -24,6 +24,7 @@ class NavigationEntry {
   }
 }
 
+/// Fixed context-aware page that properly handles settings
 class _ContextAwarePage extends Page {
   final FitRoute route;
   final Map<String, dynamic> routeArguments;
@@ -40,8 +41,63 @@ class _ContextAwarePage extends Page {
   Route createRoute(BuildContext context) {
     // Create the actual page with the correct context
     final fitPage = route.pageBuilder!(context, routeArguments);
-    return fitPage.createRoute(context);
+
+    // Create a custom route that properly returns this page as settings
+    return _CustomPageRoute(
+      page: this,
+      fitPage: fitPage,
+    );
   }
+}
+
+/// Custom route that ensures settings return the correct page
+class _CustomPageRoute<T> extends PageRoute<T> {
+  final _ContextAwarePage page;
+  final FitPage fitPage;
+
+  _CustomPageRoute({
+    required this.page,
+    required this.fitPage,
+  }) : super(settings: page);
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
+    return fitPage.child;
+  }
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation, Widget child) {
+    // Use the FitPage's transition logic
+    final route = fitPage.createRoute(context);
+    if (route is PageRoute) {
+      return route.buildTransitions(
+          context, animation, secondaryAnimation, child);
+    }
+    return child;
+  }
+
+  @override
+  Duration get transitionDuration => fitPage.transitionDuration;
+
+  @override
+  Duration get reverseTransitionDuration => fitPage.reverseTransitionDuration;
+
+  @override
+  bool get maintainState => fitPage.maintainState;
+
+  @override
+  bool get fullscreenDialog => fitPage.fullscreenDialog;
+
+  @override
+  Color? get barrierColor => fitPage.barrierColor;
+
+  @override
+  bool get barrierDismissible => fitPage.barrierDismissible;
+
+  @override
+  String? get barrierLabel => fitPage.barrierLabel;
 }
 
 /// Router delegate that manages navigation stack
@@ -57,6 +113,9 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
   final GlobalKey<NavigatorState> navigatorKey;
 
   final List<NavigationEntry> _navigationStack = [];
+
+  // Counter to ensure unique keys
+  static int _pageCounter = 0;
 
   FitRouterDelegate({
     required Map<String, FitRoute> routes,
@@ -88,7 +147,6 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
     return Navigator(
       key: navigatorKey,
       pages: _navigationStack.map((entry) => entry.page).toList(),
-      // Fixed: Use onDidRemovePage instead of deprecated onPopPage
       onDidRemovePage: _onDidRemovePage,
       observers: _observers,
     );
@@ -107,7 +165,6 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
 
   @override
   Future<void> setNewRoutePath(RouteInformation routeInformation) async {
-    // Fixed: Use uri.path instead of deprecated location
     final path = routeInformation.uri.path;
     final parsed = RouteUtils.parseUrlPath(path, _routes);
 
@@ -225,7 +282,7 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
     return null;
   }
 
-  /// Add entry to navigation stack
+  /// Add entry to navigation stack with improved key generation
   void _addToStack(String routeName, Map<String, dynamic> arguments) {
     final route = _routes[routeName]!;
     final page = _createPage(routeName, route, arguments);
@@ -237,17 +294,17 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
     ));
   }
 
-  /// Create page for route
+  /// Create page for route with guaranteed unique keys
   Page _createPage(
       String routeName, FitRoute route, Map<String, dynamic> arguments) {
-    // Create a unique key to avoid duplicate GlobalKey issues
-    final key = ValueKey(
-        '$routeName-${arguments.hashCode}-${DateTime.now().microsecondsSinceEpoch}');
+    // Generate a truly unique key using an incrementing counter
+    final uniqueKey = ValueKey(
+        '${routeName}_${++_pageCounter}_${DateTime.now().microsecondsSinceEpoch}');
 
     if (route.pageBuilder != null) {
-      // Fix: Create a wrapper page that calls pageBuilder with proper context
+      // Create wrapper page that calls pageBuilder with proper context
       return _ContextAwarePage(
-        key: key,
+        key: uniqueKey,
         name: routeName,
         arguments: arguments,
         route: route,
@@ -257,7 +314,7 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
 
     // Create default page with route's transition settings
     return FitPage(
-      key: key,
+      key: uniqueKey,
       name: routeName,
       arguments: arguments,
       child: Builder(

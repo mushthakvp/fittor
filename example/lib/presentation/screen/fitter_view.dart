@@ -93,10 +93,10 @@ class _FittorViewState extends State<FittorView> {
             10.h,
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const DemoCodeView()),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => const DemoCodeView()),
+                // );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
