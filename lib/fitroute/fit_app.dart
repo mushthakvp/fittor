@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:web/web.dart' as web;
 
@@ -78,28 +79,70 @@ class FitApp extends StatefulWidget {
 }
 
 class _FitAppState extends State<FitApp> {
-  void _removeHashFromUrl() {
-    final currentUrl = web.window.location.href;
-    if (currentUrl.contains('#/')) {
-      final cleanPath = '/${currentUrl.split('#/')[1]}';
-      web.window.history.replaceState(null, '', cleanPath);
-    }
-  }
-
   late FitRouter _router;
+  String? _initialRouteFromUrl;
 
   @override
   void initState() {
     super.initState();
+    _processInitialUrl();
     _initializeRouter();
-    _removeHashFromUrl();
+  }
+
+  /// Process initial URL and clean up any hash fragments
+  void _processInitialUrl() {
+    if (!kIsWeb) return;
+
+    try {
+      final currentUrl = web.window.location.href;
+      final currentPath = web.window.location.pathname;
+
+      // Clean up hash-based URLs
+      if (currentUrl.contains('#/')) {
+        final hashPath = currentUrl.split('#/')[1];
+        final cleanPath = '/$hashPath';
+
+        // Replace the URL without the hash
+        web.window.history.replaceState(null, '', cleanPath);
+
+        // Set the initial route based on the cleaned path
+        _initialRouteFromUrl = _parsePathToRouteName(cleanPath);
+      } else if (currentPath != '/' && currentPath.isNotEmpty) {
+        // Direct path access
+        _initialRouteFromUrl = _parsePathToRouteName(currentPath);
+      }
+    } catch (e) {
+      debugPrint('Error processing initial URL: $e');
+    }
+  }
+
+  /// Parse path to determine route name
+  String? _parsePathToRouteName(String path) {
+    // Remove leading/trailing slashes and convert to route name
+    final cleanPath = path.replaceAll(RegExp(r'^/+|/+$'), '');
+    if (cleanPath.isEmpty) return null;
+
+    // Try to find matching route
+    for (final entry in widget.routes.entries) {
+      final route = entry.value;
+      if (route.extractParameters(path) != null) {
+        return entry.key;
+      }
+    }
+
+    return null;
   }
 
   void _initializeRouter() {
     _router = FitRouter.instance;
+
+    // Use initial route from URL if available, otherwise use provided initial route
+    final effectiveInitialRoute =
+        _initialRouteFromUrl ?? widget.initialRoute ?? widget.routes.keys.first;
+
     _router.initialize(
       routes: widget.routes,
-      initialRoute: widget.initialRoute,
+      initialRoute: effectiveInitialRoute,
       notFoundRoute: widget.notFoundRoute,
       observers: widget.observers,
     );
@@ -131,6 +174,15 @@ class _FitAppState extends State<FitApp> {
       );
     }
 
+    // Get initial route information for web
+    RouteInformation? initialRouteInfo;
+    if (kIsWeb) {
+      final currentPath = web.window.location.pathname;
+      if (currentPath != '/' && currentPath.isNotEmpty) {
+        initialRouteInfo = RouteInformation(uri: Uri.parse(currentPath));
+      }
+    }
+
     // Use FitRouter configuration
     return MaterialApp.router(
       title: widget.title,
@@ -147,9 +199,10 @@ class _FitAppState extends State<FitApp> {
       routerDelegate: _router.routerDelegate,
       routeInformationParser: _router.routeInformationParser,
       routeInformationProvider: PlatformRouteInformationProvider(
-        initialRouteInformation: RouteInformation(
-          uri: Uri.parse(widget.initialRoute ?? '/'),
-        ),
+        initialRouteInformation: initialRouteInfo ??
+            RouteInformation(
+              uri: Uri.parse('/'),
+            ),
       ),
     );
   }

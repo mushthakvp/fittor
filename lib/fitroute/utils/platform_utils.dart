@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../core/index.dart';
-import '../web/index.dart';
 import '../mobile/index.dart';
+import '../web/index.dart';
 
 /// Platform-specific utilities
 class PlatformUtils {
@@ -27,7 +27,9 @@ class PlatformUtils {
       {Map<String, dynamic>? arguments}) {
     if (kIsWeb) {
       // For web, return the URL path
-      return '/$routeName';
+      // Convert route name to kebab-case path
+      final path = _routeNameToPath(routeName);
+      return path;
     } else {
       // For mobile, return deep link URL
       return MobileDeepLinkHandler.generateDeepLink(
@@ -111,6 +113,8 @@ class PlatformUtils {
     if (kIsWeb) {
       // Web-specific initialization
       debugPrint('Initializing FitRouter for web platform');
+      // Clean up any hash URLs on initialization
+      WebHistoryManager.instance.cleanupHashUrl();
     } else {
       // Mobile-specific initialization
       debugPrint('Initializing FitRouter for ${getPlatformName()} platform');
@@ -208,5 +212,34 @@ class PlatformUtils {
       'currentUrl': getCurrentUrlOrState(),
       'timestamp': DateTime.now().toIso8601String(),
     };
+  }
+
+  /// Convert route name to URL path
+  static String _routeNameToPath(String routeName) {
+    // Convert camelCase to kebab-case
+    final kebabCase = routeName
+        .replaceAllMapped(RegExp(r'([a-z])([A-Z])'),
+            (match) => '${match.group(1)}-${match.group(2)?.toLowerCase()}')
+        .toLowerCase();
+
+    return '/$kebabCase';
+  }
+
+  /// Convert URL path to route name
+  static String pathToRouteName(String path) {
+    // Remove leading slash and convert kebab-case to camelCase
+    final cleanPath = path.replaceFirst(RegExp(r'^/+'), '');
+    if (cleanPath.isEmpty) return 'home';
+
+    final camelCase = cleanPath
+        .split('-')
+        .asMap()
+        .entries
+        .map((entry) => entry.key == 0
+            ? entry.value
+            : entry.value[0].toUpperCase() + entry.value.substring(1))
+        .join('');
+
+    return camelCase;
   }
 }

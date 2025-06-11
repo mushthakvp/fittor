@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:js_interop';
+
 import 'package:flutter/foundation.dart';
 import 'package:web/web.dart' as web;
 
@@ -16,12 +17,15 @@ class WebHistoryManager {
     if (!kIsWeb) return;
 
     try {
+      // Ensure path starts with /
+      final cleanPath = _normalizePath(path);
+
       // Convert state to JSAny compatible format
       final stateData = state != null ? jsonEncode(state).toJS : null;
       web.window.history.pushState(
         stateData,
         '',
-        path,
+        cleanPath,
       );
     } catch (e) {
       debugPrint('Error pushing state to history: $e');
@@ -33,12 +37,15 @@ class WebHistoryManager {
     if (!kIsWeb) return;
 
     try {
+      // Ensure path starts with /
+      final cleanPath = _normalizePath(path);
+
       // Convert state to JSAny compatible format
       final stateData = state != null ? jsonEncode(state).toJS : null;
       web.window.history.replaceState(
         stateData,
         '',
-        path,
+        cleanPath,
       );
     } catch (e) {
       debugPrint('Error replacing state in history: $e');
@@ -182,7 +189,7 @@ class WebHistoryManager {
   void updateUrl(String path, {Map<String, String>? queryParams}) {
     if (!kIsWeb) return;
 
-    String fullPath = path;
+    String fullPath = _normalizePath(path);
     if (queryParams != null && queryParams.isNotEmpty) {
       fullPath += buildQueryString(queryParams);
     }
@@ -210,5 +217,46 @@ class WebHistoryManager {
     } catch (e) {
       debugPrint('Error reloading page: $e');
     }
+  }
+
+  /// Clean up hash-based URLs and convert to proper paths
+  void cleanupHashUrl() {
+    if (!kIsWeb) return;
+
+    try {
+      final currentUrl = web.window.location.href;
+      if (currentUrl.contains('#/')) {
+        final hashPath = currentUrl.split('#/')[1];
+        final cleanPath = '/$hashPath';
+
+        // Replace the URL without the hash
+        replaceState(cleanPath);
+      }
+    } catch (e) {
+      debugPrint('Error cleaning up hash URL: $e');
+    }
+  }
+
+  /// Normalize path to ensure it starts with /
+  String _normalizePath(String path) {
+    if (path.isEmpty) return '/';
+
+    // Remove hash fragments if present
+    final hashIndex = path.indexOf('#');
+    if (hashIndex != -1) {
+      path = path.substring(0, hashIndex);
+    }
+
+    // Ensure starts with /
+    if (!path.startsWith('/')) {
+      path = '/$path';
+    }
+
+    // Remove trailing / except for root
+    if (path.length > 1 && path.endsWith('/')) {
+      path = path.substring(0, path.length - 1);
+    }
+
+    return path;
   }
 }

@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'fit_route.dart';
-import 'fit_page.dart';
 import '../storage/index.dart';
 import '../utils/index.dart';
+import 'fit_page.dart';
+import 'fit_route.dart';
 
 /// Navigation stack entry
 class NavigationEntry {
@@ -166,11 +166,26 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
   @override
   Future<void> setNewRoutePath(RouteInformation routeInformation) async {
     final path = routeInformation.uri.path;
+
+    // Check if state contains route information
+    final state = routeInformation.state as Map<String, dynamic>?;
+    if (state != null && state.containsKey('routeName')) {
+      final routeName = state['routeName'] as String;
+      final arguments = state['arguments'] as Map<String, dynamic>? ?? {};
+
+      // Clear stack and navigate to the route
+      _navigationStack.clear();
+      await _navigateToRoute(routeName, arguments: arguments);
+      return;
+    }
+
+    // Parse the path manually
     final parsed = RouteUtils.parseUrlPath(path, _routes);
 
     if (parsed != null) {
-      await _navigateToRoute(parsed.routeName,
-          arguments: parsed.arguments, replace: true);
+      // Clear stack and navigate to parsed route
+      _navigationStack.clear();
+      await _navigateToRoute(parsed.routeName, arguments: parsed.arguments);
     } else {
       await _handleNotFound(path);
     }
@@ -339,12 +354,16 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
   void _updateWebUrl() {
     if (!kIsWeb || _navigationStack.isEmpty) return;
 
-    final currentEntry = _navigationStack.last;
-    final route = _routes[currentEntry.routeName];
+    try {
+      final currentEntry = _navigationStack.last;
+      final route = _routes[currentEntry.routeName];
 
-    if (route != null && route.addToHistory) {
-      final path = route.generatePath(currentEntry.arguments);
-      PlatformUtils.updateUrl(path);
+      if (route != null && route.addToHistory) {
+        final path = route.generatePath(currentEntry.arguments);
+        PlatformUtils.updateUrl(path);
+      }
+    } catch (e) {
+      debugPrint('Error updating web URL: $e');
     }
   }
 
@@ -353,8 +372,9 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
     if (_notFoundRoute != null) {
       await _navigateToRoute('notFound', arguments: {'path': path});
     } else {
-      debugPrint('Route not found: $path');
+      debugPrint('Route not found: $path, navigating to initial route');
       // Navigate to initial route as fallback
+      _navigationStack.clear();
       await _navigateToRoute(_initialRoute);
     }
   }
@@ -368,7 +388,13 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
 
     if (route != null) {
       final path = route.generatePath(currentEntry.arguments);
-      return RouteInformation(uri: Uri.parse(path));
+      return RouteInformation(
+        uri: Uri.parse(path),
+        state: {
+          'routeName': currentEntry.routeName,
+          'arguments': currentEntry.arguments,
+        },
+      );
     }
 
     return null;
