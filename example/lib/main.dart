@@ -16,18 +16,7 @@ class FittorApp extends StatelessWidget with FittorAppMixin {
   Widget responsive(BuildContext context) {
     return FitExplore(
       fitStates: AppBindings(),
-      child: FitApp(
-        debugShowCheckedModeBanner: false,
-        initialRoute: Routes.initialRoute,
-        routes: Routes.routes,
-        // home: ConnectivityWrapper(
-        //   onConnectivityChanged: (ConnectivityStatus status) {
-        //     debugPrint('Connectivity changed: $status');
-        //   },
-        //   // ignoreOfflineState: true,
-        //   child: const FittorView(),
-        // ),
-      ),
+      child: FitApp(initialRoute: Routes.initialRoute, routes: Routes.routes),
     );
   }
 }

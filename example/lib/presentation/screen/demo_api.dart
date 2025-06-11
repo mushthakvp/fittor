@@ -1,6 +1,7 @@
 import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
-import 'package:test/presentation/controller/api_controller.dart';
+
+import '../controller/api_controller.dart';
 
 class DemoApi extends StatefulWidget {
   const DemoApi({super.key});

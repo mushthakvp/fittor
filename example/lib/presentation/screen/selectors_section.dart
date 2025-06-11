@@ -1,7 +1,8 @@
 import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
-import 'package:test/presentation/controller/sample_controller.dart';
-import 'package:test/presentation/controller/user_controller.dart';
+
+import '../controller/sample_controller.dart';
+import '../controller/user_controller.dart';
 
 /// Selectors section demonstrating automatic updates
 class SelectorsSection extends StatelessWidget {

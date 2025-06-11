@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:web/web.dart' as web;
 
+import '../connectivity/connectivity_wrapper.dart';
 import 'core/index.dart';
 import 'utils/platform_utils.dart';
 import 'utils/route_utils.dart';
@@ -45,7 +46,7 @@ class FitApp extends StatefulWidget {
     this.locale,
     this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.localizationsDelegates,
-    this.debugShowCheckedModeBanner = true,
+    this.debugShowCheckedModeBanner = false,
     this.onGenerateTitle,
     this.builder,
     this.scaffoldMessengerKey,
@@ -77,10 +78,6 @@ class _FitAppState extends State<FitApp> {
     try {
       final currentUrl = web.window.location.href;
       final currentPath = web.window.location.pathname;
-
-      debugPrint('Initial URL: $currentUrl');
-      debugPrint('Initial path: $currentPath');
-
       // Clean up hash-based URLs
       if (currentUrl.contains('#/')) {
         final hashPath = currentUrl.split('#/')[1];
@@ -89,15 +86,10 @@ class _FitAppState extends State<FitApp> {
         // Replace the URL without the hash
         web.window.history.replaceState(null, '', cleanPath);
         _initialRouteFromUrl = _parsePathToRouteName(cleanPath);
-
-        debugPrint('Cleaned hash URL to: $cleanPath');
       } else if (currentPath != '/' && currentPath.isNotEmpty) {
         // Direct path access
         _initialRouteFromUrl = _parsePathToRouteName(currentPath);
-        debugPrint('Using direct path: $currentPath');
       }
-
-      debugPrint('Initial route from URL: $_initialRouteFromUrl');
     } catch (e) {
       debugPrint('Error processing initial URL: $e');
     }
@@ -109,7 +101,6 @@ class _FitAppState extends State<FitApp> {
       // Try to find matching route using RouteUtils
       final parsed = RouteUtils.parseUrlPath(path, widget.routes);
       if (parsed != null) {
-        debugPrint('Found matching route: ${parsed.routeName} for path: $path');
         return parsed.routeName;
       }
 
@@ -124,11 +115,8 @@ class _FitAppState extends State<FitApp> {
           return routeName;
         }
       }
-
-      debugPrint('No matching route found for path: $path');
       return null;
     } catch (e) {
-      debugPrint('Error parsing path to route name: $e');
       return null;
     }
   }
@@ -142,10 +130,8 @@ class _FitAppState extends State<FitApp> {
     if (_initialRouteFromUrl != null &&
         widget.routes.containsKey(_initialRouteFromUrl)) {
       effectiveInitialRoute = _initialRouteFromUrl!;
-      debugPrint('Using initial route from URL: $effectiveInitialRoute');
     } else {
       effectiveInitialRoute = widget.initialRoute ?? widget.routes.keys.first;
-      debugPrint('Using configured initial route: $effectiveInitialRoute');
     }
 
     _router.initialize(
@@ -170,9 +156,11 @@ class _FitAppState extends State<FitApp> {
   Widget build(BuildContext context) {
     if (!_isInitialized) {
       return const MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(),
+        home: ConnectivityWrapper(
+          child: Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
           ),
         ),
       );
@@ -204,7 +192,6 @@ class _FitAppState extends State<FitApp> {
 
       if (fullPath != '/' && fullPath.isNotEmpty) {
         initialRouteInfo = RouteInformation(uri: Uri.parse(fullPath));
-        debugPrint('Setting initial route info: $fullPath');
       }
     }
 
@@ -231,7 +218,7 @@ class _FitAppState extends State<FitApp> {
 }
 
 /// Extension to provide convenient static methods for FitRoute navigation
-extension FitRouteNavigation on FitRoute {
+extension FitGo on FitRoute {
   /// Push a named route
   static Future<T?> push<T extends Object?>(
     String routeName, {

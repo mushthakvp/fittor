@@ -1,7 +1,7 @@
 import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
-import 'package:test/core/routes/app_routes.dart';
 
+import '../../core/routes/app_routes.dart';
 import '../screen/readmore.dart';
 import 'counter_section.dart';
 import 'currency.dart';
@@ -39,11 +39,11 @@ class _FittorViewState extends State<FittorView> {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             30.h,
-            SizedBox(width: context.wp(95), child: CounterSection()),
+            SizedBox(width: context.wp(95), child: const CounterSection()),
             10.h,
-            SizedBox(width: context.wp(95), child: UserSection()),
+            SizedBox(width: context.wp(95), child: const UserSection()),
             10.h,
-            SizedBox(width: context.wp(95), child: SelectorsSection()),
+            SizedBox(width: context.wp(95), child: const SelectorsSection()),
             10.h,
             ElevatedButton(
               onPressed: () {
@@ -97,7 +97,7 @@ class _FittorViewState extends State<FittorView> {
                 //   context,
                 //   MaterialPageRoute(builder: (context) => const DemoCodeView()),
                 // );
-                FitRouteNavigation.push(Routes.demoCodeView);
+                FitGo.push(Routes.demoCodeView);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,

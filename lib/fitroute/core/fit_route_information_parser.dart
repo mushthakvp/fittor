@@ -14,41 +14,64 @@ class FitRouteInformationParser
   @override
   Future<RouteInformation> parseRouteInformation(
       RouteInformation routeInformation) async {
-    // Get the path from the URI
-    final path = routeInformation.uri.path;
+    try {
+      // Get the path from the URI
+      final path = routeInformation.uri.path;
 
-    // Clean up the path - remove any hash fragments and normalize
-    final cleanPath = _cleanPath(path);
+      // Clean up the path - remove any hash fragments and normalize
+      final cleanPath = _cleanPath(path);
 
-    // Parse the URL path and extract route information
-    final parsed = RouteUtils.parseUrlPath(cleanPath, _routes);
+      // Parse the URL path and extract route information
+      final parsed = RouteUtils.parseUrlPath(cleanPath, _routes);
 
-    if (parsed != null) {
-      // Valid route found - return configuration with cleaned path
-      return RouteInformation(
-        uri: Uri.parse(cleanPath),
-        state: {
-          'routeName': parsed.routeName,
-          'arguments': parsed.arguments,
-        },
-      );
-    }
+      if (parsed != null) {
+        // Valid route found - return configuration with cleaned path
+        return RouteInformation(
+          uri: Uri.parse(cleanPath),
+          state: {
+            'routeName': parsed.routeName,
+            'arguments': parsed.arguments,
+          },
+        );
+      }
 
-    // Invalid route - check if it's root path
-    if (cleanPath == '/' || cleanPath.isEmpty) {
-      // Find the first route or initial route
-      final initialRouteName = _routes.keys.first;
+      // Invalid route - check if it's root path
+      if (cleanPath == '/' || cleanPath.isEmpty) {
+        // Find the first route or initial route
+        final initialRouteName =
+            _routes.keys.isNotEmpty ? _routes.keys.first : 'home';
+        return RouteInformation(
+          uri: Uri.parse('/'),
+          state: {
+            'routeName': initialRouteName,
+            'arguments': <String, dynamic>{},
+          },
+        );
+      }
+
+      // Return a valid configuration for unknown routes
+      // Use the first available route as fallback
+      final fallbackRouteName =
+          _routes.keys.isNotEmpty ? _routes.keys.first : 'home';
       return RouteInformation(
         uri: Uri.parse('/'),
         state: {
-          'routeName': initialRouteName,
+          'routeName': fallbackRouteName,
+          'arguments': <String, dynamic>{'originalPath': cleanPath},
+        },
+      );
+    } catch (e) {
+      // If any error occurs, return a safe fallback
+      final fallbackRouteName =
+          _routes.keys.isNotEmpty ? _routes.keys.first : 'home';
+      return RouteInformation(
+        uri: Uri.parse('/'),
+        state: {
+          'routeName': fallbackRouteName,
           'arguments': <String, dynamic>{},
         },
       );
     }
-
-    // Return the original information for unknown routes
-    return routeInformation;
   }
 
   @override
@@ -64,6 +87,12 @@ class FitRouteInformationParser
     final hashIndex = path.indexOf('#');
     if (hashIndex != -1) {
       path = path.substring(0, hashIndex);
+    }
+
+    // Remove query parameters for path matching
+    final queryIndex = path.indexOf('?');
+    if (queryIndex != -1) {
+      path = path.substring(0, queryIndex);
     }
 
     // Ensure starts with /

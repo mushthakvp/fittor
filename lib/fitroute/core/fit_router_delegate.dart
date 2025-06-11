@@ -126,6 +126,7 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
   final List<NavigationEntry> _navigationStack = [];
   bool _isRestoringFromBrowser = false;
   bool _isHandlingBrowserEvent = false;
+  bool _isInitialized = false; // Track initialization state
 
   // Counter to ensure unique keys
   static int _pageCounter = 0;
@@ -144,6 +145,8 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
         _storage = storage,
         navigatorKey = navigatorKeys {
     _setupBrowserIntegration();
+    // Initialize synchronously to prevent empty pages
+    _initializeInitialRouteSync();
   }
 
   /// Setup browser integration for web platform
@@ -189,14 +192,36 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
     }
   }
 
-  /// Initialize with the initial route
-  Future<void> _initializeInitialRoute() async {
+  /// Initialize with the initial route synchronously
+  void _initializeInitialRouteSync() {
+    if (_routes.containsKey(_initialRoute)) {
+      _addToStack(_initialRoute, {});
+      _isInitialized = true;
+    } else {
+      if (_routes.isNotEmpty) {
+        final firstRoute = _routes.keys.first;
+        _addToStack(firstRoute, {});
+        _isInitialized = true;
+      }
+    }
+
+    // Start async initialization for web state restoration in the background
     if (kIsWeb) {
+      _initializeWebStateAsync();
+    }
+  }
+
+  /// Async initialization for web state restoration
+  Future<void> _initializeWebStateAsync() async {
+    try {
       // Try to restore navigation stack from storage
       final savedStack = await _storage.getNavigationStack();
       if (savedStack != null && savedStack.isNotEmpty) {
         _isRestoringFromBrowser = true;
         try {
+          // Clear the current stack and restore from saved state
+          _navigationStack.clear();
+
           for (final entry in savedStack) {
             final routeName = entry['routeName'] as String;
             final arguments =
@@ -215,20 +240,48 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
           return;
         }
       }
-    }
 
-    // Default initialization
-    if (_routes.containsKey(_initialRoute)) {
-      _addToStack(_initialRoute, {});
-    } else {
-      debugPrint('Initial route "$_initialRoute" not found');
+      // If no saved state, check current URL
+      final currentPath = PlatformUtils.getCurrentPath();
+      if (currentPath != null && currentPath != '/') {
+        final parsed = RouteUtils.parseUrlPath(currentPath, _routes);
+        if (parsed != null && parsed.routeName != _initialRoute) {
+          // URL indicates a different route, navigate to it
+          _navigationStack.clear();
+          await _navigateToRoute(parsed.routeName,
+              arguments: parsed.arguments, updateBrowser: false);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error during async web state initialization: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Always ensure we have at least one page
+    if (_navigationStack.isEmpty && _isInitialized) {
+      // Fallback: add initial route if somehow we lost all pages
+      _initializeInitialRouteSync();
+    }
+
+    // If still no pages (shouldn't happen now), show a loading page
     if (_navigationStack.isEmpty) {
-      _initializeInitialRoute();
+      return Navigator(
+        key: navigatorKey,
+        pages: const [
+          MaterialPage(
+            key: ValueKey('loading'),
+            child: Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          ),
+        ],
+        onDidRemovePage: _onDidRemovePage,
+        observers: _observers,
+      );
     }
 
     return Navigator(
@@ -244,6 +297,11 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
     final index = _navigationStack.indexWhere((entry) => entry.page == page);
     if (index != -1) {
       _navigationStack.removeAt(index);
+
+      // Ensure we never have an empty stack
+      if (_navigationStack.isEmpty) {
+        _initializeInitialRouteSync();
+      }
 
       // Update browser URL only if not handling browser event
       if (!_isHandlingBrowserEvent) {
@@ -374,14 +432,12 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
   }) async {
     final route = _routes[routeName];
     if (route == null) {
-      debugPrint('Route "$routeName" not found');
       return null;
     }
 
     final processedArguments = route.processArguments(arguments);
 
     if (!route.canNavigate(processedArguments)) {
-      debugPrint('Navigation to "$routeName" blocked by guards');
       return null;
     }
 
@@ -493,7 +549,6 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
     if (_notFoundRoute != null) {
       await _navigateToRoute('notFound', arguments: {'path': path});
     } else {
-      debugPrint('Route not found: $path, navigating to initial route');
       _navigationStack.clear();
       await _navigateToRoute(_initialRoute);
     }

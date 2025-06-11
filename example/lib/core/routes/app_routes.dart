@@ -1,8 +1,8 @@
 import 'package:fittor/fittor.dart';
-import 'package:test/presentation/screen/demo_code.dart';
-import 'package:test/presentation/screen/no_screen.dart';
 
+import '../../presentation/screen/demo_code.dart';
 import '../../presentation/screen/fitter_view.dart';
+import '../../presentation/screen/no_screen.dart';
 
 class Routes {
   static const String initialRoute = splash;
@@ -13,15 +13,16 @@ class Routes {
   static final Map<String, FitRoute> routes = {
     splash: FitRoute.page(
       path: splash,
-      pageBuilder: (context, args) => FitPage.fade(child: const FittorView()),
+      pageBuilder: (context, args) =>
+          const FitPage(child: ConnectivityWrapper(child: FittorView())),
     ),
     no: FitRoute.page(
       path: no,
-      pageBuilder: (context, args) => FitPage.fade(child: const NoScreen()),
+      pageBuilder: (context, args) => const FitPage(child: NoScreen()),
     ),
     demoCodeView: FitRoute.page(
       path: demoCodeView,
-      pageBuilder: (context, args) => FitPage.fade(child: const DemoCodeView()),
+      pageBuilder: (context, args) => const FitPage(child: DemoCodeView()),
     ),
   };
 }

@@ -1,6 +1,7 @@
 import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
-import 'package:test/presentation/controller/sample_controller.dart';
+
+import '../controller/sample_controller.dart';
 
 /// Counter section demonstrating different update methods
 class CounterSection extends StatelessWidget {
@@ -64,8 +65,8 @@ class CounterSection extends StatelessWidget {
               runSpacing: 8,
               children: [
                 ElevatedButton(
-                  onPressed:
-                      () => Fit.find<CounterController>().incrementNormal(),
+                  onPressed: () =>
+                      Fit.find<CounterController>().incrementNormal(),
                   child: const Text('Normal ++'),
                 ),
                 ElevatedButton(
@@ -81,16 +82,15 @@ class CounterSection extends StatelessWidget {
                   child: const Text('Reset'),
                 ),
                 FitGet<CounterController>(
-                  builder:
-                      (controller) => ElevatedButton(
-                        onPressed: controller.incrementAsync,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
-                        ),
-                        child: Text(
-                          controller.isLoading ? 'Loading...' : 'Async ++',
-                        ),
-                      ),
+                  builder: (controller) => ElevatedButton(
+                    onPressed: controller.incrementAsync,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                    ),
+                    child: Text(
+                      controller.isLoading ? 'Loading...' : 'Async ++',
+                    ),
+                  ),
                 ),
               ],
             ),

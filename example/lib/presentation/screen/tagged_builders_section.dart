@@ -1,7 +1,8 @@
 import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
-import 'package:test/presentation/controller/sample_controller.dart';
-import 'package:test/presentation/controller/user_controller.dart';
+
+import '../controller/sample_controller.dart';
+import '../controller/user_controller.dart';
 
 /// Tagged builders section demonstrating selective updates
 class TaggedBuildersSection extends StatelessWidget {
@@ -67,23 +68,22 @@ class TaggedBuildersSection extends StatelessWidget {
               runSpacing: 8,
               children: [
                 ElevatedButton(
-                  onPressed:
-                      () => Fit.find<CounterController>().incrementSpecial(),
+                  onPressed: () =>
+                      Fit.find<CounterController>().incrementSpecial(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.purple,
                   ),
                   child: const Text('Special ++'),
                 ),
                 FitGet<UserController>(
-                  builder:
-                      (controller) => ElevatedButton(
-                        onPressed:
-                            () => controller.updateEmail('tagged@example.com'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.yellow,
-                        ),
-                        child: const Text('Update Email'),
-                      ),
+                  builder: (controller) => ElevatedButton(
+                    onPressed: () =>
+                        controller.updateEmail('tagged@example.com'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.yellow,
+                    ),
+                    child: const Text('Update Email'),
+                  ),
                 ),
               ],
             ),

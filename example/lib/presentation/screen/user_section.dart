@@ -1,6 +1,7 @@
 import 'package:fittor/fittor.dart';
 import 'package:flutter/material.dart';
-import 'package:test/presentation/controller/user_controller.dart';
+
+import '../controller/user_controller.dart';
 
 /// User section demonstrating user controller
 class UserSection extends StatelessWidget {
@@ -62,51 +63,45 @@ class UserSection extends StatelessWidget {
               runSpacing: 8,
               children: [
                 FitGet<UserController>(
-                  builder:
-                      (controller) => ElevatedButton(
-                        onPressed:
-                            () => controller.updateUser(
-                              'John Doe',
-                              25,
-                              email: 'john@example.com',
-                            ),
-                        child: const Text('Update User'),
-                      ),
+                  builder: (controller) => ElevatedButton(
+                    onPressed: () => controller.updateUser(
+                      'John Doe',
+                      25,
+                      email: 'john@example.com',
+                    ),
+                    child: const Text('Update User'),
+                  ),
                 ),
                 FitGet<UserController>(
-                  builder:
-                      (controller) => ElevatedButton(
-                        onPressed:
-                            () => controller.login(
-                              'Jane Smith',
-                              'jane@example.com',
-                              userPermissions: ['read', 'write', 'admin'],
-                            ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                        ),
-                        child: const Text('Login'),
-                      ),
+                  builder: (controller) => ElevatedButton(
+                    onPressed: () => controller.login(
+                      'Jane Smith',
+                      'jane@example.com',
+                      userPermissions: ['read', 'write', 'admin'],
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                    ),
+                    child: const Text('Login'),
+                  ),
                 ),
                 FitGet<UserController>(
-                  builder:
-                      (controller) => ElevatedButton(
-                        onPressed: controller.logout,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                        ),
-                        child: const Text('Logout'),
-                      ),
+                  builder: (controller) => ElevatedButton(
+                    onPressed: controller.logout,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                    ),
+                    child: const Text('Logout'),
+                  ),
                 ),
                 FitGet<UserController>(
-                  builder:
-                      (controller) => ElevatedButton(
-                        onPressed: controller.fetchUserData,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
-                        ),
-                        child: const Text('Fetch Data'),
-                      ),
+                  builder: (controller) => ElevatedButton(
+                    onPressed: controller.fetchUserData,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                    ),
+                    child: const Text('Fetch Data'),
+                  ),
                 ),
               ],
             ),
