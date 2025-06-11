@@ -1,10 +1,11 @@
+// lib/fitroute/web/web_history_manager.dart
 import 'dart:convert';
 import 'dart:js_interop';
 
 import 'package:flutter/foundation.dart';
 import 'package:web/web.dart' as web;
 
-/// Manages browser history for web platform
+/// Manages browser history for web platform with improved integration
 class WebHistoryManager {
   static WebHistoryManager? _instance;
   static WebHistoryManager get instance =>
@@ -12,42 +13,47 @@ class WebHistoryManager {
 
   WebHistoryManager._internal();
 
+  web.EventListener? _popstateListener;
+  bool _isNavigating = false;
+
   /// Push a new state to browser history
   void pushState(String path, {Map<String, dynamic>? state}) {
-    if (!kIsWeb) return;
+    if (!kIsWeb || _isNavigating) return;
 
     try {
-      // Ensure path starts with /
+      _isNavigating = true;
       final cleanPath = _normalizePath(path);
-
-      // Convert state to JSAny compatible format
       final stateData = state != null ? jsonEncode(state).toJS : null;
-      web.window.history.pushState(
-        stateData,
-        '',
-        cleanPath,
-      );
+
+      web.window.history.pushState(stateData, '', cleanPath);
+
+      // Small delay to prevent rapid successive calls
+      Future.delayed(const Duration(milliseconds: 10), () {
+        _isNavigating = false;
+      });
     } catch (e) {
+      _isNavigating = false;
       debugPrint('Error pushing state to history: $e');
     }
   }
 
   /// Replace current state in browser history
   void replaceState(String path, {Map<String, dynamic>? state}) {
-    if (!kIsWeb) return;
+    if (!kIsWeb || _isNavigating) return;
 
     try {
-      // Ensure path starts with /
+      _isNavigating = true;
       final cleanPath = _normalizePath(path);
-
-      // Convert state to JSAny compatible format
       final stateData = state != null ? jsonEncode(state).toJS : null;
-      web.window.history.replaceState(
-        stateData,
-        '',
-        cleanPath,
-      );
+
+      web.window.history.replaceState(stateData, '', cleanPath);
+
+      // Small delay to prevent rapid successive calls
+      Future.delayed(const Duration(milliseconds: 10), () {
+        _isNavigating = false;
+      });
     } catch (e) {
+      _isNavigating = false;
       debugPrint('Error replacing state in history: $e');
     }
   }
@@ -133,18 +139,32 @@ class WebHistoryManager {
     }
   }
 
-  /// Set up popstate listener
+  /// Set up popstate listener with improved handling
   void setupPopstateListener(void Function(String path) onPopstate) {
     if (!kIsWeb) return;
 
     try {
-      // Create a proper EventListener
-      web.EventListener listener = (web.Event event) {
+      // Remove existing listener if any
+      if (_popstateListener != null) {
+        web.window.removeEventListener('popstate', _popstateListener!);
+      }
+
+      // Create new listener
+      _popstateListener = (web.Event event) {
+        // Prevent handling if we're currently navigating
+        if (_isNavigating) return;
+
         final path = currentPath;
-        onPopstate(path);
+        debugPrint('Browser popstate event: $path');
+
+        // Use a small delay to ensure the URL has updated
+        Future.delayed(const Duration(milliseconds: 50), () {
+          onPopstate(path);
+        });
       }.toJS;
 
-      web.window.addEventListener('popstate', listener);
+      web.window.addEventListener('popstate', _popstateListener!);
+      debugPrint('Popstate listener setup complete');
     } catch (e) {
       debugPrint('Error setting up popstate listener: $e');
     }
@@ -186,7 +206,8 @@ class WebHistoryManager {
   }
 
   /// Update URL without triggering navigation
-  void updateUrl(String path, {Map<String, String>? queryParams}) {
+  void updateUrl(String path,
+      {Map<String, String>? queryParams, bool replace = true}) {
     if (!kIsWeb) return;
 
     String fullPath = _normalizePath(path);
@@ -194,7 +215,11 @@ class WebHistoryManager {
       fullPath += buildQueryString(queryParams);
     }
 
-    replaceState(fullPath);
+    if (replace) {
+      replaceState(fullPath);
+    } else {
+      pushState(fullPath);
+    }
   }
 
   /// Navigate to URL (triggers page reload)
@@ -228,12 +253,43 @@ class WebHistoryManager {
       if (currentUrl.contains('#/')) {
         final hashPath = currentUrl.split('#/')[1];
         final cleanPath = '/$hashPath';
-
-        // Replace the URL without the hash
         replaceState(cleanPath);
       }
     } catch (e) {
       debugPrint('Error cleaning up hash URL: $e');
+    }
+  }
+
+  /// Check if we can go back in history
+  bool canGoBack() {
+    if (!kIsWeb) return false;
+
+    try {
+      // This is a simple check - in a real app you might want to track this
+      return web.window.history.length > 1;
+    } catch (e) {
+      debugPrint('Error checking if can go back: $e');
+      return false;
+    }
+  }
+
+  /// Get browser history length
+  int get historyLength {
+    if (!kIsWeb) return 0;
+
+    try {
+      return web.window.history.length;
+    } catch (e) {
+      debugPrint('Error getting history length: $e');
+      return 0;
+    }
+  }
+
+  /// Dispose resources
+  void dispose() {
+    if (_popstateListener != null) {
+      web.window.removeEventListener('popstate', _popstateListener!);
+      _popstateListener = null;
     }
   }
 

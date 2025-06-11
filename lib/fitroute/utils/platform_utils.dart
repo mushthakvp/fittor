@@ -1,3 +1,4 @@
+// lib/fitroute/utils/platform_utils.dart
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -5,12 +6,30 @@ import '../core/index.dart';
 import '../mobile/index.dart';
 import '../web/index.dart';
 
-/// Platform-specific utilities
+/// Platform-specific utilities with improved browser integration
 class PlatformUtils {
-  /// Update URL (web only)
-  static void updateUrl(String path) {
+  /// Update URL with proper browser history management
+  static void updateUrl(String path, {bool replace = true}) {
     if (kIsWeb) {
-      WebHistoryManager.instance.updateUrl(path);
+      if (replace) {
+        WebHistoryManager.instance.replaceState(path);
+      } else {
+        WebHistoryManager.instance.pushState(path);
+      }
+    }
+  }
+
+  /// Push new URL to browser history
+  static void pushUrl(String path) {
+    if (kIsWeb) {
+      WebHistoryManager.instance.pushState(path);
+    }
+  }
+
+  /// Replace current URL in browser history
+  static void replaceUrl(String path) {
+    if (kIsWeb) {
+      WebHistoryManager.instance.replaceState(path);
     }
   }
 
@@ -22,16 +41,35 @@ class PlatformUtils {
     return null;
   }
 
+  /// Check if browser can go back
+  static bool canGoBack() {
+    if (kIsWeb) {
+      return WebHistoryManager.instance.canGoBack();
+    }
+    return false;
+  }
+
+  /// Go back in browser history
+  static void goBack() {
+    if (kIsWeb) {
+      WebHistoryManager.instance.back();
+    }
+  }
+
+  /// Go forward in browser history
+  static void goForward() {
+    if (kIsWeb) {
+      WebHistoryManager.instance.forward();
+    }
+  }
+
   /// Generate deep link based on platform
   static String generateDeepLink(String routeName,
       {Map<String, dynamic>? arguments}) {
     if (kIsWeb) {
-      // For web, return the URL path
-      // Convert route name to kebab-case path
       final path = _routeNameToPath(routeName);
       return path;
     } else {
-      // For mobile, return deep link URL
       return MobileDeepLinkHandler.generateDeepLink(
         routeName,
         FitRoute(path: '/$routeName', builder: (_, __) => const SizedBox()),
@@ -43,10 +81,8 @@ class PlatformUtils {
   /// Parse deep link based on platform
   static ParsedRoute? parseDeepLink(String url) {
     if (kIsWeb) {
-      // For web, parse as URL path
       return null; // Would be handled by web router
     } else {
-      // For mobile, parse as deep link
       return MobileDeepLinkHandler.parseDeepLink(url, {});
     }
   }
@@ -58,7 +94,7 @@ class PlatformUtils {
 
   /// Check if platform supports deep linking
   static bool supportsDeepLinking() {
-    return !kIsWeb; // Mobile platforms support deep linking
+    return !kIsWeb;
   }
 
   /// Get platform name
@@ -111,12 +147,9 @@ class PlatformUtils {
   /// Handle platform-specific initialization
   static void platformSpecificInit() {
     if (kIsWeb) {
-      // Web-specific initialization
       debugPrint('Initializing FitRouter for web platform');
-      // Clean up any hash URLs on initialization
       WebHistoryManager.instance.cleanupHashUrl();
     } else {
-      // Mobile-specific initialization
       debugPrint('Initializing FitRouter for ${getPlatformName()} platform');
     }
   }
@@ -146,14 +179,14 @@ class PlatformUtils {
     };
   }
 
-  /// Handle platform-specific URL changes
-  static void handleUrlChange(String url, Function(String) callback) {
+  /// Handle platform-specific URL changes with improved browser integration
+  static void handleUrlChange(String initialUrl, Function(String) callback) {
     if (kIsWeb) {
       WebHistoryManager.instance.setupPopstateListener((path) {
+        debugPrint('URL changed to: $path');
         callback(path);
       });
     } else {
-      // For mobile, handle through deep link mechanism
       MobileDeepLinkHandler.instance.initialize(
         onDeepLink: (link) {
           callback(link);
@@ -174,16 +207,13 @@ class PlatformUtils {
   /// Share content based on platform
   static Future<bool> shareContent(String content, {String? subject}) async {
     if (kIsWeb) {
-      // Web sharing implementation
       try {
-        // This would use Web Share API or fallback to clipboard
         return true;
       } catch (e) {
         debugPrint('Error sharing on web: $e');
         return false;
       }
     } else {
-      // Mobile sharing implementation
       return await MobileDeepLinkHandler.instance
           .shareDeepLink(content, subject: subject);
     }
@@ -210,13 +240,14 @@ class PlatformUtils {
       'isDesktop': isDesktop(),
       'capabilities': getPlatformCapabilities(),
       'currentUrl': getCurrentUrlOrState(),
+      'canGoBack': canGoBack(),
+      'historyLength': kIsWeb ? WebHistoryManager.instance.historyLength : 0,
       'timestamp': DateTime.now().toIso8601String(),
     };
   }
 
   /// Convert route name to URL path
   static String _routeNameToPath(String routeName) {
-    // Convert camelCase to kebab-case
     final kebabCase = routeName
         .replaceAllMapped(RegExp(r'([a-z])([A-Z])'),
             (match) => '${match.group(1)}-${match.group(2)?.toLowerCase()}')
@@ -227,7 +258,6 @@ class PlatformUtils {
 
   /// Convert URL path to route name
   static String pathToRouteName(String path) {
-    // Remove leading slash and convert kebab-case to camelCase
     final cleanPath = path.replaceFirst(RegExp(r'^/+'), '');
     if (cleanPath.isEmpty) return 'home';
 

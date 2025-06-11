@@ -1,58 +1,36 @@
+// lib/fitroute/fit_app.dart
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:web/web.dart' as web;
 
 import 'core/index.dart';
+import 'utils/platform_utils.dart';
+import 'utils/route_utils.dart';
 
-/// FitApp - A replacement for MaterialApp that uses FitRouter
+/// FitApp - A replacement for MaterialApp that uses FitRouter with improved browser integration
 class FitApp extends StatefulWidget {
-  /// Map of route names to FitRoute configurations
   final Map<String, FitRoute> routes;
-
-  /// Initial route name
   final String? initialRoute;
-
-  /// Route to show when no matching route is found
   final FitRoute? notFoundRoute;
-
-  /// Navigator observers
   final List<NavigatorObserver>? observers;
-
-  /// App title
   final String title;
-
-  /// Theme data
   final ThemeData? theme;
-
-  /// Dark theme data
   final ThemeData? darkTheme;
-
-  /// Theme mode
   final ThemeMode? themeMode;
-
-  /// Locale
   final Locale? locale;
-
-  /// Supported locales
   final Iterable<Locale> supportedLocales;
-
-  /// Localizations delegates
   final Iterable<LocalizationsDelegate<dynamic>>? localizationsDelegates;
-
-  /// Debug banner
   final bool debugShowCheckedModeBanner;
-
-  /// On generate title callback
   final String Function(BuildContext)? onGenerateTitle;
-
-  /// Builder callback for wrapping the Navigator
   final Widget Function(BuildContext, Widget?)? builder;
-
-  /// Scaffold messenger key
   final GlobalKey<ScaffoldMessengerState>? scaffoldMessengerKey;
-
-  /// Router config (advanced usage)
   final RouterConfig<Object>? routerConfig;
+
+  /// Whether to restore navigation stack from storage (web only)
+  final bool restoreNavigationStack;
+
+  /// Whether to persist navigation history (web only)
+  final bool persistNavigationHistory;
 
   const FitApp({
     super.key,
@@ -72,6 +50,8 @@ class FitApp extends StatefulWidget {
     this.builder,
     this.scaffoldMessengerKey,
     this.routerConfig,
+    this.restoreNavigationStack = true,
+    this.persistNavigationHistory = true,
   });
 
   @override
@@ -81,6 +61,7 @@ class FitApp extends StatefulWidget {
 class _FitAppState extends State<FitApp> {
   late FitRouter _router;
   String? _initialRouteFromUrl;
+  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -97,6 +78,9 @@ class _FitAppState extends State<FitApp> {
       final currentUrl = web.window.location.href;
       final currentPath = web.window.location.pathname;
 
+      debugPrint('Initial URL: $currentUrl');
+      debugPrint('Initial path: $currentPath');
+
       // Clean up hash-based URLs
       if (currentUrl.contains('#/')) {
         final hashPath = currentUrl.split('#/')[1];
@@ -104,13 +88,16 @@ class _FitAppState extends State<FitApp> {
 
         // Replace the URL without the hash
         web.window.history.replaceState(null, '', cleanPath);
-
-        // Set the initial route based on the cleaned path
         _initialRouteFromUrl = _parsePathToRouteName(cleanPath);
+
+        debugPrint('Cleaned hash URL to: $cleanPath');
       } else if (currentPath != '/' && currentPath.isNotEmpty) {
         // Direct path access
         _initialRouteFromUrl = _parsePathToRouteName(currentPath);
+        debugPrint('Using direct path: $currentPath');
       }
+
+      debugPrint('Initial route from URL: $_initialRouteFromUrl');
     } catch (e) {
       debugPrint('Error processing initial URL: $e');
     }
@@ -118,27 +105,48 @@ class _FitAppState extends State<FitApp> {
 
   /// Parse path to determine route name
   String? _parsePathToRouteName(String path) {
-    // Remove leading/trailing slashes and convert to route name
-    final cleanPath = path.replaceAll(RegExp(r'^/+|/+$'), '');
-    if (cleanPath.isEmpty) return null;
-
-    // Try to find matching route
-    for (final entry in widget.routes.entries) {
-      final route = entry.value;
-      if (route.extractParameters(path) != null) {
-        return entry.key;
+    try {
+      // Try to find matching route using RouteUtils
+      final parsed = RouteUtils.parseUrlPath(path, widget.routes);
+      if (parsed != null) {
+        debugPrint('Found matching route: ${parsed.routeName} for path: $path');
+        return parsed.routeName;
       }
-    }
 
-    return null;
+      // Fallback: remove leading/trailing slashes and convert to route name
+      final cleanPath = path.replaceAll(RegExp(r'^/+|/+$'), '');
+      if (cleanPath.isEmpty) return null;
+
+      // Simple conversion for exact matches
+      for (final routeName in widget.routes.keys) {
+        final route = widget.routes[routeName]!;
+        if (route.path == path || route.path == '/$cleanPath') {
+          return routeName;
+        }
+      }
+
+      debugPrint('No matching route found for path: $path');
+      return null;
+    } catch (e) {
+      debugPrint('Error parsing path to route name: $e');
+      return null;
+    }
   }
 
   void _initializeRouter() {
     _router = FitRouter.instance;
 
-    // Use initial route from URL if available, otherwise use provided initial route
-    final effectiveInitialRoute =
-        _initialRouteFromUrl ?? widget.initialRoute ?? widget.routes.keys.first;
+    // Determine effective initial route
+    String effectiveInitialRoute;
+
+    if (_initialRouteFromUrl != null &&
+        widget.routes.containsKey(_initialRouteFromUrl)) {
+      effectiveInitialRoute = _initialRouteFromUrl!;
+      debugPrint('Using initial route from URL: $effectiveInitialRoute');
+    } else {
+      effectiveInitialRoute = widget.initialRoute ?? widget.routes.keys.first;
+      debugPrint('Using configured initial route: $effectiveInitialRoute');
+    }
 
     _router.initialize(
       routes: widget.routes,
@@ -146,18 +154,31 @@ class _FitAppState extends State<FitApp> {
       notFoundRoute: widget.notFoundRoute,
       observers: widget.observers,
     );
+
+    _isInitialized = true;
   }
 
   @override
   void dispose() {
-    _router.dispose();
+    if (_isInitialized) {
+      _router.dispose();
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      );
+    }
+
     if (widget.routerConfig != null) {
-      // Use custom router config if provided
       return MaterialApp.router(
         title: widget.title,
         theme: widget.theme,
@@ -178,12 +199,15 @@ class _FitAppState extends State<FitApp> {
     RouteInformation? initialRouteInfo;
     if (kIsWeb) {
       final currentPath = web.window.location.pathname;
-      if (currentPath != '/' && currentPath.isNotEmpty) {
-        initialRouteInfo = RouteInformation(uri: Uri.parse(currentPath));
+      final currentSearch = web.window.location.search;
+      final fullPath = currentPath + currentSearch;
+
+      if (fullPath != '/' && fullPath.isNotEmpty) {
+        initialRouteInfo = RouteInformation(uri: Uri.parse(fullPath));
+        debugPrint('Setting initial route info: $fullPath');
       }
     }
 
-    // Use FitRouter configuration
     return MaterialApp.router(
       title: widget.title,
       theme: widget.theme,
@@ -199,16 +223,14 @@ class _FitAppState extends State<FitApp> {
       routerDelegate: _router.routerDelegate,
       routeInformationParser: _router.routeInformationParser,
       routeInformationProvider: PlatformRouteInformationProvider(
-        initialRouteInformation: initialRouteInfo ??
-            RouteInformation(
-              uri: Uri.parse('/'),
-            ),
+        initialRouteInformation:
+            initialRouteInfo ?? RouteInformation(uri: Uri.parse('/')),
       ),
     );
   }
 }
 
-/// Extension to provide convenient static methods for FitRoute
+/// Extension to provide convenient static methods for FitRoute navigation
 extension FitRouteNavigation on FitRoute {
   /// Push a named route
   static Future<T?> push<T extends Object?>(
@@ -271,5 +293,18 @@ extension FitRouteNavigation on FitRoute {
   /// Handle deep link
   static Future<bool> handleLink(String url) {
     return FitRouter.instance.handleDeepLink(url);
+  }
+
+  /// Get navigation debug info
+  static Map<String, dynamic> getDebugInfo() {
+    final router = FitRouter.instance;
+    return {
+      'currentRoute': router.currentRouteName,
+      'currentArguments': router.currentArguments,
+      'canPop': router.canPop(),
+      'stackSize': router.routerDelegate.navigationStackSize,
+      'navigationStack': router.routerDelegate.navigationStackDebug,
+      'platformInfo': PlatformUtils.getDebugInfo(),
+    };
   }
 }

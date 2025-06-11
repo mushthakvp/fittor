@@ -1,3 +1,4 @@
+// lib/fitroute/core/fit_router_delegate.dart
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -17,6 +18,23 @@ class NavigationEntry {
     required this.arguments,
     required this.page,
   });
+
+  /// Convert to JSON for storage
+  Map<String, dynamic> toJson() {
+    return {
+      'routeName': routeName,
+      'arguments': arguments,
+    };
+  }
+
+  /// Create from JSON
+  static NavigationEntry fromJson(Map<String, dynamic> json, Page page) {
+    return NavigationEntry(
+      routeName: json['routeName'] as String,
+      arguments: Map<String, dynamic>.from(json['arguments'] as Map),
+      page: page,
+    );
+  }
 
   @override
   String toString() {
@@ -39,14 +57,8 @@ class _ContextAwarePage extends Page {
 
   @override
   Route createRoute(BuildContext context) {
-    // Create the actual page with the correct context
     final fitPage = route.pageBuilder!(context, routeArguments);
-
-    // Create a custom route that properly returns this page as settings
-    return _CustomPageRoute(
-      page: this,
-      fitPage: fitPage,
-    );
+    return _CustomPageRoute(page: this, fitPage: fitPage);
   }
 }
 
@@ -69,7 +81,6 @@ class _CustomPageRoute<T> extends PageRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation,
       Animation<double> secondaryAnimation, Widget child) {
-    // Use the FitPage's transition logic
     final route = fitPage.createRoute(context);
     if (route is PageRoute) {
       return route.buildTransitions(
@@ -100,7 +111,7 @@ class _CustomPageRoute<T> extends PageRoute<T> {
   String? get barrierLabel => fitPage.barrierLabel;
 }
 
-/// Router delegate that manages navigation stack
+/// Router delegate that manages navigation stack with proper browser integration
 class FitRouterDelegate extends RouterDelegate<RouteInformation>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<RouteInformation> {
   final Map<String, FitRoute> _routes;
@@ -113,6 +124,8 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
   final GlobalKey<NavigatorState> navigatorKey;
 
   final List<NavigationEntry> _navigationStack = [];
+  bool _isRestoringFromBrowser = false;
+  bool _isHandlingBrowserEvent = false;
 
   // Counter to ensure unique keys
   static int _pageCounter = 0;
@@ -130,11 +143,81 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
         _observers = observers,
         _storage = storage,
         navigatorKey = navigatorKeys {
-    _initializeInitialRoute();
+    _setupBrowserIntegration();
+  }
+
+  /// Setup browser integration for web platform
+  void _setupBrowserIntegration() {
+    if (kIsWeb) {
+      // Listen to browser back/forward button events
+      PlatformUtils.handleUrlChange(getCurrentPath() ?? '/', (path) {
+        if (!_isHandlingBrowserEvent) {
+          _handleBrowserNavigation(path);
+        }
+      });
+    }
+  }
+
+  /// Handle browser navigation events (back/forward button)
+  void _handleBrowserNavigation(String path) async {
+    if (_isRestoringFromBrowser) return;
+
+    _isHandlingBrowserEvent = true;
+    try {
+      final parsed = RouteUtils.parseUrlPath(path, _routes);
+      if (parsed != null) {
+        // Check if this route is already in our stack
+        final existingIndex = _navigationStack.indexWhere(
+          (entry) => entry.routeName == parsed.routeName,
+        );
+
+        if (existingIndex != -1) {
+          // Route exists in stack, pop to that route
+          while (_navigationStack.length > existingIndex + 1) {
+            _navigationStack.removeLast();
+          }
+        } else {
+          // New route, clear stack and navigate
+          _navigationStack.clear();
+          await _navigateToRoute(parsed.routeName,
+              arguments: parsed.arguments, updateBrowser: false);
+        }
+        notifyListeners();
+      }
+    } finally {
+      _isHandlingBrowserEvent = false;
+    }
   }
 
   /// Initialize with the initial route
-  void _initializeInitialRoute() {
+  Future<void> _initializeInitialRoute() async {
+    if (kIsWeb) {
+      // Try to restore navigation stack from storage
+      final savedStack = await _storage.getNavigationStack();
+      if (savedStack != null && savedStack.isNotEmpty) {
+        _isRestoringFromBrowser = true;
+        try {
+          for (final entry in savedStack) {
+            final routeName = entry['routeName'] as String;
+            final arguments =
+                Map<String, dynamic>.from(entry['arguments'] as Map);
+
+            if (_routes.containsKey(routeName)) {
+              _addToStack(routeName, arguments);
+            }
+          }
+        } finally {
+          _isRestoringFromBrowser = false;
+        }
+
+        if (_navigationStack.isNotEmpty) {
+          notifyListeners();
+          return;
+        }
+      }
+    }
+
+    // Default initialization
     if (_routes.containsKey(_initialRoute)) {
       _addToStack(_initialRoute, {});
     } else {
@@ -144,6 +227,10 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
 
   @override
   Widget build(BuildContext context) {
+    if (_navigationStack.isEmpty) {
+      _initializeInitialRoute();
+    }
+
     return Navigator(
       key: navigatorKey,
       pages: _navigationStack.map((entry) => entry.page).toList(),
@@ -152,13 +239,18 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
     );
   }
 
-  /// Handle page removal (replaces deprecated onPopPage)
+  /// Handle page removal with proper browser history management
   void _onDidRemovePage(Page<Object?> page) {
-    // Find and remove the corresponding navigation entry
     final index = _navigationStack.indexWhere((entry) => entry.page == page);
     if (index != -1) {
       _navigationStack.removeAt(index);
-      _updateWebUrl();
+
+      // Update browser URL only if not handling browser event
+      if (!_isHandlingBrowserEvent) {
+        _updateWebUrl();
+      }
+
+      _saveNavigationStack();
       notifyListeners();
     }
   }
@@ -166,26 +258,23 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
   @override
   Future<void> setNewRoutePath(RouteInformation routeInformation) async {
     final path = routeInformation.uri.path;
-
-    // Check if state contains route information
     final state = routeInformation.state as Map<String, dynamic>?;
+
     if (state != null && state.containsKey('routeName')) {
       final routeName = state['routeName'] as String;
       final arguments = state['arguments'] as Map<String, dynamic>? ?? {};
 
-      // Clear stack and navigate to the route
       _navigationStack.clear();
-      await _navigateToRoute(routeName, arguments: arguments);
+      await _navigateToRoute(routeName,
+          arguments: arguments, updateBrowser: false);
       return;
     }
 
-    // Parse the path manually
     final parsed = RouteUtils.parseUrlPath(path, _routes);
-
     if (parsed != null) {
-      // Clear stack and navigate to parsed route
       _navigationStack.clear();
-      await _navigateToRoute(parsed.routeName, arguments: parsed.arguments);
+      await _navigateToRoute(parsed.routeName,
+          arguments: parsed.arguments, updateBrowser: false);
     } else {
       await _handleNotFound(path);
     }
@@ -210,10 +299,21 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
     return _navigateToRoute<T>(routeName, arguments: arguments ?? {});
   }
 
-  /// Pop current route
+  /// Pop current route with proper browser history update
   void pop<T extends Object?>([T? result]) {
     if (canPop()) {
-      navigatorKey.currentState?.pop<T>(result);
+      // Remove the last entry from stack
+      if (_navigationStack.length > 1) {
+        _navigationStack.removeLast();
+
+        // Update browser URL to previous route
+        if (!_isHandlingBrowserEvent) {
+          _updateWebUrl();
+        }
+
+        _saveNavigationStack();
+        notifyListeners();
+      }
     }
   }
 
@@ -223,7 +323,12 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
         _navigationStack.last.routeName != routeName) {
       _navigationStack.removeLast();
     }
-    _updateWebUrl();
+
+    if (!_isHandlingBrowserEvent) {
+      _updateWebUrl();
+    }
+
+    _saveNavigationStack();
     notifyListeners();
   }
 
@@ -256,14 +361,16 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
   Future<void> restoreRoute(String routeName,
       {Map<String, dynamic>? arguments}) async {
     _navigationStack.clear();
-    await _navigateToRoute(routeName, arguments: arguments ?? {});
+    await _navigateToRoute(routeName,
+        arguments: arguments ?? {}, updateBrowser: false);
   }
 
-  /// Navigate to a route
+  /// Navigate to a route with proper browser integration
   Future<T?> _navigateToRoute<T extends Object?>(
     String routeName, {
     Map<String, dynamic> arguments = const {},
     bool replace = false,
+    bool updateBrowser = true,
   }) async {
     final route = _routes[routeName];
     if (route == null) {
@@ -271,10 +378,8 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
       return null;
     }
 
-    // Process arguments through middleware
     final processedArguments = route.processArguments(arguments);
 
-    // Check route guards
     if (!route.canNavigate(processedArguments)) {
       debugPrint('Navigation to "$routeName" blocked by guards');
       return null;
@@ -286,18 +391,21 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
 
     _addToStack(routeName, processedArguments);
 
-    // Persist arguments if needed (web only)
     if (kIsWeb && route.persistArguments) {
       await _storage.saveRouteArguments(routeName, processedArguments);
     }
 
-    _updateWebUrl();
+    if (updateBrowser && !_isHandlingBrowserEvent) {
+      _updateWebUrl();
+    }
+
+    _saveNavigationStack();
     notifyListeners();
 
     return null;
   }
 
-  /// Add entry to navigation stack with improved key generation
+  /// Add entry to navigation stack
   void _addToStack(String routeName, Map<String, dynamic> arguments) {
     final route = _routes[routeName]!;
     final page = _createPage(routeName, route, arguments);
@@ -309,15 +417,13 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
     ));
   }
 
-  /// Create page for route with guaranteed unique keys
+  /// Create page for route with unique keys
   Page _createPage(
       String routeName, FitRoute route, Map<String, dynamic> arguments) {
-    // Generate a truly unique key using an incrementing counter
     final uniqueKey = ValueKey(
         '${routeName}_${++_pageCounter}_${DateTime.now().microsecondsSinceEpoch}');
 
     if (route.pageBuilder != null) {
-      // Create wrapper page that calls pageBuilder with proper context
       return _ContextAwarePage(
         key: uniqueKey,
         name: routeName,
@@ -327,7 +433,6 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
       );
     }
 
-    // Create default page with route's transition settings
     return FitPage(
       key: uniqueKey,
       name: routeName,
@@ -345,12 +450,12 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
   /// Get transition type from route
   FitPageTransition _getTransitionType(FitRoute route) {
     if (route.transitionBuilder != null) {
-      return FitPageTransition.none; // Custom transition
+      return FitPageTransition.none;
     }
-    return FitPageTransition.slide; // Default
+    return FitPageTransition.slide;
   }
 
-  /// Update web URL
+  /// Update web URL with browser history
   void _updateWebUrl() {
     if (!kIsWeb || _navigationStack.isEmpty) return;
 
@@ -360,10 +465,26 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
 
       if (route != null && route.addToHistory) {
         final path = route.generatePath(currentEntry.arguments);
-        PlatformUtils.updateUrl(path);
+
+        // Use pushState if we're navigating forward, replaceState if we're going back
+        if (_navigationStack.length > 1) {
+          PlatformUtils.updateUrl(path);
+        } else {
+          // For single routes or when stack is reset, replace state
+          PlatformUtils.updateUrl(path);
+        }
       }
     } catch (e) {
       debugPrint('Error updating web URL: $e');
+    }
+  }
+
+  /// Save navigation stack to storage
+  void _saveNavigationStack() {
+    if (kIsWeb) {
+      final stackData =
+          _navigationStack.map((entry) => entry.toJson()).toList();
+      _storage.saveNavigationStack(stackData);
     }
   }
 
@@ -373,7 +494,6 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
       await _navigateToRoute('notFound', arguments: {'path': path});
     } else {
       debugPrint('Route not found: $path, navigating to initial route');
-      // Navigate to initial route as fallback
       _navigationStack.clear();
       await _navigateToRoute(_initialRoute);
     }
@@ -398,5 +518,23 @@ class FitRouterDelegate extends RouterDelegate<RouteInformation>
     }
 
     return null;
+  }
+
+  /// Get current path for browser integration
+  String? getCurrentPath() {
+    return PlatformUtils.getCurrentPath();
+  }
+
+  /// Get the current navigation stack size
+  int get navigationStackSize => _navigationStack.length;
+
+  /// Get navigation stack for debugging purposes
+  List<Map<String, dynamic>> get navigationStackDebug {
+    return _navigationStack
+        .map((entry) => {
+              'routeName': entry.routeName,
+              'arguments': entry.arguments,
+            })
+        .toList();
   }
 }
